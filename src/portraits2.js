@@ -224,6 +224,7 @@
   };
 
   CH.tingxue.oy = 64;
+  Art.body = { fab, tube, hand, shadow, pattern, cuff, longRobe, boots, OUT };
 
   /* ---------- 立绘：整幅，透明底 ---------- */
   const cache = {};

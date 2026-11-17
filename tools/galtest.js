@@ -11,7 +11,8 @@ const path = require('path');
   await page.click('#title [data-a="gallery"]'); await page.waitForTimeout(500);
   console.log('从标题进图鉴', await page.evaluate(() => ({ open: JX.ui.galleryOpen(), titleHidden: document.getElementById('title').classList.contains('hide'), modal: JX.ui.modal })));
   for (let i = 0; i < 5; i++) { await page.keyboard.press('ArrowRight'); await page.waitForTimeout(250); }
-  console.log('按五次右键后在哪页', await page.evaluate(() => document.querySelector('#gal .tab.on').textContent));
+  console.log('按五次右键后在哪页', await page.evaluate(() => document.querySelector('#gal .tab.on').textContent + ' / ' + document.querySelector('#gal .sub.on').textContent));
+  await page.evaluate(() => document.querySelectorAll('#gal .tab')[2].click()); await page.waitForTimeout(300);
   const ids = await page.evaluate(() => JX.TRACKS.map(t => t[0]));
   for (const id of ids) {
     await page.click('#gal [data-play="' + id + '"]'); 

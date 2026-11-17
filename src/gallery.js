@@ -14,7 +14,25 @@
       acts: [['抱琵琶', { carry: 'pipa' }], ['坐弹', { carry: 'pipa', pose: 'sit', seat: 26 }, 'stool']] },
     { id: 'tingxue', bio: '十八岁。东辽宰相耶律德生的小女儿，偷跑到临安来看灯。娇生惯养，饭量惊人，掌力更惊人。脖子上挂着一颗旧佛珠，从小戴着，不知道哪来的。',
       acts: [['捧面碗', { carry: 'bowl' }], ['坐着吃', { carry: 'bowl', pose: 'sit', seat: 26 }, 'stool']] },
+    /* —— 以下是重点配角 —— */
+    { id: 'fan', bio: '六十二岁。靠窗第三张桌，面前永远是一只空壶，赊了三年的账。身后题壁墙上那首七绝是他写的。看人先问手稳不稳，说完就打鼾。',
+      acts: [['落座', { pose: 'sit', seat: 26 }, 'stool']] },
+    { id: 'he', bio: '半闲堂第一谋士，元夕夜在二楼办词会。说话温和，从不高声，眼睛却不放过任何一样东西。写得一手好字——谁的字，他都写得像。',
+      acts: [['落座', { pose: 'sit', seat: 26 }, 'stool']] },
+    { id: 'laodao', bio: '御街上挑担卖历日的老道，正月过了一半还在卖。说话像是早就算好的。他的名号和来历，前几卷不说破。',
+      acts: [['落座', { pose: 'sit', seat: 26 }, 'stool']] },
+    { id: 'siniang', bio: '醉春楼掌柜。嘴上三条规矩，心里一本明账。伙计们怕她，也只服她。真到了要紧的时候，她站在门口不让。',
+      acts: [['落座', { pose: 'sit', seat: 26 }, 'stool']] },
+    { id: 'laochu', bio: '醉春楼铛头，管着后厨八眼灶。骂人最凶，往人手里塞吃的也最快。',
+      acts: [['端托盘', { carry: 'tray' }]] },
+    { id: 'agui', bio: '酒窖小厮，十三四岁，什么都要问一句为什么。管惊蛰叫“蛰哥”，蛰哥说什么他都抢着接下半句。',
+      acts: [['抱酒坛', { carry: 'jar' }], ['蹲下', { pose: 'squat' }]] },
+    { id: 'xieke', bio: '半闲堂养的“促织客”之一，袖口绣着一只蟋蟀。铁塔似的身量，两条铁臂一撞，铮然有声；格挡的时候刀枪不入。',
+      acts: [['落座', { pose: 'sit', seat: 26 }, 'stool']] },
+    { id: 'zhong', bio: '临安府推官。办了半辈子案，知道哪些案子压得住，哪些压不住。见了醉春楼的阿蛰，先叹一口气。',
+      acts: [['落座', { pose: 'sit', seat: 26 }, 'stool']] },
   ];
+  const LEADS = 5, GROUPS = [['主角', 0], ['配角', LEADS], ['配乐', -1]];
   const MOODS = [['', '平常'], ['smile', '笑'], ['grin', '嬉'], ['smirk', '撇嘴'], ['cold', '冷'], ['angry', '怒'], ['surprise', '惊'], ['closed', '闭目'], ['sad', '黯然']];
   const TRACKS = [
     ['zhuti', '惊蛰', '标题画面 · 全剧主题', '箫领，筝的分解和音托着。宫调慢板。'],
@@ -46,14 +64,15 @@
     ch.acts.forEach((a, i) => { c.save(); c.translate(x0 + i * gap, 822); c.scale(Z, Z); if (a[2] === 'stool') { c.save(); c.translate(0, -3); stool(c); c.restore(); } Fig.draw(c, sp, 0, 0.5, a[1]); c.restore(); lab(a[0], x0 + i * gap, 850); });
   }
   function render() {
-    const tabs = CHARS.map((ch, i) => { const a = Art.chars[ch.id]; return '<div class="tab jx-clickable' + (i === page ? ' on' : '') + '" data-p="' + i + '">' + a.name + '<i>' + a.season + '</i></div>'; }).join('') +
-      '<div class="tab jx-clickable' + (page === CHARS.length ? ' on' : '') + '" data-p="' + CHARS.length + '">配乐<i>' + TRACKS.length + ' 首</i></div>';
+    const grp = page >= CHARS.length ? 2 : page >= LEADS ? 1 : 0;
+    const tabs = GROUPS.map((g, i) => '<div class="tab jx-clickable' + (i === grp ? ' on' : '') + '" data-p="' + (g[1] < 0 ? CHARS.length : g[1]) + '">' + g[0] + '</div>').join('') + '<div class="sep"></div>' +
+      CHARS.map((ch, i) => (grp === 2 || (i >= LEADS) !== (grp === 1)) ? '' : '<div class="sub jx-clickable' + (i === page ? ' on' : '') + '" data-p="' + i + '">' + Art.chars[ch.id].name + '</div>').join('');
     let h = '<div class="bar"><h2>图鉴</h2>' + tabs + '<div class="close jx-clickable" data-act="close">← → 翻页　Esc 返回</div></div>';
     spr = null;
     if (page < CHARS.length) {
       const ch = CHARS[page], a = Art.chars[ch.id];
       h += '<canvas class="port-bg" width="518" height="944"></canvas><canvas class="port" width="' + Art.PW * 2 + '" height="' + Art.PH * 2 + '"></canvas>' +
-        '<div class="info"><h3>' + a.name + '</h3><div class="ti">' + a.season + '　·　' + a.title + '</div><p class="bio">' + ch.bio + '</p><p class="q">“' + a.line + '”</p></div>' +
+        '<div class="info"><h3>' + a.name + '</h3><div class="ti">' + (a.support ? '' : a.season + '　·　') + a.title + '</div><p class="bio">' + ch.bio + '</p><p class="q">“' + a.line + '”</p></div>' +
         '<div class="faces"><h4>对话头像 · 表情</h4><div class="g">' + MOODS.map((m, i) => '<div class="face"><canvas width="380" height="436" data-m="' + i + '"></canvas><span>' + m[1] + '</span></div>').join('') + '</div></div>' +
         '<div class="spr"><h4>场景里的样子</h4><canvas width="1160" height="1720"></canvas></div>';
     } else {

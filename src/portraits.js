@@ -322,7 +322,7 @@
     if (!noBody && ch.front) { c.save(); c.translate(0, -up); ch.front(c); c.restore(); }
   };
   Art.has = id => !!CH[id];
-  Art.face = face; Art.neck = neck; Art.tools = { shape, stroke, lg, rg, soft, hairFill, strands, folds, fur, bead, braid, bust, crossCollar, P2, INK, HAIR };
+  Art.face = face; Art.neck = neck; Art.MOOD = MOOD; Art.tools = { shape, stroke, lg, rg, soft, hairFill, strands, folds, fur, bead, braid, bust, crossCollar, P2, INK, HAIR };
 
   /* ---------- 对话头像：头肩，透明底，底边渐隐 ---------- */
   const cache = {};
