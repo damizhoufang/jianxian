@@ -1,0 +1,6 @@
+shots/
+tools/music.py.txt
+node_modules/
+.DS_Store
+*.ogg
+*.raw

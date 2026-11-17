@@ -1,0 +1,29 @@
+/* 启动：标题画面 → 新的故事或接着上回 → 跑剧本 */
+'use strict';
+(function () {
+  const JX = window.JX, W = JX.world, UI = JX.ui;
+  JX.game = { playing: false };
+  window.addEventListener('DOMContentLoaded', async () => {
+    JX.initStage(); UI.init(); JX.bindPointer(); JX.start();
+    const hash = (location.hash || '').slice(1);
+    if (hash.indexOf('auto') === 0) { JX.auto = true; JX.autoDelay = hash === 'autoslow' ? 0.5 : 0.03; JX.fast = hash === 'autoslow' ? 2.2 : 5; JX.autoLoad = hash === 'autoload'; }
+    const dev = ['cellar', 'kitchen', 'hall', 'street', 'snow'].find(s => hash === s || hash === s + '-god');
+    if (dev) {                                                    // 开发时直接落到某个场景里走走
+      UI.quiet = false; JX.state.stage = dev === 'street' ? 3 : dev === 'hall' ? 2 : 1; JX.state.flags = { aguiUp: true, jar: true, jarDone: true, s1done: true, daoGone: false };
+      W.setPlayer(dev === 'snow' ? 'child' : 'jingzhe', dev === 'snow' ? { carry: 'bundle' } : null); W.load(dev, 'start'); if (dev === 'snow') UI.tone('sepia');
+      W.locked = false; JX.game.playing = true; UI.roam(true); if (hash.endsWith('-god')) W.godOn = true; UI.fade(0, 0.4); return;
+    }
+    /* 标题画面的背景：灯市，镜头慢慢横移 */
+    UI.quiet = true; JX.state.stage = 0; W.load('street', 'title'); W.locked = true;
+    const pan = { x: 1440, y: 700 }; W.focus = pan;
+    const drift = () => { pan.x = 1440 + Math.sin(JX.time * 0.07) * 520; }; JX.on('update', drift);
+    JX.audio.music('zhuti'); JX.audio.hold = true;
+    UI.fade(0.12, 1.6);
+    const act = await UI.title();
+    await UI.fade(1, 0.8);
+    W.focus = null; UI.quiet = false; JX.audio.hold = false;
+    let label = null;
+    if (act === 'load') { const s = JX.store.get('save'); if (s) { label = s.label; JX.state.money = s.money || 0; JX.state.maxed = !!s.maxed; JX.state.flags = s.flags || {}; } }
+    JX.story.run(window.JX_SCRIPTS.prologue, label);
+  });
+})();

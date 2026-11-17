@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>剑仙情缘恩仇录 · 序章《青玉案》</title>
+<style>
+  :root { --kai: "Kaiti SC","STKaiti","KaiTi","楷体","LXGW WenKai","Noto Serif CJK SC","Songti SC",serif; --song: "Songti SC","STSong","Noto Serif CJK SC","Source Han Serif SC","SimSun",serif; --ink:#2b221c; --paper:#efe4c8; --gold:#d7a544; --red:#a8362a; --ts:1; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #070605; overflow: hidden; color: var(--paper); font-family: var(--song); -webkit-font-smoothing: antialiased; }
+  body { display: flex; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; }
+  #stage { position: relative; width: 100vw; height: 56.25vw; overflow: hidden; background: #000; cursor: default; }
+  #world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transition: filter .9s; }
+  #world.sepia { filter: sepia(.5) saturate(.62) contrast(.96) brightness(1.08); }
+  #tone { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 52%, rgba(10,6,4,.5) 100%); }
+  #tone.sepia { background: radial-gradient(ellipse at 50% 46%, rgba(120,90,50,.05) 40%, rgba(30,18,8,.72) 100%); }
+  #ui { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; pointer-events: none; }
+  #ui > * { position: absolute; }
+  #fade { position: absolute; inset: 0; background: #000; opacity: 1; pointer-events: none; }
+  .hide { display: none !important; }
+  .jx-clickable { pointer-events: auto; cursor: pointer; }
+
+  /* 指引与提示 */
+  #obj { left: 34px; top: 30px; max-width: 900px; padding: 12px 26px 12px 20px; font: 600 28px/1.3 var(--kai); color: #f6e9c8; background: linear-gradient(90deg, rgba(30,20,14,.88), rgba(30,20,14,.6) 80%, rgba(30,20,14,0)); border-left: 5px solid var(--gold); text-shadow: 0 1px 2px #000; }
+  #obj b { color: var(--gold); margin-right: 10px; font-weight: 600; }
+  #keys { right: 30px; bottom: 22px; font: 20px/1.4 var(--kai); color: rgba(246,233,200,.62); text-shadow: 0 1px 3px #000; text-align: right; }
+  #purse { right: 34px; top: 30px; font: 600 26px var(--kai); color: #f6e9c8; text-shadow: 0 1px 3px #000; background: rgba(30,20,14,.7); padding: 8px 18px; border-radius: 4px; border: 1px solid rgba(215,165,68,.5); }
+  #banner { left: 0; top: 150px; width: 1920px; text-align: center; opacity: 0; transition: opacity .8s; }
+  #banner .n { font: 600 76px var(--kai); letter-spacing: .3em; margin-left: .3em; color: #f8ecd0; text-shadow: 0 2px 18px rgba(0,0,0,.9), 0 0 3px #000; }
+  #banner .s { font: 26px var(--kai); letter-spacing: .4em; color: #e4cf9a; margin-top: 8px; text-shadow: 0 1px 6px #000; }
+  #banner .l { width: 360px; height: 2px; margin: 14px auto 0; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  #toast { left: 0; top: 120px; width: 1920px; text-align: center; opacity: 0; transition: opacity .35s; }
+  #toast span { display: inline-block; font: 600 28px var(--kai); color: #f6e9c8; background: rgba(34,22,14,.9); border: 1px solid rgba(215,165,68,.7); padding: 10px 30px; border-radius: 6px; }
+
+  /* 对白 */
+  #dlg { left: 170px; top: 760px; width: 1580px; height: 270px; pointer-events: auto; }
+  #dlg .box { position: absolute; left: 110px; top: 30px; right: 0; bottom: 0; background: linear-gradient(180deg, #f4ead2, #e7d9b6); border: 3px solid #3d2a1c; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.6), inset 0 0 0 2px #f8f0dc, inset 0 0 0 4px rgba(168,54,42,.45), inset 0 0 60px rgba(120,90,40,.18); }
+  #dlg .med { position: absolute; left: 0; top: 34px; width: 226px; height: 226px; filter: drop-shadow(0 6px 14px rgba(0,0,0,.6)); }
+  #dlg .name { position: absolute; left: 250px; top: 0; min-width: 150px; padding: 8px 26px 9px; text-align: center; font: 600 34px var(--kai); letter-spacing: .12em; color: #f8ecd0; background: linear-gradient(180deg, #b23c2e, #8e2a20); border: 2px solid #3d2a1c; border-radius: 4px; box-shadow: 0 3px 10px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,220,160,.4); }
+  #dlg .body { position: absolute; left: 252px; top: 72px; right: 60px; bottom: 26px; font: calc(38px * var(--ts)) / 1.62 var(--song); color: var(--ink); text-align: justify; overflow: hidden; }
+  #dlg.nomed .body { left: 170px; }
+  #dlg.nomed .name { left: 168px; }
+  #dlg .body i { font-style: normal; font-family: var(--kai); color: #7a5d3a; }
+  #dlg .next { position: absolute; right: 34px; bottom: 18px; font-size: 28px; color: var(--red); animation: bob 1s infinite; }
+  @keyframes bob { 50% { transform: translateY(6px); } }
+  #narr { left: 260px; top: 836px; width: 1400px; pointer-events: auto; padding: 26px 60px 28px; text-align: center; font: calc(36px * var(--ts)) / 1.7 var(--kai); color: #f4e8cc; background: linear-gradient(90deg, rgba(18,12,9,0), rgba(18,12,9,.86) 12%, rgba(18,12,9,.86) 88%, rgba(18,12,9,0)); text-shadow: 0 1px 3px #000; }
+  #narr .next { position: absolute; right: 190px; bottom: 12px; font-size: 22px; color: var(--gold); animation: bob 1s infinite; }
+  #cap { left: 0; top: 0; width: 1920px; height: 1080px; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity .9s; }
+  #cap .t { font: 54px/1.7 var(--kai); letter-spacing: .16em; color: #f1e4c4; text-align: center; text-shadow: 0 2px 12px #000; }
+  #cap .s { font: 28px var(--kai); letter-spacing: .1em; color: #c9b282; margin-top: 26px; }
+
+  /* 题词：竖排，自右而左 */
+  #card { left: 0; top: 0; width: 1920px; height: 1080px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s; background: radial-gradient(ellipse at center, rgba(8,5,3,.55), rgba(8,5,3,.9)); }
+  #card .scroll { display: flex; flex-direction: row-reverse; align-items: flex-start; gap: 38px; padding: 70px 90px 60px; background: linear-gradient(180deg, #f1e6cb, #e2d2ac); border: 3px solid #3d2a1c; box-shadow: 0 20px 80px rgba(0,0,0,.8), inset 0 0 0 3px #f8f0dc, inset 0 0 0 5px rgba(168,54,42,.4), inset 0 0 120px rgba(120,90,40,.25); }
+  #card .col { writing-mode: vertical-rl; font: 50px/1.5 var(--kai); letter-spacing: .22em; color: var(--ink); }
+  #card .head { writing-mode: vertical-rl; font: 600 62px var(--kai); letter-spacing: .3em; color: #8e2a20; padding-left: 20px; border-left: 2px solid rgba(142,42,32,.5); }
+  #card .src { writing-mode: vertical-rl; font: 28px var(--kai); letter-spacing: .2em; color: #6a5236; align-self: flex-end; }
+  #card .seal { writing-mode: vertical-rl; align-self: flex-end; font: 600 24px var(--kai); color: #f8ecd0; background: #a8362a; padding: 8px 5px; border-radius: 3px; letter-spacing: .1em; }
+
+  /* 选择、教学、面板 */
+  #choice { left: 560px; top: 300px; width: 800px; pointer-events: auto; }
+  #choice .q { font: 600 34px var(--kai); text-align: center; color: #f6e9c8; text-shadow: 0 2px 6px #000; margin-bottom: 22px; }
+  .btn { display: block; width: 100%; margin: 12px 0; padding: 16px 30px; font: 32px var(--kai); color: var(--ink); text-align: center; background: linear-gradient(180deg, #f4ead2, #e3d3ad); border: 2px solid #3d2a1c; border-radius: 5px; box-shadow: 0 4px 14px rgba(0,0,0,.5), inset 0 0 0 2px rgba(168,54,42,.3); pointer-events: auto; cursor: pointer; }
+  .btn.sel, .btn:hover { background: linear-gradient(180deg, #fff6dc, #f0dca8); box-shadow: 0 4px 18px rgba(0,0,0,.6), inset 0 0 0 3px #a8362a; }
+  .btn.small { display: inline-block; width: auto; font-size: 26px; padding: 10px 26px; margin: 6px; }
+  .btn.off { opacity: .45; }
+  #tut { left: 410px; top: 300px; width: 1100px; padding: 40px 56px 34px; pointer-events: auto; background: linear-gradient(180deg, rgba(40,27,18,.96), rgba(26,17,11,.96)); border: 2px solid var(--gold); border-radius: 8px; box-shadow: 0 16px 60px rgba(0,0,0,.7); }
+  #tut h3 { margin: 0 0 16px; font: 600 36px var(--kai); color: var(--gold); letter-spacing: .2em; }
+  #tut p { margin: 0; font: calc(31px * var(--ts)) / 1.75 var(--kai); color: #f4e8cc; }
+  #tut .ok { margin-top: 24px; text-align: right; font: 26px var(--kai); color: var(--gold); }
+  kbd { display: inline-block; min-width: 1.5em; padding: 0 .35em; margin: 0 .12em; text-align: center; font: 600 .82em var(--song); color: #2b221c; background: #efe4c8; border-radius: 5px; border-bottom: 3px solid #b39b6a; }
+  .panel { background: linear-gradient(180deg, #f3e8cf, #e4d5b0); color: var(--ink); border: 3px solid #3d2a1c; border-radius: 8px; box-shadow: 0 20px 80px rgba(0,0,0,.75), inset 0 0 0 2px #f8f0dc, inset 0 0 0 4px rgba(168,54,42,.4); pointer-events: auto; }
+  .panel h2 { margin: 0 0 18px; font: 600 44px var(--kai); letter-spacing: .25em; color: #8e2a20; }
+  .panel p { font: 28px/1.7 var(--kai); margin: 8px 0; }
+  #menu { left: 360px; top: 130px; width: 1200px; height: 820px; padding: 44px 56px; }
+  #menu .tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid rgba(61,42,28,.4); }
+  #menu .tab { padding: 10px 34px; font: 600 32px var(--kai); letter-spacing: .15em; color: #6a5236; cursor: pointer; pointer-events: auto; border-radius: 6px 6px 0 0; }
+  #menu .tab.on { color: #f8ecd0; background: #8e2a20; }
+  #menu .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 4px; font: 30px var(--kai); border-bottom: 1px dashed rgba(61,42,28,.25); }
+  #menu .opts span { display: inline-block; padding: 4px 18px; margin-left: 8px; border: 1.5px solid rgba(61,42,28,.5); border-radius: 4px; cursor: pointer; pointer-events: auto; font-size: 26px; }
+  #menu .opts span.on { background: #3d2a1c; color: #f8ecd0; }
+  #menu .stat { display: flex; gap: 40px; }
+  #menu .stat canvas { width: 250px; height: 250px; }
+  #menu .stat table { font: 28px/1.6 var(--kai); border-collapse: collapse; }
+  #menu .stat td { padding: 2px 22px 2px 0; } #menu .stat td:first-child { color: #7a5d3a; }
+  #menu .moves { margin-top: 12px; font: 26px/1.7 var(--kai); }
+  #menu .moves span { display: inline-block; margin: 4px 10px 4px 0; padding: 2px 16px; border: 1.5px solid rgba(61,42,28,.45); border-radius: 4px; color: rgba(43,34,28,.45); }
+  #menu .moves span.got { color: #8e2a20; border-color: #8e2a20; background: rgba(168,54,42,.08); }
+  #menu .foot { position: absolute; left: 56px; right: 56px; bottom: 34px; display: flex; justify-content: space-between; align-items: center; font: 24px var(--kai); color: #7a5d3a; }
+
+  /* 行菜 */
+  #mini { left: 310px; top: 190px; width: 1300px; padding: 40px 50px; }
+  #mini .trays { display: flex; gap: 22px; margin-top: 18px; }
+  #mini .tray { flex: 1; padding: 22px 16px 18px; text-align: center; font: 30px/1.75 var(--kai); background: radial-gradient(ellipse at 50% 30%, #a2553a, #6a2c1c); color: #f8ecd0; border: 3px solid #3d2a1c; border-radius: 50% / 16%; box-shadow: 0 6px 18px rgba(0,0,0,.5), inset 0 0 0 3px rgba(255,220,160,.25); cursor: pointer; pointer-events: auto; }
+  #mini .tray:hover, #mini .tray.sel { box-shadow: 0 6px 24px rgba(0,0,0,.6), inset 0 0 0 4px #ffd778; }
+  #mini .tray b { display: block; font: 600 24px var(--kai); color: #ffd778; letter-spacing: .2em; margin-bottom: 6px; }
+  #mini .tray.gone { opacity: .25; pointer-events: none; }
+
+  /* 特写画面 */
+  #cut { left: 310px; top: 110px; width: 1300px; height: 640px; opacity: 0; transition: opacity .7s; border: 3px solid #3d2a1c; box-shadow: 0 20px 80px rgba(0,0,0,.85), 0 0 0 3px rgba(215,165,68,.5); }
+  #cut canvas { width: 100%; height: 100%; display: block; }
+
+  /* 标题 */
+  #title { left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: auto; background: linear-gradient(90deg, rgba(8,5,4,.2), rgba(8,5,4,.05) 40%, rgba(8,5,4,.75) 78%); }
+  #title .name { position: absolute; right: 250px; top: 96px; height: 900px; white-space: nowrap; writing-mode: vertical-rl; font: 600 108px var(--kai); letter-spacing: .1em; color: #f8ecd0; text-shadow: 0 4px 30px rgba(0,0,0,.9), 0 0 4px #000; }
+  #title .sub { position: absolute; right: 180px; top: 116px; white-space: nowrap; writing-mode: vertical-rl; font: 34px var(--kai); letter-spacing: .5em; color: #e4cf9a; text-shadow: 0 2px 8px #000; }
+  #title .seal { position: absolute; right: 412px; top: 690px; writing-mode: vertical-rl; font: 600 30px var(--kai); color: #f8ecd0; background: #a8362a; padding: 12px 7px; border-radius: 4px; letter-spacing: .12em; box-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  #title .menu { position: absolute; left: 150px; bottom: 150px; width: 420px; }
+  #title .ver { position: absolute; left: 150px; bottom: 60px; font: 22px var(--kai); color: rgba(246,233,200,.6); text-shadow: 0 1px 3px #000; }
+  #end { left: 460px; top: 240px; width: 1000px; padding: 50px 60px; text-align: center; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="world"></canvas>
+  <div id="tone"></div>
+  <div id="fade"></div>
+  <div id="ui"></div>
+</div>
+<script src="src/core.js"></script>
+<script src="src/paint.js"></script>
+<script src="src/figures.js"></script>
+<script src="src/world.js"></script>
+<script src="src/scenes1.js"></script>
+<script src="src/scenes2.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/ui.js"></script>
+<script src="data/prologue.js"></script>
+<script src="src/story.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>
