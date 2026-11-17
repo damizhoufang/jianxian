@@ -188,17 +188,19 @@
         '<p style="font-size:24px;color:#7a5d3a">方向键任何时候都是四个固定方向。俯瞰（V）时点地面，人会自己走过去。</p>';
     } else if (tab === 3) {
       const all = JX.story.scenes(), cur = JX.game.playing ? all.indexOf(st.label) : -1, nx = all[cur + 1];
-      h += '<p style="font-size:25px;line-height:1.5">测试用：直接跳到某一场的开头。跳过去以后，前面的事都按“做对了”算，赏钱按 60 文算。<br>游戏里随时可以按 <kbd>]</kbd> 跳到下一场、<kbd>[</kbd> 回上一场。</p>' +
+      const chap = l => (l.indexOf('第一章·') === 0 ? '第一章　钗头凤' : '序章　青玉案'), short = l => l.replace(/^第一章·/, '');
+      const groups = []; all.forEach((l, i) => { const g = chap(l); if (!groups.length || groups[groups.length - 1].name !== g) groups.push({ name: g, items: [] }); groups[groups.length - 1].items.push([l, i]); });
+      h += '<p style="font-size:23px;line-height:1.4;margin:0 0 4px">测试用：点哪一场，就跳到那一场的开头。游戏里随时可按 <kbd>]</kbd> 下一场、<kbd>[</kbd> 上一场。</p>' +
         (all.length ? '' : '<p style="color:#8e2a20">场次表没有载入到。<span class="btn small jx-clickable" data-act="title">重新载入页面</span></p>') +
-        '<div class="scenes">' + all.map((l, i) => '<div class="sc jx-clickable' + (i === cur ? ' on' : '') + '" data-jump="' + i + '">' + JX.esc(l) + (i === cur ? '<i>现在</i>' : '') + '</div>').join('') + '</div>' +
-        (cur >= 0 ? '<div class="btn small jx-clickable' + (nx ? '' : ' off') + '" data-act="next">' + (nx ? '跳到下一场 ▶　' + JX.esc(nx) : '已经是最后一场') + '</div><div class="btn small jx-clickable" data-act="again">这一场从头再来</div>' : '');
+        '<div class="scwrap">' + groups.map(g => '<div class="grp">' + g.name + '</div><div class="scenes">' + g.items.map(([l, i]) => '<div class="sc jx-clickable' + (i === cur ? ' on' : '') + '" data-jump="' + i + '">' + JX.esc(short(l)) + (i === cur ? '<i>现在</i>' : '') + '</div>').join('') + '</div>').join('') + '</div>' +
+        (cur >= 0 ? '<div class="btn small jx-clickable' + (nx ? '' : ' off') + '" data-act="next">' + (nx ? '跳到下一场 ▶　' + JX.esc(short(nx)) : '已经是最后一场') + '</div><div class="btn small jx-clickable" data-act="again">这一场从头再来</div>' : '');
     } else {
       const s = JX.store.get('save');
       h += '<p>进度在每一场开头自动保存，存在这台电脑的这个浏览器里。读档后从那一场的开头接着玩。</p>' +
         '<p>' + (s ? '现有存档：<b>' + JX.esc(s.label) + '</b>　' + JX.esc(s.when || '') : '还没有存档。') + '</p>' +
         '<div class="btn small jx-clickable" data-act="title">回到标题画面</div>';
     }
-    h += '<div class="foot"><span>《剑仙情缘恩仇录》序章试玩 ' + JX.VERSION + '</span><span class="jx-clickable" data-act="close" style="color:#8e2a20;font-size:28px">Esc 关闭</span></div>';
+    h += '<div class="foot"><span>《剑仙情缘恩仇录》试玩 ' + JX.VERSION + '</span><span class="jx-clickable" data-act="close" style="color:#8e2a20;font-size:28px">Esc 关闭</span></div>';
     menu.innerHTML = h;
     if (tab === 0) { const c = menu.querySelector('canvas').getContext('2d'); if (JX.Art && JX.Art.has('jingzhe')) c.drawImage(JX.Art.avatar('jingzhe'), 0, 0, 380, 436); else c.drawImage(Fig.medallion('jingzhe'), 10, 76, 360, 360); }
     menu.onclick = e => {
@@ -230,9 +232,9 @@
     return new Promise(res => {
       const t = root.appendChild(el('div')); t.id = 'title';
       const s = JX.store.get('save');
-      t.innerHTML = '<div class="name">剑仙情缘恩仇录</div><div class="sub">卷一　惊蛰　·　序章　青玉案</div><div class="seal">咸淳三年元夕</div>' +
+      t.innerHTML = '<div class="name">剑仙情缘恩仇录</div><div class="sub">卷一　惊蛰　·　序章　·　第一章</div><div class="seal">咸淳三年元夕</div>' +
         '<div class="menu"><div class="btn jx-clickable" data-a="new">新的故事</div>' + (s ? '<div class="btn jx-clickable" data-a="load">接着上回　<span style="font-size:22px;color:#7a5d3a">' + JX.esc(s.label) + '</span></div>' : '') + '<div class="btn jx-clickable" data-a="gallery">人物图鉴 · 配乐</div><div class="btn jx-clickable" data-a="scenes">选一场开始　<span style="font-size:22px;color:#7a5d3a">测试用</span></div><div class="btn small jx-clickable" data-a="full" style="margin-top:18px">全屏显示（F）</div></div>' +
-        '<div class="ver">序章试玩 ' + JX.VERSION + '　·　序章全十场　·　建议用 Chrome</div>';
+        '<div class="ver">试玩 ' + JX.VERSION + '　·　序章十场，第一章做到第三场　·　建议用 Chrome</div>';
       const btns = [...t.querySelectorAll('.btn:not(.small)')]; let sel = s ? 1 : 0;
       const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel)); paint();
       const finish = a => { hs.splice(hs.indexOf(tick), 1); t.remove(); JX.audio && JX.audio.sfx('gong'); res(a); };

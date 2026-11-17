@@ -208,8 +208,9 @@
       const len = Math.hypot(mx, my), sp = 250 * S.walk * (p.speedK || 1) * (JX.fast || 1) * dt;
       const nx = p.x + mx / len * sp, ny = p.y + my / len * sp;
       let moved = false;
-      if (free(nx, p.y, p)) { p.x = nx; moved = moved || !!mx; }
-      if (free(p.x, ny, p)) { p.y = ny; moved = moved || !!my; }
+      const inside = !free(p.x, p.y, p);                          // 万一被演出摆进了桌子或人的占位里，先许他走出来，不然哪边都迈不动
+      if (inside || free(nx, p.y, p)) { p.x = nx; moved = moved || !!mx; }
+      if (inside || free(p.x, ny, p)) { p.y = ny; moved = moved || !!my; }
       /* 蹭到桌角、凳角走不动的时候：只按着一个方向，就往旁边让一让，顺着角滑过去（不然得自己松手、挪半步、再按） */
       if (!moved && (!mx || !my)) {
         const ax = mx ? 1 : 0, sx = Math.sign(mx), sy = Math.sign(my), g = W.guide && W.guide.path && W.guide.path[0];

@@ -450,6 +450,7 @@
     chaiyi: { name: '差役', h: 158, kind: 'short', robe: '#3d4a5c', trim: '#1e2630', pants: '#2a323c', hair: 'futou', sash: '#8e2a20', beard: 'black' },
     huyuan: { name: '护院', h: 162, fat: 1.12, kind: 'short', robe: '#4a4038', trim: '#241e1a', pants: '#3a3430', beard: 'black', brow: 1.2, sash: '#8e2a20' },
     luoer: { name: '罗二', h: 152, kind: 'short', robe: '#6a6456', trim: '#3a362e', pants: '#4a463c', beard: 'stubble', band: '#5a5548', skin: '#d9b28a' },
+    zhanggui: { name: '仁寿堂掌柜', h: 146, kind: 'robe', robe: '#5f6658', trim: '#33382f', hair: 'old', hairCol: '#cfcbc2', beard: 'grey', wide: 1.5, band: '#3d4238', brow: -0.3 },
     baoqi: { name: '鲍七', h: 146, kind: 'short', robe: '#6a5a6a', trim: '#3d333d', pants: '#474049', beard: 'black' },
   };
   /* 路人和食客：按种子配一身衣裳 */

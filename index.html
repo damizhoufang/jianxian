@@ -85,8 +85,10 @@
   #menu .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 4px; font: 30px var(--kai); border-bottom: 1px dashed rgba(61,42,28,.25); }
   #menu .opts span { display: inline-block; padding: 4px 18px; margin-left: 8px; border: 1.5px solid rgba(61,42,28,.5); border-radius: 4px; cursor: pointer; pointer-events: auto; font-size: 26px; }
   #menu .opts span.on { background: #3d2a1c; color: #f8ecd0; }
-  #menu .scenes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 22px; margin: 16px 0 18px; }
-  #menu .scenes .sc { padding: 9px 22px; font: 29px var(--kai); border: 1.5px solid rgba(61,42,28,.5); border-radius: 5px; background: rgba(255,250,235,.45); }
+  #menu .scwrap { max-height: 486px; overflow-y: auto; margin: 4px 0 10px; padding-right: 8px; pointer-events: auto; }
+  #menu .grp { margin: 8px 0 4px; font: 600 24px var(--kai); letter-spacing: .2em; color: #8e2a20; }
+  #menu .scenes { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 22px; margin: 0 0 6px; }
+  #menu .scenes .sc { padding: 5px 20px; font: 26px var(--kai); border: 1.5px solid rgba(61,42,28,.5); border-radius: 5px; background: rgba(255,250,235,.45); }
   #menu .scenes .sc:hover { background: #fff6dc; box-shadow: inset 0 0 0 2px #a8362a; }
   #menu .scenes .sc.on { background: #3d2a1c; color: #f8ecd0; }
   #menu .scenes .sc i { float: right; font-style: normal; font-size: 21px; color: #e4cf9a; }
@@ -219,7 +221,7 @@
    试了几回还不行，把话说在屏幕上，不留一块黑屏。
    地址后面带版本号，换了版本浏览器就不会拿旧文件来凑。 */
 (function () {
-  var V = window.JX_V = '0.5.2';
+  var V = window.JX_V = '0.6.0';
   var FILES = [
     'src/core.js',
     'src/paint.js',
@@ -231,11 +233,13 @@
     'src/scenes1.js',
     'src/scenes2.js',
     'src/scenes3.js',
+    'src/scenes4.js',
     'src/audio.js',
     'src/ui.js',
     'src/gallery.js',
     'src/battle.js',
     'data/prologue.js',
+    'data/chapter1.js',
     'data/checkpoints.js',
     'src/story.js',
     'src/main.js'

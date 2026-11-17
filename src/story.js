@@ -104,9 +104,30 @@
       if (sg === 1 && !f.aguiUp) W.add('agui', 'agui', 1010, 722, { dir: 1, carry: 'jar', tag: '阿桂' });
       if (sg === 1 && !f.jar) W.add('jar2', { h: 96 }, 834, 668, { verb: '抱起', tag: '二楼的酒', draw(g) { P.jar(g, 0, 0, 0.96, { seed: 9, text: '春' }); g.fillStyle = '#f0dca8'; g.fillRect(-9, -72, 18, 12); g.fillStyle = '#8e2a20'; g.font = '600 10px ' + P.KAI; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('二楼', 0, -66); } });
     }
+    if (sg >= 11) { off['kitchen:down'] = '酒窖回头再说，\n先把眼前这件事查清。'; off['kitchen:hall'] = '先把后厨这一头查清楚。'; }
+    /* ---- 第一章 ---- */
+    if (id === 'yamen') {
+      W.add('zhong', 'zhong', 690, 616, { dir: 3, tag: '钟推官' });
+      W.add('xiali', 'xiali', 1650, 650, { dir: 1, tag: '夏公子' });
+      W.add('cy1', 'chaiyi', 1056, 596, { dir: 0, bark: ['（打了个呵欠）', '正门今日不开。'] }); W.add('cy2', 'chaiyi', 1344, 596, { dir: 0, bark: ['……', '有状子，过了卯时再递。'] });
+      W.add('danzi', { h: 96 }, 1934, 660, { draw(g) { P.shadow(g, 0, 0, 70, 14, 0.4); P.table(g, 0, 0, 120, 44, 40, { col: '#6a4a32', seed: 7 }); for (let i = 0; i < 2; i++) P.steamer(g, -28 + i * 54, -90, 26, 2); } });
+      W.add('tanzhu', { h: 148, kind: 'short', robe: '#7a6a55', trim: '#4a4034', pants: '#4a443c', hair: 'cook', beard: 'stubble' }, 2020, 662, { dir: 1, bark: ['炊饼——刚出笼的炊饼——', '小哥，来一个？两文。'] });
+    }
+    if (id === 'yaopu') {
+      W.add('zhanggui', 'zhanggui', 960, 612, { dir: 0, tag: '仁寿堂掌柜', reach: 190, solid: false });
+      W.add('xiali', 'xiali', 180, 880, { dir: 3, tag: '夏公子', solid: false });
+      W.add('bingren', { h: 144, kind: 'dress', female: true, hair: 'female', robe: '#6a6f7a', trim: '#3c404a', skirt: '#4a4f58', inner: '#d9d2c0' }, 1420, 706, { dir: 0, pose: 'sit', seat: 30, solid: false, bark: ['（咳了两声）', '先生还没回来……'] });
+    }
     if (id === 'kitchen') {
-      W.add('laochu', 'laochu', 770, 474, { dir: 0, tag: '老褚', bark: ['别挡着灶口。', '蟹酿橙还差一笼。', '手脚麻利点，今晚要跑到三更。'] });
+      W.add('laochu', 'laochu', 770, 474, { dir: 0, tag: '老褚', bark: sg >= 11 ? ['……（看了你一眼，往灶里添了把柴）'] : ['别挡着灶口。', '蟹酿橙还差一笼。', '手脚麻利点，今晚要跑到三更。'] });
       W.add('cook2', { h: 150, kind: 'short', robe: '#7d6f5c', trim: '#4a3f33', pants: '#4f4840', apron: '#d8d0bc', hair: 'cook' }, 1140, 470, { dir: 2, bark: ['……（忙着颠勺，没空理你）'] });
+      if (sg === 12) {
+        W.add('xiali', 'xiali', 1330, 690, { dir: 3, tag: '夏公子', solid: false });
+        W.add('swill', { h: 84 }, 600, 842, { verb: '翻一翻', tag: '泔水桶', draw(g) {                         // 后门边的泔水桶
+          P.shadow(g, 0, 0, 44, 11, 0.42); g.fillStyle = P.hgrad(g, -34, 0, 68, [[0, '#4f3a28'], [0.5, '#7a5a3e'], [1, '#4a3626']]); g.beginPath(); g.moveTo(-30, -70); g.lineTo(30, -70); g.lineTo(36, 0); g.lineTo(-36, 0); g.closePath(); g.fill(); g.strokeStyle = 'rgba(43,34,28,0.9)'; g.lineWidth = 1.8; g.stroke();
+          P.line(g, -32, -52, 32, -52, 3, '#2e2a26'); P.line(g, -35, -16, 35, -16, 3, '#2e2a26'); P.ellipse(g, 0, -70, 30, 9, '#5d5a3c', 'rgba(43,34,28,0.9)', 1.6); P.ellipse(g, -8, -71, 8, 3, '#8a8660'); P.ellipse(g, 12, -69, 5, 2, '#b8b08a');
+        } });
+      }
       if (sg !== 8) off['kitchen:back'] = '后门闩着。当值的时候，\n不许从这儿溜。';
       if (sg >= 6) {
         W.add('bowls', { h: 150 }, 1560, 792, { draw(g) { P.shadow(g, 0, 0, 62, 14, 0.4); const r = JX.rng(66); for (let col = -2; col <= 2; col++) { const n = 9 - Math.abs(col) * 2 + Math.floor(r() * 2); for (let i = 0; i < n; i++) { const x = col * 26 + (r() - 0.5) * 5, y = -8 - i * 15; g.fillStyle = P.hgrad(g, x - 15, 0, 30, [[0, '#8fae9a'], [0.4, '#dceee2'], [1, '#7c9a88']]); g.beginPath(); g.moveTo(x - 15, y - 9); g.lineTo(x + 15, y - 9); g.quadraticCurveTo(x + 13, y + 5, x, y + 5); g.quadraticCurveTo(x - 13, y + 5, x - 15, y - 9); g.closePath(); g.fill(); g.strokeStyle = 'rgba(43,34,28,0.7)'; g.lineWidth = 1; g.stroke(); } } } });
@@ -650,15 +671,72 @@
     async 回头看() { const p = W.player; await W.walk(p, 1440, 860, { speed: 110, dir: 0, straight: true }); p.dir = 2; await JX.tween(JX.auto ? 0.03 : 2.2, q => { W.focus = { x: 1440, y: 700 - 330 * q }; }); await JX.sleep(JX.auto ? 0.02 : 1.2); },
     async 老道走过() { const d = W.add('laodao', 'laodao', 760, 1010, { dir: 3, solid: false, tag: '卖历日的老道' }); await JX.tween(JX.auto ? 0.03 : 1.2, q => { W.focus = { x: 1440 - 240 * q, y: 370 + 520 * q }; }); await W.walk(d, 1240, 1010, { speed: 120, dir: 3, straight: true }); d.dir = 0; },
     async 老道走远() { const d = W.byId.laodao; if (d) W.walk(d, 2300, 1040, { speed: 120, straight: true }); await JX.sleep(JX.auto ? 0.02 : 1.6); },
+    /* ================= 第一章《钗头凤》 ================= */
+    async 入一一() { const st = JX.state, f = st.flags; st.stage = 11; f.follow = false; f.saber = false; f.fell = true; if (!W.player) W.setPlayer('jingzhe'); const p = W.player; p.carry = null; p.vis = true; p.pose = null; UI.purse(st.money); UI.tone(null); W.focus = null; },
+    async 夏离等着() {
+      const z = W.byId.zhong, x = W.byId.xiali, p = W.player;
+      if (z) { await W.walk(z, 748, 590, { speed: 150, straight: true }); W.remove('zhong'); JX.audio.sfx('door'); }
+      W.focus = { x: 1460, y: 660 }; await JX.sleep(JX.auto ? 0.02 : 1.3);
+      await W.walk(p, 1490, 664, { speed: 230 }); if (x) { W.face(x, p.x, p.y); W.face(p, x.x, x.y); }
+    },
+    async 跟上夏离() { JX.state.flags.follow = 'xiali'; W.focus = null; const x = W.byId.xiali; if (x) x.solid = false; },
+    async 入一二() { const st = JX.state, f = st.flags; st.stage = 12; f.follow = false; if (!W.player) W.setPlayer('jingzhe'); const p = W.player; p.carry = null; p.vis = true; p.pose = null; UI.purse(st.money); UI.tone(null); W.focus = null; },
+    async 后厨站位() { const p = W.player, t = W.byId.tingxue; p.x = 1396; p.y = 838; p.dir = 3; /* 别摆进桌子的占位里，会走不动 */ if (t) { t.dir = 1; t.bark = null; } },
+    async 鲍七进来() { const b = W.add('baoqi', 'baoqi', 1800, 690, { dir: 1, tag: '鲍七', solid: false }); JX.audio.sfx('door'); await W.walk(b, 1600, 700, { speed: 200, straight: true }); b.dir = 1; },
+    async 捞壶() {
+      const p = W.player, x = W.byId.xiali, b = W.byId.swill; JX.state.flags.follow = false;
+      if (x) { x.path = null; W.walk(x, p.x + 110, p.y - 10, { speed: 220 }).then(() => { if (b) W.face(x, b.x, b.y); }); }
+      p.pose = 'squat'; JX.audio.sfx('pop'); await JX.sleep(JX.auto ? 0.02 : 1.1); p.pose = null; JX.audio.sfx('tick');
+    },
+    /* 回想昨夜：借二楼回廊（夜里的样子正合适），旧绢色调 */
+    async 入回想() {
+      UI.tone('sepia'); UI.purse(null); const q0 = UI.quiet; UI.quiet = true; W.load('floor2', 'fromHall'); UI.quiet = q0;
+      const p = W.player; p.x = 500; p.y = 440; p.dir = 3; p.carry = 'tray'; p.pose = null;
+      W.add('luoer', 'luoer', 400, 452, { dir: 3, solid: false });
+      const q = W.byId.qiushui; if (q) { q.pose = 'sit'; q.seat = 34; q.carry = 'pipa'; q.dir = 0; }
+      W.focus = { x: 760, y: 560 }; W.camSnap = true; W.locked = true;
+    },
+    async 回想擦肩() {
+      const p = W.player, e = W.byId.luoer;
+      if (e) W.walk(e, 700, 452, { speed: 170, straight: true }); await W.walk(p, 800, 440, { speed: 170, straight: true, dir: 3 });
+      const g = W.add('ke', { h: 154, kind: 'robe', robe: '#3a3a44', trim: '#1c1c22', hair: 'futou', wide: 1.4 }, p.x + 430, p.y + 14, { dir: 1, solid: false });
+      await W.walk(g, p.x + 44, p.y + 12, { speed: 250, dir: 1, straight: true });
+      JX.audio.sfx('tick'); const x0 = p.x; await JX.tween(JX.auto ? 0.03 : 0.4, k => { p.x = x0 - Math.sin(k * Math.PI) * 12; }); p.x = x0;
+      W.walk(g, 180, 440, { speed: 250, straight: true }).then(() => W.remove('ke')); await JX.sleep(JX.auto ? 0.02 : 0.7);
+    },
+    async 看小台() { W.focus = { x: 1080, y: 660 }; await JX.sleep(JX.auto ? 0.02 : 1.8); },
+    async 出回想() {
+      UI.tone(null); W.focus = null; const q0 = UI.quiet; UI.quiet = true; W.load('kitchen', 'fromHall'); UI.quiet = q0;
+      const p = W.player, x = W.byId.xiali, t = W.byId.tingxue; p.carry = null; p.pose = null; p.x = 700; p.y = 836; p.dir = 3; if (x) { x.x = 810; x.y = 800; x.dir = 1; } if (t) { t.dir = 1; t.bark = null; }
+      W.add('baoqi', 'baoqi', 1590, 740, { dir: 1, tag: '鲍七', solid: false }); UI.purse(JX.state.money);
+    },
+    async 入一三() { const st = JX.state, f = st.flags; st.stage = 13; f.follow = 'xiali'; f.tibi = false; if (!W.player) W.setPlayer('jingzhe'); const p = W.player; p.carry = null; p.vis = true; p.pose = null; UI.purse(st.money); UI.tone(null); W.focus = null; },
+    async 验渣() { const p = W.player; p.dir = 2; JX.audio.sfx('page'); await JX.sleep(JX.auto ? 0.02 : 0.9); },
+    async 题壁可看() { const h = W.hots.find(q => q.id === 'tibi'); if (h) { h.r = 170; h.act = () => { HOOKS.看题壁(); }; } },
+    async 看题壁() {
+      if (W.locked || UI.modal) return; W.locked = true; UI.roam(false); const f = JX.state.flags;
+      await UI.narrate('白墙上有人题了一首诗，墨色已经旧了。');
+      await UI.card('题壁', ['世味年来薄似纱，', '谁令骑马客京华。', '小楼一夜听春雨，', '深巷明朝卖杏花。', '矮纸斜行闲作草，', '晴窗细乳戏分茶。', '素衣莫起风尘叹，', '犹及清明可到家。'], '陆游《临安春雨初霁》');
+      if (!f.tibi) {
+        f.tibi = true;
+        await UI.say('xiali', '夏离', '小楼一夜听春雨，深巷明朝卖杏花。——谁的诗？', 'normal');
+        await UI.say('jingzhe', '陆惊蛰', '……一个老头子。在临安住过一个春天，住得不大痛快。', 'sad');
+        await UI.say('xiali', '夏离', '你倒清楚。', 'cold');
+        await UI.say('jingzhe', '陆惊蛰', '跑堂的，耳朵杂。', 'grin');
+      }
+      W.locked = false; UI.roam(true);
+    },
+    /* 做到哪里，就在哪里停：一张卡片，可以留下来走走，也可以回标题 */
     async 试玩结束() {
-      JX.state.label = '第十场　三天'; ST.save();
-      UI.modal++; UI.purse(null);
+      ST.save();
+      UI.modal++; UI.purse(null); UI.objective(null); W.objective = null;
       const box = UI.root().appendChild(JX.el('div', 'panel')); box.id = 'end';
-      box.innerHTML = '<h2>试玩到此</h2><p>序章《青玉案》到这里就完了：十场，一个元夕夜。</p><p>三天的期限从正月十六算起。第一章《钗头凤》——查案，和阑珊屋里那册盖着朱印的旧书——还在写。</p><div class="btn jx-clickable" data-a="stay">留在御街上走走</div><div class="btn jx-clickable" data-a="title">回到标题画面</div>';
-      const a = await new Promise(res => { box.onclick = e => { const b = e.target.closest('[data-a]'); if (b) res(b.dataset.a); }; if (JX.auto) res('stay'); const hs = JX._upd = JX._upd || [], born = JX.time; const tick = () => { if (UI.menuOpen()) return; if (JX.time - born < 0.8) { JX.input.eat('confirm'); return; } if (JX.input.hit('confirm')) { hs.splice(hs.indexOf(tick), 1); res('stay'); } }; hs.push(tick); });      // 刚出来的一瞬不收回车，免得连按字幕时一下子跳过去
+      box.innerHTML = '<h2>试玩到此</h2><p>序章《青玉案》十场已经做完；第一章《钗头凤》做到第三场：壶是在楼梯拐角换的，毒是岭南的钩吻。</p><p>下一场在北瓦——团头老癞，和溜出去打擂的听雪。还在做。</p><div class="btn jx-clickable" data-a="stay">留在药铺里看看</div><div class="btn jx-clickable" data-a="title">回到标题画面</div>';
+      const a = await new Promise(res => { box.onclick = e => { const b = e.target.closest('[data-a]'); if (b) res(b.dataset.a); }; if (JX.auto) res('stay'); const hs = JX._upd = JX._upd || [], born = JX.time; const tick = () => { if (UI.menuOpen()) return; if (JX.time - born < 0.8) { JX.input.eat('confirm'); return; } if (JX.input.hit('confirm')) { hs.splice(hs.indexOf(tick), 1); res('stay'); } }; hs.push(tick); });      // 刚出来的一瞬不收回车，免得连按对白时一下子跳过去
       box.remove(); UI.modal--;
       if (a === 'title') { location.reload(); return; }
-      ['cy1', 'cy2', 'laodao'].forEach(id => W.remove(id)); W.focus = null; W.locked = false; UI.purse(JX.state.money); UI.roam(true); JX.ended = true;      // 留下来：差役和老道都散了，把画面亮回来
+      const p = W.player; if (p) { p.x = 250; p.y = 820; p.dir = 3; p.path = null; }
+      W.focus = null; W.locked = false; UI.purse(JX.state.money); UI.roam(true); JX.ended = true;
       await UI.fade(0, JX.auto ? 0.05 : 1.2);
     },
   };

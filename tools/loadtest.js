@@ -23,7 +23,7 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascri
     let extra = '';
     if (expect === 'ok' && st.booted) {
       await page.waitForTimeout(1200); await page.click('#title [data-a="scenes"]'); await page.waitForTimeout(300);
-      const opts = await page.evaluate(() => document.querySelectorAll('#menu [data-jump]').length); extra = '选场页 ' + opts + ' 项'; if (opts !== 10) st.booted = false;
+      const [opts, want] = await page.evaluate(() => [document.querySelectorAll('#menu [data-jump]').length, (window.JX_CHECKPOINTS || []).length]); extra = '选场页 ' + opts + ' 项'; if (!opts || opts !== want) st.booted = false;
     }
     if (expect === 'music') { await page.waitForTimeout(1200); await page.keyboard.press('ArrowDown'); await page.mouse.click(900, 80); await page.waitForTimeout(7000); const m = await page.evaluate(() => !!(window.JX_MUSIC && window.JX_MUSIC.zhuti)); extra = '主题曲 ' + (m ? '取到了' : '没取到'); if (!m) st.booted = false; }
     const good = expect === 'msg' ? (!st.booted && /没有取到/.test(st.msg || '') && st.msg.indexOf(file) >= 0) : !!st.booted;
