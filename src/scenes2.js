@@ -42,11 +42,11 @@
   S.hall = {
     name: '一楼大堂', sub: '醉春楼 · 元夕', w: 2880, h: 1500, ambient: '#877670', music: 'yuanxi',
     walk: [[80, 344, 2800, 1460]],
-    spawns: { fromKitchen: { x: 200, y: 680, dir: 3 }, fromStreet: { x: 1440, y: 1390, dir: 2 }, start: { x: 200, y: 680, dir: 3 } },
+    spawns: { fromKitchen: { x: 200, y: 680, dir: 3 }, fromStreet: { x: 1440, y: 1390, dir: 2 }, fromStairs: { x: 2290, y: 560, dir: 1 }, start: { x: 200, y: 680, dir: 3 } },
     exits: [
       { id: 'kitchen', x: 56, y: 590, w: 66, h: 180, to: 'kitchen', spawn: 'fromHall', label: '后厨', lx: 190, ly: 540, back: [30, 0] },
       { id: 'door', x: 1340, y: 1436, w: 200, h: 40, to: 'street', spawn: 'fromHall', label: '门首', ly: 1400, back: [0, -30] },
-      { id: 'stairs', x: 2330, y: 470, w: 80, h: 90, label: '上二楼', lx: 2380, ly: 430, back: [-40, 20] },
+      { id: 'stairs', x: 2330, y: 470, w: 80, h: 90, to: 'floor2', spawn: 'fromHall', label: '上二楼', lx: 2380, ly: 430, back: [-40, 20] },
     ],
     marks: [{ t: '出菜口', x: 245, y: 330 }, { t: '柜台', x: 700, y: 320 }],
     hots: [{ id: 'pass', x: 245, y: 372, r: 110, up: 120, verb: '端菜' }, { id: 'wall', x: 1470, y: 600, r: 0, up: 300 }],

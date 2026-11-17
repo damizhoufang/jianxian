@@ -8,7 +8,7 @@
     const hash = (location.hash || '').slice(1);
     if (hash.indexOf('auto') === 0) { JX.auto = true; JX.autoDelay = hash === 'autoslow' ? 0.5 : 0.03; JX.fast = hash === 'autoslow' ? 2.2 : 5; JX.autoLoad = hash === 'autoload'; }
     if (hash.indexOf('gallery') === 0) UI.openGalleryAt = parseInt(hash.split('-')[1], 10) || 0;      // 直接打开图鉴
-    const dev = ['cellar', 'kitchen', 'hall', 'street', 'snow'].find(s => hash === s || hash === s + '-god');
+    const dev = ['cellar', 'kitchen', 'hall', 'street', 'snow', 'floor2', 'tingchao'].find(s => hash === s || hash === s + '-god');
     if (dev) {                                                    // 开发时直接落到某个场景里走走
       UI.quiet = false; JX.state.stage = dev === 'street' ? 3 : dev === 'hall' ? 2 : 1; JX.state.flags = { aguiUp: true, jar: true, jarDone: true, s1done: true, daoGone: false };
       W.setPlayer(dev === 'snow' ? 'child' : 'jingzhe', dev === 'snow' ? { carry: 'bundle' } : null); W.load(dev, 'start'); if (dev === 'snow') UI.tone('sepia');
