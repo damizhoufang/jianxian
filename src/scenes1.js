@@ -15,7 +15,7 @@
 
   /* ================= 酒窖 ================= */
   S.cellar = {
-    name: '酒窖', sub: '醉春楼 · 地下', w: 1920, h: 1080, ambient: '#35324c', particles: 'dust', music: 'yuanxi', muffle: 520,
+    name: '酒窖', sub: '醉春楼 · 地下', w: 1920, h: 1080, ambient: '#5e5a76', particles: 'dust', music: 'kaitan',
     walk: [[80, 300, 1840, 1040]],
     spawns: { start: { x: 900, y: 720, dir: 0 }, fromKitchen: { x: 1580, y: 370, dir: 0 } },
     exits: [{ id: 'up', x: 1500, y: 296, w: 160, h: 26, to: 'kitchen', spawn: 'fromCellar', label: '上后厨', ly: 250, back: [0, 30] }],
@@ -84,7 +84,7 @@
     }
   }
   S.kitchen = {
-    name: '后厨', sub: '醉春楼 · 八眼灶', w: 1920, h: 1080, ambient: '#5b4c50', music: 'yuanxi', muffle: 1500,
+    name: '后厨', sub: '醉春楼 · 八眼灶', w: 1920, h: 1080, ambient: '#8a7a7c', music: 'zaohuo',
     walk: [[80, 440, 1840, 1040]],
     spawns: { fromCellar: { x: 250, y: 700, dir: 3 }, fromHall: { x: 1720, y: 680, dir: 1 }, start: { x: 250, y: 700, dir: 3 } },
     exits: [

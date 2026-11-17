@@ -1,7 +1,8 @@
 /* 剧本解释器与序章的演出。
    指令：@场景 场景 落脚点 ｜ @黑 ｜ @亮 秒 ｜ @暗 秒 ｜ @字幕 正文 | 落款 ｜ @题词 题 | 句/句 | 出处
         @指引 文字 | 场景:目标 …（目标写 ent=人物、exit=出口、hot=物件、x=,y=）｜ @等 人物或 exit:出口 ｜ @等到 x y 半径
-        @教学 标题 | 正文 ｜ @停 秒 ｜ @做 演出名 参数（演出写在本文件的 HOOKS 里） */
+        @教学 标题 | 正文 ｜ @停 秒 ｜ @乐 曲名（临时换曲，@乐 还 换回场景本来的）｜ @做 演出名 参数（演出写在本文件的 HOOKS 里）
+   对白可以带表情：陆惊蛰[笑]：……  可用 笑 嬉 撇 冷 怒 惊 闭 黯 平（只对画了头像的主角起作用） */
 'use strict';
 (function () {
   const JX = window.JX, P = JX.P, Fig = JX.Fig, W = JX.world, UI = JX.ui;
@@ -9,6 +10,7 @@
   JX.state = { label: null, stage: 0, money: 0, maxed: false, flags: {} };
   const NAMES = {}; Object.keys(Fig.cast).forEach(id => { NAMES[Fig.cast[id].name] = id; });
   NAMES['孩子'] = 'child';
+  const MOODS = { 笑: 'smile', 嬉: 'grin', 撇: 'smirk', 冷: 'cold', 怒: 'angry', 惊: 'surprise', 闭: 'closed', 黯: 'sad', 平: 'normal', 常: null };
 
   ST.parse = function (text) {
     const beats = [];
@@ -18,7 +20,7 @@
       if ((m = s.match(/^==\s*(.+?)\s*==$/))) beats.push({ t: 'label', name: m[1] });
       else if (s[0] === '@') { const sp = s.indexOf(' '); beats.push({ t: 'cmd', cmd: sp < 0 ? s.slice(1) : s.slice(1, sp), arg: sp < 0 ? '' : s.slice(sp + 1).trim() }); }
       else if ((m = s.match(/^\*(.+)\*$/))) beats.push({ t: 'narr', text: m[1] });
-      else if ((m = s.match(/^([^：]{1,8})：(.+)$/))) beats.push({ t: 'say', who: m[1], text: m[2] });
+      else if ((m = s.match(/^([^：\[]{1,8})(?:\[(.+?)\])?：(.+)$/))) beats.push({ t: 'say', who: m[1], mood: MOODS[m[2]] || null, text: m[3] });
       else beats.push({ t: 'narr', text: s });
     });
     return beats;
@@ -37,7 +39,7 @@
 
   async function exec(b) {
     if (b.t === 'label') { JX.state.label = b.name; ST.save(); return; }
-    if (b.t === 'say') { const e = talker(b.who); W.talker = e; await UI.say(NAMES[b.who], b.who, b.text); W.talker = null; return; }
+    if (b.t === 'say') { const e = talker(b.who); W.talker = e; await UI.say(NAMES[b.who], b.who, b.text, b.mood); W.talker = null; return; }
     if (b.t === 'narr') { await UI.narrate(b.text); return; }
     const a = b.arg, parts = a.split('|').map(s => s.trim());
     switch (b.cmd) {
@@ -48,6 +50,7 @@
       case '字幕': await UI.caption(parts[0], parts[1]); break;
       case '题词': await UI.card(parts[0], parts[1].split('/'), parts[2]); break;
       case '教学': await UI.tutorial(parts[0], parts[1]); break;
+      case '乐': if (a === '还') { JX.audio.hold = false; if (W.sc && W.sc.music) JX.audio.music(W.sc.music, W.sc.muffle); } else { JX.audio.hold = true; JX.audio.music(a); } break;   // 临时换一首；“还”是换回这个场景本来的曲子
       case '停': await JX.sleep(JX.auto ? 0.02 : parseFloat(a)); break;
       case '指引': W.objective = { text: parts[0], at: parseTargets(parts[1] || '') }; UI.objective(parts[0]); W.guideAt = 0; break;
       case '等': {

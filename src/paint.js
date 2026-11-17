@@ -69,7 +69,7 @@
   /* 墙根、桌底那种顺着一条边压暗 */
   P.ao = function (ctx, x, y, w, h, side, a) {
     let g;
-    const c0 = 'rgba(18,10,6,' + (a == null ? 0.35 : a) + ')', c1 = 'rgba(18,10,6,0)';
+    const c0 = 'rgba(18,10,6,' + ((a == null ? 0.35 : a) * 0.55).toFixed(3) + ')', c1 = 'rgba(18,10,6,0)';
     if (side === 'top') g = P.vgrad(ctx, x, y, h, [[0, c0], [1, c1]]);
     else if (side === 'bottom') g = P.vgrad(ctx, x, y, h, [[0, c1], [1, c0]]);
     else if (side === 'left') g = P.hgrad(ctx, x, y, w, [[0, c0], [1, c1]]);

@@ -14,14 +14,16 @@
     toast = root.appendChild(el('div', '', '<span></span>')); toast.id = 'toast';
     cap = root.appendChild(el('div', '', '<div class="t"></div><div class="s"></div>')); cap.id = 'cap';
     card = root.appendChild(el('div', 'hide')); card.id = 'card';
-    dlg = root.appendChild(el('div', 'hide', '<div class="box"></div><canvas class="med" width="360" height="360"></canvas><div class="name"></div><div class="body"></div><div class="next">▾</div>')); dlg.id = 'dlg';
+    dlg = root.appendChild(el('div', 'hide', '<div class="box"></div><canvas class="med" width="380" height="436"></canvas><div class="name"></div><div class="body"></div><div class="next">▾</div>')); dlg.id = 'dlg';
     narr = root.appendChild(el('div', 'hide', '<div class="txt"></div><div class="next">▾</div>')); narr.id = 'narr';
     choiceBox = root.appendChild(el('div', 'hide')); choiceBox.id = 'choice';
     tut = root.appendChild(el('div', 'hide')); tut.id = 'tut';
     UI.applyText();
     JX.on('sceneEnter', sc => { if (!UI.quiet) UI.banner(sc.name, sc.sub); });
   };
-  UI.applyText = () => root.style.setProperty('--ts', JX.settings.text);
+  UI.applyText = () => { root.style.setProperty('--ts', JX.settings.text); root.style.setProperty('--da', JX.settings.dlgAlpha); UI.applyLook(); };
+  /* 整体亮度与回忆的旧绢色调，都落在画布的滤镜上 */
+  UI.applyLook = () => { if (JX.canvas) JX.canvas.style.filter = (UI._sepia ? 'sepia(.5) saturate(.62) contrast(.96) ' : '') + 'brightness(' + (JX.settings.bright * (UI._sepia ? 1.05 : 1)).toFixed(3) + ')'; };
 
   /* 等玩家按确认或点一下；自动测试时自己往下走 */
   function waitConfirm(minSec) {
@@ -46,7 +48,7 @@
     return JX.tween(sec, k => { if (tok === UI._fadeTok) f.style.opacity = from + (to - from) * k; });
   };
   UI.tone = function (kind) {
-    JX.canvas.classList.toggle('sepia', kind === 'sepia'); document.getElementById('tone').classList.toggle('sepia', kind === 'sepia');
+    UI._sepia = kind === 'sepia'; UI.applyLook(); document.getElementById('tone').classList.toggle('sepia', UI._sepia);
   };
   UI.banner = function (name, sub) {
     banner.querySelector('.n').textContent = name || ''; banner.querySelector('.s').textContent = sub || '';
@@ -78,13 +80,16 @@
       const hs = JX._upd = JX._upd || []; hs.push(tick);
     });
   }
-  UI.say = async function (id, name, text) {
+  UI.say = async function (id, name, text, mood) {
     UI.modal++;
     narr.classList.add('hide'); dlg.classList.remove('hide');
-    const med = id && Fig.cast[id] ? Fig.medallion(id) : null, cv = dlg.querySelector('.med');
-    dlg.classList.toggle('nomed', !med);
-    cv.style.display = med ? '' : 'none';
-    if (med) { const c = cv.getContext('2d'); c.clearRect(0, 0, 360, 360); c.drawImage(med, 0, 0); }
+    const cv = dlg.querySelector('.med'), c = cv.getContext('2d');
+    const art = id && JX.Art && JX.Art.has(id) ? JX.Art.avatar(id, mood) : null;      // 主角用单独画的头像，其余人用小像
+    const med = !art && id && Fig.cast[id] ? Fig.medallion(id) : null;
+    dlg.classList.toggle('nomed', !art && !med);
+    cv.style.display = art || med ? '' : 'none';
+    c.clearRect(0, 0, cv.width, cv.height);
+    if (art) c.drawImage(art, 0, 0, cv.width, cv.height); else if (med) c.drawImage(med, 34, 116, 312, 312);
     dlg.querySelector('.name').textContent = name;
     JX.audio && JX.audio.sfx('page');
     await typeInto(dlg.querySelector('.body'), text);
@@ -150,14 +155,14 @@
     let h = '<div class="tabs">' + tabs.map((t, i) => '<div class="tab jx-clickable' + (i === tab ? ' on' : '') + '" data-tab="' + i + '">' + t + '</div>').join('') + '</div>';
     if (tab === 0) {
       const mx = st.maxed;
-      h += '<div class="stat"><canvas width="360" height="360"></canvas><div><table>' +
+      h += '<div class="stat"><canvas width="380" height="436"></canvas><div><table>' +
         '<tr><td>姓名</td><td>阿蛰（户籍上写的是阮蛰）</td></tr><tr><td>身份</td><td>醉春楼 · 行菜</td></tr>' +
         '<tr><td>境界</td><td>' + (mx ? '得道（坐忘七阶之末）' : '不入流——至少看上去是') + '</td></tr>' +
         '<tr><td>气血</td><td>' + (mx ? 9999 : 120) + '</td></tr><tr><td>内力</td><td>' + (mx ? 999 : 30) + '</td></tr><tr><td>身法</td><td>' + (mx ? 255 : 18) + '</td></tr>' +
         '<tr><td>赏钱</td><td>' + (st.money || 0) + ' 文</td></tr></table></div></div>' +
         '<div class="moves">稼轩剑　' + MOVES.map((m, i) => '<span class="' + (mx ? 'got' : '') + '">' + m + '</span>').join('') + '</div>' +
         '<p style="margin-top:18px">' + (mx ? '功力已经全开：六式稼轩剑与满级内力都在身上。战斗从第六场起接入，到时直接生效。' : '想跳过修炼，可以一键把功力提到满级。按下之前会自动存一次档。') + '</p>' +
-        '<div class="btn small jx-clickable' + (mx ? ' off' : '') + '" data-act="max">' + (mx ? '功力已全开' : '功力全开') + '</div>';
+        '<div class="btn small jx-clickable' + (mx ? ' off' : '') + '" data-act="max">' + (mx ? '功力已全开' : '功力全开') + '</div><div class="btn small jx-clickable" data-act="gallery">人物图鉴 · 配乐</div>';
     } else if (tab === 1) {
       h += optRow('行走速度', 'walk', [[0.6, '慢'], [0.8, '稍慢'], [1, '中'], [1.3, '快']]) +
         optRow('操作方式', 'controls', [['rel', 'W 前进 · A/D 转向 · S 掉头'], ['abs', 'WASD 四向']]) +
@@ -166,6 +171,8 @@
         optRow('音乐音量', 'music', [[0, '关'], [0.35, '小'], [0.7, '中'], [1, '大']]) +
         optRow('音效音量', 'sfx', [[0, '关'], [0.4, '小'], [0.8, '中'], [1, '大']]) +
         optRow('路线指引', 'guide', [[true, '开'], [false, '关']]) +
+        optRow('画面亮度', 'bright', [[1, '标准'], [1.1, '亮'], [1.22, '更亮']]) +
+        optRow('对话框', 'dlgAlpha', [[0.94, '不透明'], [0.72, '半透明'], [0.5, '更透']]) +
         '<p style="font-size:24px;color:#7a5d3a">方向键任何时候都是四个固定方向。俯瞰（V）时点地面，人会自己走过去。</p>';
     } else {
       const s = JX.store.get('save');
@@ -175,7 +182,7 @@
     }
     h += '<div class="foot"><span>《剑仙情缘恩仇录》序章试玩 ' + JX.VERSION + '</span><span class="jx-clickable" data-act="close" style="color:#8e2a20;font-size:28px">Esc 关闭</span></div>';
     menu.innerHTML = h;
-    if (tab === 0) { const c = menu.querySelector('canvas').getContext('2d'); c.drawImage(Fig.medallion('jingzhe'), 0, 0); }
+    if (tab === 0) { const c = menu.querySelector('canvas').getContext('2d'); if (JX.Art && JX.Art.has('jingzhe')) c.drawImage(JX.Art.avatar('jingzhe'), 0, 0, 380, 436); else c.drawImage(Fig.medallion('jingzhe'), 10, 76, 360, 360); }
     menu.onclick = e => {
       const t = e.target.closest('[data-tab],[data-k],[data-act]'); if (!t) return;
       JX.audio && JX.audio.sfx('tick');
@@ -185,12 +192,13 @@
         JX.settings[t.dataset.k] = v; JX.saveSettings(); UI.applyText(); JX.audio && JX.audio.applyVolume(); renderMenu();
       } else if (t.dataset.act === 'close') UI.toggleMenu();
       else if (t.dataset.act === 'title') location.reload();
+      else if (t.dataset.act === 'gallery') { UI.toggleMenu(); UI.gallery(null, () => { JX.audio.hold = false; const sc = JX.world.sc; if (sc && sc.music) JX.audio.music(sc.music, sc.muffle); }); }
       else if (t.dataset.act === 'max' && !JX.state.maxed) { JX.story.save(); JX.state.maxed = true; JX.story.save(); JX.audio && JX.audio.sfx('gong'); UI.toast('功力全开'); renderMenu(); }
     };
   }
   JX.on('update', () => {
     if (menu && (JX.input.hit('menu') || JX.input.hit('cancel'))) { JX.input.eat('menu'); JX.input.eat('cancel'); UI.toggleMenu(); }
-    else if (!menu && JX.game && JX.game.playing && !JX.world.locked && UI.modal === 0 && JX.input.hit('menu')) { JX.input.eat('menu'); UI.toggleMenu(); }
+    else if (!menu && !UI.galleryOpen() && JX.game && JX.game.playing && !JX.world.locked && UI.modal === 0 && JX.input.hit('menu')) { JX.input.eat('menu'); UI.toggleMenu(); }
   });
 
   /* ---------- 标题画面 ---------- */
@@ -199,17 +207,21 @@
       const t = root.appendChild(el('div')); t.id = 'title';
       const s = JX.store.get('save');
       t.innerHTML = '<div class="name">剑仙情缘恩仇录</div><div class="sub">卷一　惊蛰　·　序章　青玉案</div><div class="seal">咸淳三年元夕</div>' +
-        '<div class="menu"><div class="btn jx-clickable" data-a="new">新的故事</div>' + (s ? '<div class="btn jx-clickable" data-a="load">接着上回　<span style="font-size:22px;color:#7a5d3a">' + JX.esc(s.label) + '</span></div>' : '') + '<div class="btn small jx-clickable" data-a="full" style="margin-top:18px">全屏显示（F）</div></div>' +
+        '<div class="menu"><div class="btn jx-clickable" data-a="new">新的故事</div>' + (s ? '<div class="btn jx-clickable" data-a="load">接着上回　<span style="font-size:22px;color:#7a5d3a">' + JX.esc(s.label) + '</span></div>' : '') + '<div class="btn jx-clickable" data-a="gallery">人物图鉴 · 配乐</div><div class="btn small jx-clickable" data-a="full" style="margin-top:18px">全屏显示（F）</div></div>' +
         '<div class="ver">序章试玩 ' + JX.VERSION + '　·　第一至三场　·　建议用 Chrome</div>';
       const btns = [...t.querySelectorAll('.btn:not(.small)')]; let sel = s ? 1 : 0;
       const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel)); paint();
       const finish = a => { hs.splice(hs.indexOf(tick), 1); t.remove(); JX.audio && JX.audio.sfx('gong'); res(a); };
-      t.onclick = e => { const b = e.target.closest('[data-a]'); if (!b) return; if (b.dataset.a === 'full') UI.fullscreen(); else finish(b.dataset.a); };
+      const gal = p => { JX.audio && JX.audio.sfx('page'); t.classList.add('hide'); UI.gallery(p, () => { t.classList.remove('hide'); JX.audio.hold = true; JX.audio.music('zhuti'); }); };
+      const go = a => { if (a === 'full') UI.fullscreen(); else if (a === 'gallery') gal(); else finish(a); };
+      t.onclick = e => { const b = e.target.closest('[data-a]'); if (b) go(b.dataset.a); };
+      if (UI.openGalleryAt != null) { const p = UI.openGalleryAt; UI.openGalleryAt = null; gal(p); }
       const tick = () => {
+        if (UI.galleryOpen()) return;
         if (JX.auto) return finish(JX.autoLoad && s ? 'load' : 'new');
         if (JX.input.hit('up') || JX.input.hit('w')) { sel = (sel + btns.length - 1) % btns.length; paint(); }
         if (JX.input.hit('down') || JX.input.hit('s')) { sel = (sel + 1) % btns.length; paint(); }
-        if (JX.input.hit('confirm')) { JX.input.eat('confirm'); finish(btns[sel].dataset.a); }
+        if (JX.input.hit('confirm')) { JX.input.eat('confirm'); go(btns[sel].dataset.a); }
       };
       const hs = JX._upd = JX._upd || []; hs.push(tick);
     });

@@ -40,7 +40,7 @@
     ['醉里挑灯看剑', 26, 0.7], ['梦回吹角连营', 26, 0.7], ['少年不识愁滋味', 20, 0.45], ['爱上层楼', 20, 0.45],
   ];
   S.hall = {
-    name: '一楼大堂', sub: '醉春楼 · 元夕', w: 2880, h: 1500, ambient: '#4b3d46', music: 'yuanxi',
+    name: '一楼大堂', sub: '醉春楼 · 元夕', w: 2880, h: 1500, ambient: '#877670', music: 'yuanxi',
     walk: [[80, 344, 2800, 1460]],
     spawns: { fromKitchen: { x: 200, y: 680, dir: 3 }, fromStreet: { x: 1440, y: 1390, dir: 2 }, start: { x: 200, y: 680, dir: 3 } },
     exits: [
@@ -190,7 +190,7 @@
   function stringPts(s, n) { const out = []; for (let i = 1; i < n; i++) { const u = i / n; out.push({ x: s[0] + (s[2] - s[0]) * u, y: s[1] + (s[3] - s[1]) * u + Math.sin(u * Math.PI) * 60, i }); } return out; }
   const LCOL = ['#e0482e', '#f0b23c', '#e06a8a', '#68b08a', '#e0482e', '#f08a3c'];
   S.street = {
-    name: '门首 · 御街口', sub: '正月十五夜', w: 2880, h: 1300, ambient: '#2a2d4c', particles: 'embers', music: 'yuanxi', outside: '#06070c',
+    name: '门首 · 御街口', sub: '正月十五夜', w: 2880, h: 1300, ambient: '#545c8a', particles: 'embers', music: 'dengshi', outside: '#06070c',
     walk: [[60, 540, 2820, 1240]],
     spawns: { fromHall: { x: 1440, y: 610, dir: 0 }, start: { x: 1440, y: 610, dir: 0 }, title: { x: 1440, y: 760, dir: 0 } },
     exits: [{ id: 'door', x: 1350, y: 528, w: 180, h: 30, to: 'hall', spawn: 'fromStreet', label: '回醉春楼', ly: 480, back: [0, 30] }],
@@ -281,7 +281,7 @@
 
   /* ================= 雪夜（忆一） ================= */
   S.snow = {
-    name: '雪夜', sub: '宝祐四年 · 冬', w: 3000, h: 1080, ambient: '#5a6c98', particles: 'snow', music: 'xueye', outside: '#05060a',
+    name: '雪夜', sub: '宝祐四年 · 冬', w: 3000, h: 1080, ambient: '#8494ba', particles: 'snow', music: 'xueye', outside: '#05060a',
     walk: [[60, 500, 2940, 1000]],
     spawns: { start: { x: 220, y: 760, dir: 3 } },
     exits: [],

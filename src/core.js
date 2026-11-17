@@ -2,7 +2,7 @@
    逻辑坐标一律用 1920×1080 的“单位”，按屏幕实际像素放大绘制（4K 屏上是 2 倍）。 */
 'use strict';
 (function () {
-  const JX = window.JX = { VERSION: '0.1.0', W: 1920, H: 1080, S: 1 };
+  const JX = window.JX = { VERSION: '0.2.0', W: 1920, H: 1080, S: 1 };
 
   /* ---------- 工具 ---------- */
   JX.clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -66,6 +66,8 @@
     textSpeed: 1,       // 出字速度
     music: 0.7, sfx: 0.8,
     guide: true,        // 路线指引
+    bright: 1.1,        // 画面亮度
+    dlgAlpha: 0.72,     // 对话框的不透明度
   }, store.get('settings') || {});
   JX.saveSettings = () => store.set('settings', JX.settings);
 
