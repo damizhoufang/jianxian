@@ -42,7 +42,7 @@
   S.hall = {
     name: '一楼大堂', sub: '醉春楼 · 元夕', w: 2880, h: 1500, ambient: '#877670', music: 'yuanxi',
     walk: [[80, 344, 2800, 1460]],
-    spawns: { fromKitchen: { x: 200, y: 680, dir: 3 }, fromStreet: { x: 1440, y: 1390, dir: 2 }, fromStairs: { x: 2290, y: 560, dir: 1 }, start: { x: 200, y: 680, dir: 3 } },
+    spawns: { fromKitchen: { x: 200, y: 680, dir: 3 }, fromStreet: { x: 1440, y: 1390, dir: 2 }, fromStairs: { x: 2290, y: 560, dir: 1 }, mid: { x: 1380, y: 1190, dir: 0 }, start: { x: 200, y: 680, dir: 3 } },
     exits: [
       { id: 'kitchen', x: 56, y: 590, w: 66, h: 180, to: 'kitchen', spawn: 'fromHall', label: '后厨', lx: 190, ly: 540, back: [30, 0] },
       { id: 'door', x: 1340, y: 1436, w: 200, h: 40, to: 'street', spawn: 'fromHall', label: '门首', ly: 1400, back: [0, -30] },

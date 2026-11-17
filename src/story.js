@@ -97,7 +97,13 @@
     }
     if (id === 'hall') {
       W.add('baoqi', 'baoqi', 640, 404, { dir: 0, tag: '鲍七', solid: false, bark: ['皇都春、琼花露、蓬莱春，\n今晚都得往外搬。', '认酒容易，认喝酒的人难。'] });
-      W.add('siniang', 'siniang', 880, 500, { dir: 0, tag: '阮四娘', bark: ['不许赊账，不许吵架，\n不许出人命。', '还站着？前头客人等着呢。'] });
+      W.add('siniang', 'siniang', sg === 6 ? 1290 : 880, sg === 6 ? 1190 : 500, { dir: sg === 6 ? 3 : 0, tag: '阮四娘', bark: ['不许赊账，不许吵架，\n不许出人命。', '还站着？前头客人等着呢。'] });
+      if (sg === 6) {
+        if (!f.xueGone) W.add('tingxue', 'tingxue', 1600, 1270, { dir: 1, tag: '北边来的小娘子' });
+        W.add('huyuan', 'huyuan', f.thrown ? 1778 : 1800, f.thrown ? 1262 : 1200, { dir: 1, pose: f.thrown ? 'squat' : null }); W.add('huyuan2', 'huyuan', f.thrown ? 1792 : 1820, f.thrown ? 1296 : 1340, { dir: 1, pose: f.thrown ? 'squat' : null });
+        W.add('bench6', { h: 30 }, 1210, 1330, { solid: false, draw(g) { g.save(); g.rotate(-0.5); P.shadow(g, 0, 10, 80, 12, 0.35); g.fillStyle = '#614430'; g.fillRect(-84, -12, 168, 16); g.strokeStyle = 'rgba(43,34,28,0.85)'; g.lineWidth = 1.4; g.strokeRect(-84, -12, 168, 16); g.fillRect(-70, -40, 9, 28); g.fillRect(60, -40, 9, 28); g.strokeRect(-70, -40, 9, 28); g.strokeRect(60, -40, 9, 28); g.restore(); } });
+      }
+      if (sg === 7 && f.follow) { const p = W.player; W.add('luoer', 'luoer', p.x - 70, p.y + 20, { dir: p.dir, tag: '真州来客', solid: false }); }
       W.add('fan', 'fan', 1470, 366, { dir: 0, pose: 'slump', solid: false, tag: '范醉翁', reach: 190, bark: ['（鼾声）'] });
       W.add('shikeA', Fig.cast.shikeA, 912, 854, { vis: false, solid: false, pose: 'sit' });
       W.add('shikeB', Fig.cast.shikeB, 1712, 854, { vis: false, solid: false, pose: 'sit' });
@@ -111,10 +117,12 @@
       W.add('cike', { h: 150 }, 820, 894, { vis: false, solid: false });
       W.add('cike2', { h: 150 }, 1580, 894, { vis: false, solid: false }); W.add('cike3', { h: 150 }, 700, 584, { vis: false, solid: false });
       off['floor2:down'] = sg === 4 ? '酒还没送完，下去要挨骂。' : '听潮阁的客人还等着。';
+      if (sg === 7 && f.follow) { const p = W.player; W.add('luoer', 'luoer', p.x + 10, p.y + 60, { dir: 2, tag: '真州来客', solid: false }); }
       if (sg === 4 && !f.heDone) off['floor2:up'] = '先把贺先生的酒送到。';
     }
     if (id === 'tingchao') {
-      W.add('xiali', 'xiali', 960, 436, { dir: 2, tag: '夏公子' });
+      W.add('xiali', 'xiali', sg >= 7 ? 1130 : 960, sg >= 7 ? 640 : 436, { dir: sg >= 7 ? 1 : 2, tag: '夏公子' });
+      if (sg === 7 && f.follow) W.add('luoer', 'luoer', 420, 880, { dir: 3, tag: '真州来客', solid: false });
       off['tingchao:down'] = '客人的话还没说完。';
       addCups();
     }
@@ -149,6 +157,84 @@
     const v = c.createRadialGradient(650, 320, 240, 650, 320, 760); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.7)'); c.fillStyle = v; c.fillRect(0, 0, w, h);
   }
   ST._drawSeal = (c, k) => drawSeal(c, k);
+  /* 跟在阿蛰后头走的人（第七场的罗二） */
+  let followT = 0;
+  JX.on('update', dt => {
+    const f = JX.state.flags; if (!f || !f.follow || W.locked) return; const e = W.byId.luoer, p = W.player; if (!e || !p) return;
+    const d = JX.dist(e.x, e.y, p.x, p.y); followT -= dt;
+    if (d < 96) { e.path = null; e.moving = false; }
+    else if (followT <= 0) { followT = 0.35; e.path = W.findPath(e.x, e.y, p.x, p.y); e.pathSpeed = d > 300 ? 300 : 200; e.onArrive = null; }
+  });
+  /* 特写：一块画板加几句旁白 */
+  async function cutIn(draw, lines, sec) {
+    const box = UI.root().appendChild(JX.el('div', '', '<canvas width="1300" height="640"></canvas>')); box.id = 'cut';
+    const c = box.firstChild.getContext('2d'); draw(c, 0); void box.offsetWidth; box.style.opacity = 1;
+    await JX.sleep(JX.auto ? 0.05 : 0.8);
+    JX.tween(JX.auto ? 0.05 : (sec || 2.4), k => draw(c, k), JX.ease.out);
+    for (const t of lines) await UI.narrate(t);
+    box.style.opacity = 0; await JX.sleep(JX.auto ? 0.05 : 0.7); box.remove();
+  }
+  function cutBg(c, a, b2) { const bg = c.createRadialGradient(650, 320, 60, 650, 320, 800); bg.addColorStop(0, a); bg.addColorStop(0.6, b2); bg.addColorStop(1, '#0c0908'); c.fillStyle = bg; c.fillRect(0, 0, 1300, 640); }
+  function cutVig(c) { const v = c.createRadialGradient(650, 320, 240, 650, 320, 760); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.72)'); c.fillStyle = v; c.fillRect(0, 0, 1300, 640); }
+  /* 手心里的雁翎，翎管上缠着半枚铜符 */
+  function drawFeather(c, k) {
+    cutBg(c, '#4a3a30', '#221814');
+    c.save(); c.translate(650, 330); const z = 1 + k * 0.35; c.scale(z, z); c.translate(-60 * k, 10 * k);
+    /* 手：四指在上，掌心朝外，拇指在左 */
+    const skin = P.hgrad(c, -330, 0, 660, [[0, '#c99a74'], [0.5, '#efcfa8'], [1, '#c09068']]), ink = 'rgba(43,31,25,0.85)';
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    [[-176, -40, -214, -300, 88], [-58, -60, -66, -340, 92], [62, -60, 80, -330, 90], [176, -36, 222, -270, 82]].forEach(([x0, y0, x1, y1, w]) => {
+      c.strokeStyle = ink; c.lineWidth = w + 6; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.strokeStyle = '#e8c8a0'; c.lineWidth = w; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
+      const mx = (x0 + x1) / 2, my = (y0 + y1) / 2; c.strokeStyle = 'rgba(140,80,56,0.35)'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(mx - w * 0.3, my + 4); c.quadraticCurveTo(mx, my + 12, mx + w * 0.3, my + 2); c.stroke();
+    });
+    c.strokeStyle = ink; c.lineWidth = 104; c.beginPath(); c.moveTo(-250, 120); c.quadraticCurveTo(-360, 20, -390, -110); c.stroke(); c.strokeStyle = '#deb88e'; c.lineWidth = 98; c.beginPath(); c.moveTo(-250, 120); c.quadraticCurveTo(-360, 20, -390, -110); c.stroke();
+    c.fillStyle = skin; c.strokeStyle = ink; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(-300, 340); c.bezierCurveTo(-320, 180, -290, 20, -226, -40); c.bezierCurveTo(-200, -72, -150, -30, -118, -62); c.bezierCurveTo(-80, -94, -30, -44, 2, -70); c.bezierCurveTo(40, -96, 96, -40, 124, -62); c.bezierCurveTo(170, -84, 250, -30, 262, 60); c.bezierCurveTo(286, 160, 290, 260, 280, 340); c.closePath(); c.fill(); c.stroke();
+    c.strokeStyle = 'rgba(140,80,56,0.4)'; c.lineWidth = 2.6; c.beginPath(); c.moveTo(-230, 40); c.quadraticCurveTo(-40, -30, 220, 30); c.moveTo(-250, 130); c.quadraticCurveTo(-60, 50, 170, 160); c.moveTo(-110, -30); c.quadraticCurveTo(-70, 120, -170, 300); c.stroke();
+    /* 雁翎 */
+    c.save(); c.rotate(-0.42); c.translate(20, 40);
+    const vane = (s, col) => { c.fillStyle = col; c.beginPath(); c.moveTo(-250, 0); c.bezierCurveTo(-140, s * 62, 120, s * 70, 300, s * 6); c.lineTo(300, 0); c.closePath(); c.fill(); };
+    vane(-1, '#d9d4c8'); vane(1, '#b9b2a2');
+    c.strokeStyle = 'rgba(70,62,52,0.45)'; c.lineWidth = 1.3; for (let i = 0; i < 44; i++) { const x = -236 + i * 12, w = Math.sin((i + 2) / 48 * Math.PI) * 58; c.beginPath(); c.moveTo(x, 0); c.lineTo(x + 26, -w); c.moveTo(x, 0); c.lineTo(x + 26, w * 1.06); c.stroke(); }
+    c.fillStyle = 'rgba(60,52,44,0.5)'; c.beginPath(); c.moveTo(200, 0); c.bezierCurveTo(240, -30, 280, -20, 300, -4); c.lineTo(300, 4); c.bezierCurveTo(280, 22, 240, 30, 200, 0); c.fill();
+    c.strokeStyle = '#f4eedc'; c.lineWidth = 6; c.lineCap = 'round'; c.beginPath(); c.moveTo(-420, 4); c.lineTo(300, 0); c.stroke(); c.strokeStyle = 'rgba(90,80,64,0.6)'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-420, 7); c.lineTo(300, 3); c.stroke();
+    /* 半枚铜符：缠在翎管上 */
+    c.save(); c.translate(-330, 4); c.rotate(0.2);
+    c.fillStyle = P.hgrad(c, -60, 0, 120, [[0, '#5a6a4a'], [0.4, '#9aa67a'], [1, '#4a563c']]); c.strokeStyle = 'rgba(30,26,20,0.9)'; c.lineWidth = 2.6;
+    c.beginPath(); c.moveTo(-56, -40); c.lineTo(40, -40); c.lineTo(52, -26); c.lineTo(38, -12); c.lineTo(54, 2); c.lineTo(38, 16); c.lineTo(52, 30); c.lineTo(40, 42); c.lineTo(-56, 42); c.quadraticCurveTo(-70, 0, -56, -40); c.closePath(); c.fill(); c.stroke();
+    c.strokeStyle = 'rgba(30,40,24,0.75)'; c.lineWidth = 3; [[-36, -24, -36, 26], [-14, -24, -14, 26], [8, -24, 8, 10], [-46, -4, 20, -4], [-46, 16, 4, 16]].forEach(q => { c.beginPath(); c.moveTo(q[0], q[1]); c.lineTo(q[2], q[3]); c.stroke(); });
+    c.fillStyle = 'rgba(120,170,140,0.35)'; c.beginPath(); c.arc(-30, 28, 14, 0, 6.3); c.fill(); c.beginPath(); c.arc(16, -30, 10, 0, 6.3); c.fill();
+    c.strokeStyle = '#7a3a2a'; c.lineWidth = 5; for (let i = 0; i < 5; i++) { c.beginPath(); c.moveTo(-10 + i * 9, -46); c.lineTo(-18 + i * 9, 48); c.stroke(); }
+    c.restore(); c.restore(); c.restore();
+    cutVig(c);
+  }
+  /* 翻过来的壶盖：里头是光的。旁边虚虚的一只，是醉春楼的壶盖本来的样子 */
+  function drawLid(c, k) {
+    cutBg(c, '#4f4034', '#241a15');
+    const lid = (x, y, r, a, mark) => {
+      c.save(); c.translate(x, y); c.globalAlpha = a;
+      c.fillStyle = 'rgba(0,0,0,0.35)'; c.beginPath(); c.ellipse(10, 18, r * 1.04, r * 0.5, 0, 0, 6.3); c.fill();
+      const g = c.createRadialGradient(-r * 0.3, -r * 0.2, r * 0.1, 0, 0, r); g.addColorStop(0, '#e6f2e8'); g.addColorStop(0.7, '#a9c9b4'); g.addColorStop(1, '#6f8f7e'); c.fillStyle = g; c.beginPath(); c.ellipse(0, 0, r, r * 0.46, 0, 0, 6.3); c.fill(); c.strokeStyle = 'rgba(30,40,34,0.9)'; c.lineWidth = 3; c.stroke();
+      c.strokeStyle = 'rgba(30,40,34,0.75)'; c.lineWidth = r * 0.11; c.beginPath(); c.ellipse(0, 3, r * 0.66, r * 0.29, 0, 0, 6.3); c.stroke(); c.strokeStyle = '#d6e8da'; c.lineWidth = r * 0.07; c.stroke();        // 盖里一圈子口
+      c.fillStyle = '#c4dccb'; c.beginPath(); c.ellipse(0, 5, r * 0.56, r * 0.235, 0, 0, 6.3); c.fill(); c.fillStyle = 'rgba(255,255,255,0.35)'; c.beginPath(); c.ellipse(-r * 0.2, -r * 0.02, r * 0.2, r * 0.06, -0.3, 0, 6.3); c.fill();
+      if (mark) { c.save(); c.scale(1, 0.46); c.fillStyle = 'rgba(120,60,30,0.85)'; c.font = '600 ' + Math.round(r * 0.7) + 'px ' + P.KAI; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('春', 0, 12); c.strokeStyle = 'rgba(120,60,30,0.7)'; c.lineWidth = 4; c.beginPath(); c.arc(0, 8, r * 0.5, 0, 6.3); c.stroke(); c.restore(); }
+      c.restore();
+    };
+    /* 那把壶：没了盖 */
+    c.save(); c.translate(250, 350);
+    c.fillStyle = 'rgba(0,0,0,0.4)'; c.beginPath(); c.ellipse(10, 196, 150, 30, 0, 0, 6.3); c.fill();
+    c.fillStyle = P.hgrad(c, -130, 0, 260, [[0, '#6f8f7e'], [0.4, '#d8ece0'], [1, '#5f7f6e']]); c.strokeStyle = 'rgba(30,40,34,0.9)'; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(-46, -150); c.lineTo(46, -150); c.bezierCurveTo(60, -100, 140, -40, 130, 60); c.bezierCurveTo(124, 150, 80, 190, 0, 192); c.bezierCurveTo(-80, 190, -124, 150, -130, 60); c.bezierCurveTo(-140, -40, -60, -100, -46, -150); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = '#2a3a32'; c.beginPath(); c.ellipse(0, -150, 46, 12, 0, 0, 6.3); c.fill(); c.stroke();
+    c.lineWidth = 16; c.strokeStyle = 'rgba(30,40,34,0.9)'; c.beginPath(); c.moveTo(120, -10); c.bezierCurveTo(190, -20, 200, -100, 230, -130); c.stroke(); c.lineWidth = 11; c.strokeStyle = '#a9c9b4'; c.stroke();
+    c.lineWidth = 14; c.strokeStyle = 'rgba(30,40,34,0.9)'; c.beginPath(); c.moveTo(-110, -40); c.bezierCurveTo(-200, -60, -200, 80, -116, 90); c.stroke(); c.lineWidth = 9; c.strokeStyle = '#a9c9b4'; c.stroke();
+    c.restore();
+    lid(700 - 30 * k, 340, 112 + k * 22, 1, false);
+    lid(1090, 250, 96, 0.16 + 0.5 * k, true);
+    c.globalAlpha = 0.2 + 0.6 * k; c.fillStyle = '#f0dca8'; c.font = '26px ' + P.KAI; c.textAlign = 'center'; c.fillText('醉春楼的壶盖', 1090, 340); c.fillText('这一只：里头是光的', 700 - 30 * k, 440 + k * 12); c.globalAlpha = 1;
+    cutVig(c);
+  }
+  ST._drawFeather = drawFeather; ST._drawLid = drawLid;
   /* ---------- 开坛特写 ---------- */
   ST._drawPry = (c, k) => drawPry(c, k);
   function drawPry(c, k) {                                         // k：0 刀刚插进封泥，1 整块封泥落下
@@ -326,11 +412,94 @@
     async 添杯() { JX.state.flags.cup2 = true; W.focus = null; const p = W.player; p.dir = 2; JX.audio.sfx('tick'); addCups(); const x = W.byId.xiali; if (x) await W.walk(x, 1130, 640, { speed: 170, dir: 1 }); W.face(p, x); },
     async 推银() { W.add('silver', { h: 4 }, 960, 723, { solid: false, draw(g) { g.save(); g.translate(96, -96); g.fillStyle = '#d9dde0'; g.beginPath(); g.moveTo(-12, 0); g.quadraticCurveTo(-9, -9, 0, -6); g.quadraticCurveTo(9, -9, 12, 0); g.quadraticCurveTo(0, 6, -12, 0); g.fill(); g.strokeStyle = 'rgba(43,34,28,0.75)'; g.lineWidth = 1.1; g.stroke(); g.fillStyle = 'rgba(255,255,255,0.7)'; g.fillRect(-5, -5, 6, 1.6); g.restore(); } }); JX.audio.sfx('coin'); await JX.sleep(JX.auto ? 0.02 : 0.6); },
     async 收银() { await JX.sleep(JX.auto ? 0.02 : 1.1); W.remove('silver'); JX.audio.sfx('tick'); },
+    /* —— 第六场 十二碗面 —— */
+    async 入场六() { const st = JX.state; st.stage = 6; st.flags.thrown = false; st.flags.xueGone = false; st.flags.follow = false; if (!W.player) W.setPlayer('jingzhe'); W.player.carry = 'tray'; UI.purse(st.money); UI.tone(null); W.focus = null; },
+    async 巨响() { JX.audio.sfx('gong'); const c = W.cam; await JX.tween(JX.auto ? 0.03 : 0.5, k => { W.focus = { x: c.x + JX.W / 2 / c.z + Math.sin(k * 40) * 10 * (1 - k), y: c.y + JX.H / 2 / c.z + Math.cos(k * 33) * 8 * (1 - k) }; }); W.focus = null; },
+    async 条凳飞过() {
+      W.focus = { x: 1500, y: 1230 }; const e = W.byId.bench6; if (!e) return; const x1 = e.x, y1 = e.y; e.x = 1980; JX.audio.sfx('door');
+      await JX.tween(JX.auto ? 0.03 : 0.7, k => { e.x = 1980 + (x1 - 1980) * k; e.y = y1 - 60 + 60 * k; e.z = Math.sin(k * Math.PI) * 150; }, JX.ease.out); e.z = 0; JX.audio.sfx('wrong');
+      await JX.sleep(JX.auto ? 0.02 : 0.5);
+    },
+    async 护院上前() {
+      const a = W.byId.huyuan, b = W.byId.huyuan2, t = W.byId.tingxue;
+      await Promise.all([W.walk(a, 1672, 1258, { speed: 280, dir: 1, straight: true }), W.walk(b, 1676, 1294, { speed: 280, dir: 1, straight: true })]);
+      JX.audio.sfx('wrong'); t.dir = 0;
+      await JX.tween(JX.auto ? 0.03 : 0.36, k => { a.x = 1672 + k * 106; b.x = 1676 + k * 116; a.z = b.z = Math.sin(k * Math.PI) * 46; }); a.z = b.z = 0; a.pose = b.pose = 'squat'; JX.state.flags.thrown = true; JX.audio.sfx('door');
+      await JX.sleep(JX.auto ? 0.02 : 0.5);
+    },
+    async 惊蛰下楼() { const p = W.player, t = W.byId.tingxue; p.carry = 'tray'; await W.walk(p, 1380, 1280, { speed: 330, dir: 3 }); if (t) t.dir = 1; W.face('siniang', p); },
+    async 战一() {
+      const p = W.player, t = W.byId.tingxue, B = JX.battle; p.dir = 3;
+      await W.walk(t, 1640, 1280, { speed: 300, dir: 1, straight: true });
+      const MV = {
+        grab1: { name: '反手一带', tell: '她的手探向你的手腕——是要拿人', type: 'grab' },
+        palm: { name: '连环掌', tell: '她沉肩，两掌一错——连环掌，又快又密', type: 'light', pow: 1.05 },
+        grab2: { name: '探手来抓', tell: '她五指张开，手探过来——又是要拿人', type: 'grab' },
+        press: { name: '一掌按下', tell: '她吸了一口气，掌心朝下——这一掌躲不开', type: 'heavy', pow: 1.3 },
+      };
+      const second = Math.random() < 0.5 ? MV.palm : MV.grab2;
+      await B.run({
+        goal: '不露武功，撑过三个回合', music: 'jiaofeng', wheel: false, zoom: 1.36, focus: { x: 1510, y: 1150 },
+        allies: [{ ent: p, key: 'jingzhe', name: '陆惊蛰', hp: 120, spd: 12, atk: 0, def: 6, guardK: 0, cmds: [
+          { id: 'tray', name: '托盘格挡', kind: 'guard', desc: '举起托盘接一下。挡得住掌，挡不住拿——让她抓住手腕就要吃亏。' },
+          { id: 'bench', name: '借条凳闪开', kind: 'dodge', desc: '脚下勾过一条条凳，人往旁边一让。躲得开拿；又快又密的掌，只能躲开一半。' },
+          { id: 'talk', name: '劝', kind: 'talk', say: '陆惊蛰：“小娘子，有话好说——”', desc: '她在气头上，未必听。听进去一点，下一手会轻些。', fx(b) { b.calm = true; } }] }],
+        foes: [{ ent: t, key: 'tingxue', name: '耶律听雪', hp: 300, showHp: false, spd: 10, atk: 34, ai: b => (b.round === 1 ? MV.grab1 : b.round === 2 ? second : MV.press) }],
+        allow(b) { return b.round === 1 ? { ids: ['bench'], hint: '她要拿你的手腕。拿，只能闪。' } : b.round >= 3 ? { ids: ['tray'], hint: '条凳已经踢远了。这一掌，只能接。' } : { hint: '看她的架势：沉肩是掌，探手是拿。掌要挡，拿要闪。' }; },
+        autoPick(b, u, cmds) { return cmds.find(c => c.id === (b.round >= 3 || (b.round === 2 && second === MV.palm) ? 'tray' : 'bench')); },
+        resolve(b, a, m, x, r) { if (b.calm && r.dmg) { r.dmg = Math.round(r.dmg * 0.5); } b.calm = false; return r; },
+        async after(b, u) {
+          if (u.side !== 'foe') return; const n = b.round++, r = b.last.r;
+          if (n === 1) await B.talk(async () => { await UI.say('tingxue', '耶律听雪', '咦？你躲得挺准啊！', 'surprise'); await UI.say('jingzhe', '陆惊蛰', '碰巧，碰巧。', 'grin'); });
+          else if (n === 2) await B.talk(() => UI.narrate(r.evade || (r.block && !r.dmg) ? '又让过去了。满堂的食客开始叫好。' : '这一下挨得结实。他晃了晃，托盘没掉。'));
+          else if (n === 3) await B.talk(() => UI.narrate('第三回合。她一掌按在托盘上——盘里的蟹酿橙纹丝不动。她愣住了。'));
+        },
+        end(b) { return b.round > 3 ? 'win' : null; },
+      });
+      p.dir = 3; t.dir = 1; W.focus = { x: 1510, y: 1230 };
+    },
+    async 听雪去后厨() {
+      const t = W.byId.tingxue, a = W.byId.huyuan, b = W.byId.huyuan2; JX.state.flags.xueGone = true; W.focus = null; W.player.carry = null;
+      if (a) a.pose = null; if (b) b.pose = null;
+      if (t) { await W.walk(t, 1180, 1180, { speed: 240 }); W.walk(t, 200, 680, { speed: 300 }).then(() => W.remove('tingxue')); }
+      await JX.sleep(JX.auto ? 0.02 : 1.2);
+    },
+    /* —— 第七场 一壶酒 —— */
+    async 入场七() { const st = JX.state, f = st.flags; st.stage = 7; f.follow = false; f.cup1 = f.cup2 = true; f.xueGone = true; if (!W.player) W.setPlayer('jingzhe'); W.player.carry = 'tray'; UI.purse(st.money); UI.tone(null); W.focus = null; },
+    async 罗二进门() {
+      const e = W.add('luoer', 'luoer', 1440, 1440, { dir: 2, tag: '真州来客', solid: false }), p = W.player; JX.audio.sfx('door'); W.focus = { x: 1440, y: 1260 };
+      await W.walk(e, 1440, 1330, { speed: 150, dir: 2 }); for (const d of [1, 3, 2]) { e.dir = d; await JX.sleep(JX.auto ? 0.02 : 0.45); }
+      await W.walk(p, 1400, 1240, { speed: 220, dir: 0 }); W.focus = null;
+    },
+    async 跟上() { JX.state.flags.follow = true; },
+    async 擦肩() {
+      const p = W.player, e = W.byId.luoer, g = W.add('ke', { h: 154, kind: 'robe', robe: '#3a3a44', trim: '#1c1c22', hair: 'futou', wide: 1.4 }, p.x + 430, p.y + 14, { dir: 1, solid: false });
+      if (e) { e.path = null; e.moving = false; } p.dir = 3;
+      await W.walk(g, p.x + 44, p.y + 12, { speed: 250, dir: 1, straight: true });
+      JX.audio.sfx('tick'); const x0 = p.x; JX.tween(JX.auto ? 0.03 : 0.4, k => { p.x = x0 - Math.sin(k * Math.PI) * 12; }).then(() => { p.x = x0; });
+      await W.walk(g, p.x - 60, p.y + 26, { speed: 250, dir: 1, straight: true });
+      W.walk(g, 190, 400, { speed: 260 }).then(() => W.remove('ke'));
+      await JX.sleep(JX.auto ? 0.02 : 0.7);
+    },
+    async 入座() {
+      const p = W.player, e = W.byId.luoer; JX.state.flags.follow = false; W.focus = { x: 960, y: 640 };
+      const a = W.walk(p, 800, 720, { speed: 210, dir: 3 }); if (e) { await W.walk(e, 780, 560, { speed: 190 }); await W.walk(e, 960, 590, { speed: 190, dir: 0, straight: true }); e.pose = 'sit'; e.seat = 34; } await a;
+    },
+    async 斟酒() {
+      const p = W.player; p.carry = null; JX.audio.sfx('tick');
+      W.add('pot', { h: 4 }, 960, 723, { solid: false, draw(g) { g.save(); g.translate(-18, -112); g.fillStyle = P.hgrad(g, -12, 0, 24, [[0, '#8fb2a0'], [0.4, '#d8ece0'], [1, '#7fa28e']]); g.beginPath(); g.moveTo(-6, -30); g.lineTo(6, -30); g.quadraticCurveTo(16, -14, 11, 0); g.lineTo(-11, 0); g.quadraticCurveTo(-16, -14, -6, -30); g.closePath(); g.fill(); g.strokeStyle = 'rgba(43,34,28,0.8)'; g.lineWidth = 1.2; g.stroke(); P.ellipse(g, 0, -31, 6.5, 2.6, '#a9c9b4', 'rgba(43,34,28,0.8)', 1); g.restore(); } });
+      await JX.sleep(JX.auto ? 0.02 : 0.7);
+      await W.walk(p, 440, 900, { speed: 200, dir: 3 });
+    },
+    async 罗二倒下() { const e = W.byId.luoer; JX.audio.sfx('wrong'); if (e) e.pose = 'slump'; await JX.sleep(JX.auto ? 0.02 : 0.9); JX.audio.sfx('tick'); },
+    async 抢上去() { const p = W.player; await W.walk(p, 850, 610, { speed: 420, dir: 3 }); const x = W.byId.xiali; if (x) x.dir = 1; },
+    async 雁翎特写() { await cutIn(drawFeather, ['他没了声息。惊蛰低头：手心里是一根雁翎，翎管上缠着半枚铜符。']); },
+    async 壶盖特写() { await cutIn(drawLid, ['他去看那把酒壶，揭开壶盖，翻过来。']); },
     async 试玩结束() {
-      JX.state.label = '第五场　听潮阁'; ST.save();
+      JX.state.label = '第七场　一壶酒'; ST.save();
       UI.modal++;
       const box = UI.root().appendChild(JX.el('div', 'panel')); box.id = 'end';
-      box.innerHTML = '<h2>试玩到此</h2><p>序章《青玉案》第一至第五场。</p><p>第六场《十二碗面》起——楼下那一声巨响、一壶毒酒、后巷、屋顶上的蟹壳青，连同战斗——下一版接上。</p><div class="btn jx-clickable" data-a="stay">留在听潮阁看看湖</div><div class="btn jx-clickable" data-a="title">回到标题画面</div>';
+      box.innerHTML = '<h2>试玩到此</h2><p>序章《青玉案》第一至第七场。</p><p>第八场《后巷》起——后巷里等着的三个黑衣人、屋顶上的蟹壳青、三天的期限——下一版接上。</p><div class="btn jx-clickable" data-a="stay">留在听潮阁</div><div class="btn jx-clickable" data-a="title">回到标题画面</div>';
       const a = await new Promise(res => { box.onclick = e => { const b = e.target.closest('[data-a]'); if (b) res(b.dataset.a); }; if (JX.auto) res('stay'); const hs = JX._upd = JX._upd || []; const tick = () => { if (JX.input.hit('confirm')) { hs.splice(hs.indexOf(tick), 1); res('stay'); } }; hs.push(tick); });
       box.remove(); UI.modal--;
       if (a === 'title') { location.reload(); return; }

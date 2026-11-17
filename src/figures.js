@@ -443,6 +443,8 @@
     he: { name: '贺元度', h: 154, kind: 'robe', robe: '#473c5a', trim: '#221c2e', inner: '#f2ecde', hair: 'gaojin', beard: 'black', wide: 1.7, sash: '#1a1522', jade: true, skin: '#f0dac2', shoe: '#191513' },
     xieke: { name: '蟹壳青', h: 174, fat: 1.3, kind: 'short', robe: '#3f5658', trim: '#1c2628', pants: '#2c3638', hair: 'bald', hairCol: '#c0906a', band: '#4f6b6c', skin: '#c99a72', beard: 'stubble', brow: 1.4, sash: '#2a211c' },
     zhong: { name: '钟推官', h: 152, kind: 'robe', robe: '#4d6b4a', trim: '#2c3f2b', hair: 'zhanjiao', beard: 'black', wide: 1.6, sash: '#17130f', shoe: '#17130f' },
+    huyuan: { name: '护院', h: 162, fat: 1.12, kind: 'short', robe: '#4a4038', trim: '#241e1a', pants: '#3a3430', beard: 'black', brow: 1.2, sash: '#8e2a20' },
+    luoer: { name: '罗二', h: 152, kind: 'short', robe: '#6a6456', trim: '#3a362e', pants: '#4a463c', beard: 'stubble', band: '#5a5548', skin: '#d9b28a' },
     baoqi: { name: '鲍七', h: 146, kind: 'short', robe: '#6a5a6a', trim: '#3d333d', pants: '#474049', beard: 'black' },
   };
   /* 路人和食客：按种子配一身衣裳 */
