@@ -411,7 +411,7 @@ window.JX_SCRIPTS.prologue = `
 贺元度[笑]：那就好。
 @暗 0.8
 @乐 zhuti
-@场景 street fromHall
+@场景 street fromHall 静
 @做 带出门
 @亮 1
 @做 回头看
