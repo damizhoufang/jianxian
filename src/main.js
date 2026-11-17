@@ -16,6 +16,10 @@
     }
     /* 标题画面的背景：灯市，镜头慢慢横移 */
     UI.quiet = true; JX.state.stage = 0; W.load('street', 'title'); W.locked = true;
+    /* 菜单里跳场过来的：不过标题画面，黑着直接从那一场开头接上 */
+    let jump = false; try { jump = sessionStorage.getItem('jx.jump') === '1'; sessionStorage.removeItem('jx.jump'); } catch (e) { /* 取不到就照常走标题 */ }
+    const js = jump && JX.store.get('save');
+    if (js) { UI.quiet = false; JX.state.money = js.money || 0; JX.state.maxed = !!js.maxed; JX.state.flags = js.flags || {}; JX.story.run(window.JX_SCRIPTS.prologue, js.label); return; }
     const pan = { x: 1440, y: 700 }; W.focus = pan;
     const drift = () => { pan.x = 1440 + Math.sin(JX.time * 0.07) * 520; }; JX.on('update', drift);
     JX.audio.music('zhuti'); JX.audio.hold = true;

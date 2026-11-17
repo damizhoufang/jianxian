@@ -272,8 +272,10 @@
     W.guideAt -= dt;
     if (W.guideAt <= 0) {
       W.guideAt = 0.3; W.guide = null;
-      const t = JX.settings.guide && p ? W.objTarget() : null;
-      if (t) { const off = t.ent ? 44 : 0; W.guide = { path: W.findPath(p.x, p.y, t.x, t.y + off) || [], t }; }
+      const tt = p ? W.objTarget() : null, t = JX.settings.guide ? tt : null, o = W.objective;
+      if (t) { const off = t.ent ? 44 : 0, gx = t.hot && t.hot.gx != null ? t.hot.gx : t.x, gy = t.hot && t.hot.gy != null ? t.hot.gy : t.y + off; W.guide = { path: W.findPath(p.x, p.y, gx, gy) || [], t }; }
+      /* 左上角提示的最后一行：这一步具体怎么做 */
+      if (JX.ui.objHow) JX.ui.objHow(!o ? '' : o.how != null ? o.how : !tt ? '' : !JX.settings.guide ? '路线指引关着，按 H 打开' : (tt.ent || tt.hot) ? '跟着地上的金色路标走到跟前，按回车' : '跟着地上的金色路标走过去');
     }
     stepParts(dt);
     if (sc.update) sc.update(W, dt);

@@ -29,6 +29,21 @@
     const st = JX.state, d = new Date();
     JX.store.set('save', { label: st.label, money: st.money, maxed: st.maxed, flags: st.flags, when: (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') });
   };
+  /* 跳场（测试用）：把那一场开头的快照写成存档，重新装载页面，启动时不过标题直接接上。
+     这样不管此刻是在对白、演出还是战斗里，都能干净地跳过去。 */
+  ST.scenes = () => (window.JX_CHECKPOINTS || []).map(c => c.label);
+  ST.jump = function (label) {
+    const cp = (window.JX_CHECKPOINTS || []).find(c => c.label === label); if (!cp || ST._jumping) return false;
+    ST._jumping = true; const d = new Date();
+    JX.store.set('save', { label: cp.label, money: cp.money, maxed: JX.state.maxed, flags: cp.flags, when: (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') });
+    try { sessionStorage.setItem('jx.jump', '1'); } catch (e) { /* 存不了就回到标题，用“接着上回”也能到 */ }
+    UI.fade(1, 0.2); setTimeout(() => location.reload(), 240); return true;
+  };
+  ST.jumpBy = function (d) {
+    const all = ST.scenes(), i = all.indexOf(JX.state.label), k = (i < 0 ? 0 : i) + d;
+    if (k < 0) { UI.toast('已经是第一场'); return false; } if (k >= all.length) { UI.toast('已经是最后一场'); return false; }
+    UI.toast('转到　' + all[k], 1.2); return ST.jump(all[k]);
+  };
   function until(cond) { return new Promise(res => { const hs = JX._upd = JX._upd || []; const tick = () => { if (cond()) { hs.splice(hs.indexOf(tick), 1); res(); } }; hs.push(tick); }); }
   function parseTargets(s) {
     const at = {};
@@ -52,7 +67,7 @@
       case '教学': await UI.tutorial(parts[0], parts[1]); break;
       case '乐': if (a === '还') { JX.audio.hold = false; if (W.sc && W.sc.music) JX.audio.music(W.sc.music, W.sc.muffle); } else { JX.audio.hold = true; JX.audio.music(a); } break;   // 临时换一首；“还”是换回这个场景本来的曲子
       case '停': await JX.sleep(JX.auto ? 0.02 : parseFloat(a)); break;
-      case '指引': W.objective = { text: parts[0], at: parseTargets(parts[1] || '') }; UI.objective(parts[0]); W.guideAt = 0; break;
+      case '指引': W.objective = { text: parts[0], at: parseTargets(parts[1] || '') }; UI.objective(parts[0], parts[2] ? parts[2].split('/') : null); W.guideAt = 0; break;      // 第三段是补充说明，用 / 分行
       case '等': {
         W.locked = false; UI.roam(true);
         await W.waitFor(a);
@@ -324,17 +339,33 @@
   function serveRound(no) {
     const R = ROUNDS[no], st = JX.state, served = {}; let carry = null, mist = 0, panel = null;
     return new Promise(done => {
+      /* 左上角的提示。指引开着：把阿蛰心里那张单子写出来，端对了就指给你是哪一桌；指引关着：自己记。 */
+      const left = () => Object.keys(R.orders).filter(n => !served[n]);
+      const trayOf = code => R.trays.find(t => t[0] === code);
+      const cn = n => (n <= 10 ? '一二三四五六七八九十'[n - 1] : '十' + '一二三四五六七八九'[n - 11]) + '号桌';
+      let gWas = null;
       const setObj = () => {
-        if (carry) { W.objective = { text: '把这一盘送到点它的那一桌', at: {} }; UI.objective('把这一盘送到点它的那一桌（按回车上菜）'); }
-        else { W.objective = { text: '到出菜口端菜', at: { hall: { hot: 'pass' } } }; UI.objective('到出菜口端菜'); }
+        const g = gWas = JX.settings.guide;
+        if (carry) {
+          const n = left().find(n => R.orders[n] === carry), hand = ['手上：' + trayOf(carry).slice(1).join('、')];
+          if (!g) { W.objective = { text: '把这一盘送到点它的那一桌', at: {}, how: '走到桌边按回车上菜。记不清就按 H 打开指引' }; }
+          else if (n) { W.objective = { text: '把这一盘送到' + cn(+n), at: { hall: { hot: 'tb' + n } }, how: '跟着地上的金色路标走到桌边，按回车上菜' }; }
+          else { W.objective = { text: '这一盘没有人点，回出菜口换一盘', at: { hall: { hot: 'pass' } }, how: '跟着路标回出菜口，按回车放下重挑' }; }
+          UI.objective(W.objective.text, hand);
+        } else {
+          W.objective = { text: '到出菜口端菜', at: { hall: { hot: 'pass' } } };
+          UI.objective('到出菜口端菜', g ? ['还没上的——'].concat(left().map(n => cn(+n) + '　' + trayOf(R.orders[n]).slice(1).join('、'))) : ['客人点的菜要自己记。记不清就按 H 打开指引']);
+        }
         W.guideAt = 0;
       };
+      const watch = () => { if (JX.settings.guide !== gWas) setObj(); };      // 中途按 H 开关指引，提示跟着换
+      (JX._upd = JX._upd || []).push(watch);
       const pass = W.hots.find(h => h.id === 'pass');
       const closePanel = () => { if (panel) { panel.remove(); panel = null; UI.modal--; } };
       pass.act = () => {
-        if (carry) { W.bubble(W.player, '手上这盘还没送出去。', 1.8); return; }
+        if (carry) { carry = null; W.player.carry = null; JX.audio.sfx('tick'); setObj(); }      // 手上那盘先放回去，重新挑（不扣钱）
         UI.modal++; panel = UI.root().appendChild(JX.el('div', 'panel')); panel.id = 'mini';
-        panel.innerHTML = '<h2>出菜口</h2><p>端哪一盘？（数字键或鼠标选，Esc 先不端）</p><div class="trays">' + R.trays.map((t, i) => '<div class="tray jx-clickable' + (Object.values(served).includes(t[0]) ? ' gone' : '') + '" data-i="' + i + '"><b>' + '第' + '一二三四'[i] + '盘</b>' + t.slice(1).map(JX.esc).join('<br>') + '</div>').join('') + '</div>';
+        panel.innerHTML = '<h2>出菜口</h2><p>端哪一盘？（数字键或鼠标选，Esc 先不端）</p>' + (JX.settings.guide ? '<p class="memo">还没上的——<br>' + left().map(n => '<b>' + cn(+n) + '</b>　' + JX.esc(trayOf(R.orders[n]).slice(1).join('、'))).join('<br>') + '</p>' : '') + '<div class="trays">' + R.trays.map((t, i) => '<div class="tray jx-clickable' + (Object.values(served).includes(t[0]) ? ' gone' : '') + '" data-i="' + i + '"><b>' + '第' + '一二三四'[i] + '盘</b>' + t.slice(1).map(JX.esc).join('<br>') + '</div>').join('') + '</div>';
         const pick = i => { const t = R.trays[i]; if (Object.values(served).includes(t[0])) return; closePanel(); off(); carry = t[0]; W.player.carry = 'tray'; JX.audio.sfx('tick'); setObj(); };
         panel.onclick = e => { const d = e.target.closest('[data-i]'); if (d) pick(+d.dataset.i); };
         const tick = () => {
@@ -345,20 +376,20 @@
         const hs = JX._upd = JX._upd || []; hs.push(tick); const off = () => { const k = hs.indexOf(tick); if (k >= 0) hs.splice(k, 1); };
       };
       const hots = JX.hallTables.map(t => {
-        const h = { id: 'tb' + t.n, x: t.x, y: t.y - 30, r: 150, up: 170, verb: '上菜', n: t.n };
+        const h = { id: 'tb' + t.n, x: t.x, y: t.y - 30, r: 150, up: 170, verb: '上菜', n: t.n, gx: t.x - 140, gy: t.y - 30 };      // gx、gy：路标领到桌子左手边（桌子本身走不上去）
         h.act = () => {
           const a = tableAnchor(t.n);
           if (!carry) { if (mist >= 2 && R.orders[t.n] && !served[t.n]) { const tr = R.trays.find(x => x[0] === R.orders[t.n]); W.bubble(a, '我点的是：\n' + tr.slice(1).join('、').replace(/、([^、]*)$/, '，\n$1'), 3.5); } else W.bubble(W.player, '手上没有菜。', 1.4); return; }
           if (!R.orders[t.n] || served[t.n]) { W.bubble(a, served[t.n] ? '菜齐了，不用再上。' : '我们这桌没叫菜。', 2); return; }
           W.player.carry = null;
           if (R.orders[t.n] === carry) { served[t.n] = carry; st.money += 12; W.bubble(a, '对了对了！赏你的。', 2.2); JX.audio.sfx('coin'); UI.purse(st.money); }
-          else { mist++; st.money = Math.max(0, st.money - 5); W.bubble(a, '错了！这不是我点的。', 2.2); JX.audio.sfx('wrong'); UI.purse(st.money); if (mist === 2) UI.toast('记不清了？空着手走到桌边按回车，客人会再说一遍。', 4); }
+          else { mist++; st.money = Math.max(0, st.money - 5); W.bubble(a, '错了！这不是我点的。', 2.2); JX.audio.sfx('wrong'); UI.purse(st.money); if (mist === 2 && !JX.settings.guide) UI.toast('记不清了？按 H 打开指引，左上角会写出谁点了什么。', 4.5); }
           carry = null; setObj();
           if (Object.keys(served).length === Object.keys(R.orders).length) finish();
         };
         W.hots.push(h); return h;
       });
-      function finish() { hots.forEach(h => W.hots.splice(W.hots.indexOf(h), 1)); pass.act = null; W.objective = null; UI.objective(null); W.autoPilot = null; W.locked = true; UI.roam(false); W.player.path = null; W.player.moving = false; setTimeout(() => done(mist), 0); }
+      function finish() { hots.forEach(h => W.hots.splice(W.hots.indexOf(h), 1)); JX._upd.splice(JX._upd.indexOf(watch), 1); pass.act = null; W.objective = null; UI.objective(null); W.autoPilot = null; W.locked = true; UI.roam(false); W.player.path = null; W.player.moving = false; setTimeout(() => done(mist), 0); }
       setObj(); W.locked = false; UI.roam(true); UI.purse(st.money);
       if (JX.auto) W.autoPilot = () => {                           // 自动测试：自己去端、自己去送
         const p = W.player; if (p.path || UI.modal || W.locked) return;
@@ -649,7 +680,7 @@
       UI.modal++; UI.purse(null);
       const box = UI.root().appendChild(JX.el('div', 'panel')); box.id = 'end';
       box.innerHTML = '<h2>试玩到此</h2><p>序章《青玉案》到这里就完了：十场，一个元夕夜。</p><p>三天的期限从正月十六算起。第一章《钗头凤》——查案，和阑珊屋里那册盖着朱印的旧书——还在写。</p><div class="btn jx-clickable" data-a="stay">留在御街上走走</div><div class="btn jx-clickable" data-a="title">回到标题画面</div>';
-      const a = await new Promise(res => { box.onclick = e => { const b = e.target.closest('[data-a]'); if (b) res(b.dataset.a); }; if (JX.auto) res('stay'); const hs = JX._upd = JX._upd || [], born = JX.time; const tick = () => { if (JX.time - born < 0.8) { JX.input.eat('confirm'); return; } if (JX.input.hit('confirm')) { hs.splice(hs.indexOf(tick), 1); res('stay'); } }; hs.push(tick); });      // 刚出来的一瞬不收回车，免得连按字幕时一下子跳过去
+      const a = await new Promise(res => { box.onclick = e => { const b = e.target.closest('[data-a]'); if (b) res(b.dataset.a); }; if (JX.auto) res('stay'); const hs = JX._upd = JX._upd || [], born = JX.time; const tick = () => { if (UI.menuOpen()) return; if (JX.time - born < 0.8) { JX.input.eat('confirm'); return; } if (JX.input.hit('confirm')) { hs.splice(hs.indexOf(tick), 1); res('stay'); } }; hs.push(tick); });      // 刚出来的一瞬不收回车，免得连按字幕时一下子跳过去
       box.remove(); UI.modal--;
       if (a === 'title') { location.reload(); return; }
       ['cy1', 'cy2', 'laodao'].forEach(id => W.remove(id)); W.focus = null; W.locked = false; UI.purse(JX.state.money); UI.roam(true); JX.ended = true;      // 留下来：差役和老道都散了，把画面亮回来

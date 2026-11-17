@@ -30,6 +30,7 @@
     return new Promise(res => {
       let t = 0;
       const tick = dt => {
+        if (menu) return;                                       // 菜单开着的时候，对白不往下走
         t += dt;
         if (t < (minSec || 0.12)) return;
         if (JX.auto ? t > (JX.autoDelay || 0.05) : (JX.input.hit('confirm') || JX.input.clicks.length)) { JX.input.eat('confirm'); off(); res(); }
@@ -57,7 +58,14 @@
   UI.toast = function (text, sec) {
     toast.firstChild.textContent = text; toast.style.opacity = 1; clearTimeout(UI._tt); UI._tt = setTimeout(() => { toast.style.opacity = 0; }, (sec || 2.2) * 1000);
   };
-  UI.objective = function (text) { if (text) { obj.innerHTML = '<b>◆</b>' + JX.esc(text); obj.classList.remove('hide'); } else obj.classList.add('hide'); };
+  /* 左上角的“下一步”：一行要做的事，下面可以带几行补充（detail），最后一行是怎么做（objHow，世界那边按目标自动填） */
+  UI.objective = function (text, detail) {
+    if (!text) { obj.classList.add('hide'); return; }
+    const d = detail ? (Array.isArray(detail) ? detail : [detail]) : [];
+    obj.innerHTML = '<div class="k">下一步</div><div class="t">' + JX.esc(text) + '</div>' + (d.length ? '<div class="d">' + d.map(JX.esc).join('<br>') + '</div>' : '') + '<div class="h hide"></div>';
+    obj.classList.remove('hide'); UI.objHow(UI._how || '');
+  };
+  UI.objHow = function (text) { UI._how = text; const h = obj.querySelector('.h'); if (!h) return; if (h.textContent !== text) h.textContent = text; h.classList.toggle('hide', !text); };
   UI.roam = function (on) { keys.classList.toggle('hide', !on); };
   UI.purse = function (n) { if (n == null) purse.classList.add('hide'); else { purse.textContent = '赏钱 ' + n + ' 文'; purse.classList.remove('hide'); } };
 
@@ -69,6 +77,7 @@
     return new Promise(res => {
       let shown = 0, t = 0, done = false;
       const tick = dt => {
+        if (menu) return;                                       // 菜单开着的时候，对白停在原处
         t += dt;
         if (!done) {
           shown = Math.min(chars.length, shown + dt * 46 * JX.settings.textSpeed);
@@ -125,6 +134,7 @@
       choiceBox.classList.remove('hide');
       const tick = () => {
         if (JX.auto) return finish(JX.autoChoice ? JX.autoChoice(q, opts) : 0);
+        if (menu) return;
         if (JX.input.hit('up') || JX.input.hit('w')) { sel = (sel + opts.length - 1) % opts.length; paint(); }
         if (JX.input.hit('down') || JX.input.hit('s')) { sel = (sel + 1) % opts.length; paint(); }
         if (JX.input.hit('confirm')) { JX.input.eat('confirm'); finish(sel); }
@@ -151,8 +161,10 @@
     return '<div class="row"><span>' + label + '</span><span class="opts">' + opts.map(o => '<span class="jx-clickable' + (JX.settings[key] === o[0] ? ' on' : '') + '" data-k="' + key + '" data-v="' + o[0] + '">' + o[1] + '</span>').join('') + '</span></div>';
   }
   function renderMenu() {
-    const st = JX.state, tabs = ['人物', '设置', '存档'];
-    let h = '<div class="tabs">' + tabs.map((t, i) => '<div class="tab jx-clickable' + (i === tab ? ' on' : '') + '" data-tab="' + i + '">' + t + '</div>').join('') + '</div>';
+    const st = JX.state, tabs = ['人物', '设置', '存档', '场次'];
+    const show = JX.game.playing ? [0, 1, 2, 3] : [3, 1];      // 标题画面上开的：只有选场和设置
+    if (show.indexOf(tab) < 0) tab = show[0];
+    let h = '<div class="tabs">' + show.map(i => '<div class="tab jx-clickable' + (i === tab ? ' on' : '') + '" data-tab="' + i + '">' + tabs[i] + '</div>').join('') + '</div>';
     if (tab === 0) {
       const mx = st.maxed;
       h += '<div class="stat"><canvas width="380" height="436"></canvas><div><table>' +
@@ -174,6 +186,11 @@
         optRow('画面亮度', 'bright', [[1, '标准'], [1.1, '亮'], [1.22, '更亮']]) +
         optRow('对话框', 'dlgAlpha', [[0.94, '不透明'], [0.72, '半透明'], [0.5, '更透']]) +
         '<p style="font-size:24px;color:#7a5d3a">方向键任何时候都是四个固定方向。俯瞰（V）时点地面，人会自己走过去。</p>';
+    } else if (tab === 3) {
+      const all = JX.story.scenes(), cur = JX.game.playing ? all.indexOf(st.label) : -1, nx = all[cur + 1];
+      h += '<p style="font-size:25px;line-height:1.5">测试用：直接跳到某一场的开头。跳过去以后，前面的事都按“做对了”算，赏钱按 60 文算。<br>游戏里随时可以按 <kbd>]</kbd> 跳到下一场、<kbd>[</kbd> 回上一场。</p>' +
+        '<div class="scenes">' + all.map((l, i) => '<div class="sc jx-clickable' + (i === cur ? ' on' : '') + '" data-jump="' + i + '">' + JX.esc(l) + (i === cur ? '<i>现在</i>' : '') + '</div>').join('') + '</div>' +
+        (cur >= 0 ? '<div class="btn small jx-clickable' + (nx ? '' : ' off') + '" data-act="next">' + (nx ? '跳到下一场 ▶　' + JX.esc(nx) : '已经是最后一场') + '</div><div class="btn small jx-clickable" data-act="again">这一场从头再来</div>' : '');
     } else {
       const s = JX.store.get('save');
       h += '<p>进度在每一场开头自动保存，存在这台电脑的这个浏览器里。读档后从那一场的开头接着玩。</p>' +
@@ -184,9 +201,12 @@
     menu.innerHTML = h;
     if (tab === 0) { const c = menu.querySelector('canvas').getContext('2d'); if (JX.Art && JX.Art.has('jingzhe')) c.drawImage(JX.Art.avatar('jingzhe'), 0, 0, 380, 436); else c.drawImage(Fig.medallion('jingzhe'), 10, 76, 360, 360); }
     menu.onclick = e => {
-      const t = e.target.closest('[data-tab],[data-k],[data-act]'); if (!t) return;
+      const t = e.target.closest('[data-tab],[data-k],[data-act],[data-jump]'); if (!t) return;
       JX.audio && JX.audio.sfx('tick');
       if (t.dataset.tab) { tab = +t.dataset.tab; renderMenu(); }
+      else if (t.dataset.jump) JX.story.jump(JX.story.scenes()[+t.dataset.jump]);
+      else if (t.dataset.act === 'next') JX.story.jumpBy(1);
+      else if (t.dataset.act === 'again') JX.story.jumpBy(0);
       else if (t.dataset.k) {
         let v = t.dataset.v; v = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v;
         JX.settings[t.dataset.k] = v; JX.saveSettings(); UI.applyText(); JX.audio && JX.audio.applyVolume(); renderMenu();
@@ -198,8 +218,11 @@
   }
   JX.on('update', () => {
     if (menu && (JX.input.hit('menu') || JX.input.hit('cancel'))) { JX.input.eat('menu'); JX.input.eat('cancel'); UI.toggleMenu(); }
-    else if (!menu && !UI.galleryOpen() && JX.game && JX.game.playing && !JX.world.locked && UI.modal === 0 && JX.input.hit('menu')) { JX.input.eat('menu'); UI.toggleMenu(); }
+    else if (!menu && !UI.galleryOpen() && JX.game && JX.game.playing && !document.getElementById('mini') && JX.input.hit('menu')) { JX.input.eat('menu'); JX.input.eat('cancel'); UI.toggleMenu(); }      // 对白、演出、战斗里也能开（出菜口那块小面板自己用 Esc，除外）
+    /* 测试用的跳场键：] 下一场，[ 上一场 */
+    if (JX.game && JX.game.playing && !UI.galleryOpen()) { if (JX.input.hit('BracketRight')) JX.story.jumpBy(1); else if (JX.input.hit('BracketLeft')) JX.story.jumpBy(-1); }
   });
+  UI.openScenes = function () { tab = 3; if (!menu) UI.toggleMenu(); else renderMenu(); };
 
   /* ---------- 标题画面 ---------- */
   UI.title = function () {
@@ -207,18 +230,19 @@
       const t = root.appendChild(el('div')); t.id = 'title';
       const s = JX.store.get('save');
       t.innerHTML = '<div class="name">剑仙情缘恩仇录</div><div class="sub">卷一　惊蛰　·　序章　青玉案</div><div class="seal">咸淳三年元夕</div>' +
-        '<div class="menu"><div class="btn jx-clickable" data-a="new">新的故事</div>' + (s ? '<div class="btn jx-clickable" data-a="load">接着上回　<span style="font-size:22px;color:#7a5d3a">' + JX.esc(s.label) + '</span></div>' : '') + '<div class="btn jx-clickable" data-a="gallery">人物图鉴 · 配乐</div><div class="btn small jx-clickable" data-a="full" style="margin-top:18px">全屏显示（F）</div></div>' +
+        '<div class="menu"><div class="btn jx-clickable" data-a="new">新的故事</div>' + (s ? '<div class="btn jx-clickable" data-a="load">接着上回　<span style="font-size:22px;color:#7a5d3a">' + JX.esc(s.label) + '</span></div>' : '') + '<div class="btn jx-clickable" data-a="gallery">人物图鉴 · 配乐</div><div class="btn jx-clickable" data-a="scenes">选一场开始　<span style="font-size:22px;color:#7a5d3a">测试用</span></div><div class="btn small jx-clickable" data-a="full" style="margin-top:18px">全屏显示（F）</div></div>' +
         '<div class="ver">序章试玩 ' + JX.VERSION + '　·　序章全十场　·　建议用 Chrome</div>';
       const btns = [...t.querySelectorAll('.btn:not(.small)')]; let sel = s ? 1 : 0;
       const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel)); paint();
       const finish = a => { hs.splice(hs.indexOf(tick), 1); t.remove(); JX.audio && JX.audio.sfx('gong'); res(a); };
       const gal = p => { JX.audio && JX.audio.sfx('page'); t.classList.add('hide'); UI.gallery(p, () => { t.classList.remove('hide'); JX.audio.hold = true; JX.audio.music('zhuti'); }); };
-      const go = a => { if (a === 'full') UI.fullscreen(); else if (a === 'gallery') gal(); else finish(a); };
+      const go = a => { if (a === 'full') UI.fullscreen(); else if (a === 'gallery') gal(); else if (a === 'scenes') UI.openScenes(); else finish(a); };
       t.onclick = e => { const b = e.target.closest('[data-a]'); if (b) go(b.dataset.a); };
       if (UI.openGalleryAt != null) { const p = UI.openGalleryAt; UI.openGalleryAt = null; gal(p); }
       const tick = () => {
         if (UI.galleryOpen()) return;
         if (JX.auto) return finish(JX.autoLoad && s ? 'load' : 'new');
+        if (menu) return;                                       // “选一场开始”那一页开着
         if (JX.input.hit('up') || JX.input.hit('w')) { sel = (sel + btns.length - 1) % btns.length; paint(); }
         if (JX.input.hit('down') || JX.input.hit('s')) { sel = (sel + 1) % btns.length; paint(); }
         if (JX.input.hit('confirm')) { JX.input.eat('confirm'); go(btns[sel].dataset.a); }
