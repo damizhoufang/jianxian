@@ -1,11 +1,12 @@
 // 图鉴与配乐的检查：从标题进图鉴、翻页、九首曲子逐首试听（能装载、能解码）、从菜单进图鉴、关掉后还能走。用法：node tools/galtest.js
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
+const go = require('./_go');
 const path = require('path');
 (async () => {
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
   const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
   const errs = []; page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); page.on('pageerror', e => errs.push('pageerror: ' + e.message));
-  await page.goto('file://' + path.resolve('index.html'));
+  await go(page, 'file://' + path.resolve('index.html'));
   await page.waitForTimeout(1500);
   // 标题画面 → 点“人物图鉴 · 配乐”
   await page.click('#title [data-a="gallery"]'); await page.waitForTimeout(500);
@@ -23,7 +24,7 @@ const path = require('path');
   await page.keyboard.press('Escape'); await page.waitForTimeout(900);
   console.log('Esc 回标题', await page.evaluate(() => ({ open: JX.ui.galleryOpen(), titleHidden: document.getElementById('title').classList.contains('hide'), want: JX.audio.want && JX.audio.want.id, modal: JX.ui.modal })));
   // 开始游戏 → 菜单 → 图鉴 → 关 → 还能走
-  await page.goto('about:blank'); await page.goto('file://' + path.resolve('index.html') + '#kitchen'); await page.waitForTimeout(1500);
+  await go(page, 'about:blank'); await go(page, 'file://' + path.resolve('index.html') + '#kitchen'); await page.waitForTimeout(1500);
   await page.keyboard.press('Escape'); await page.waitForTimeout(300);
   await page.click('#menu [data-act="gallery"]'); await page.waitForTimeout(400);
   console.log('从菜单进图鉴', await page.evaluate(() => ({ open: JX.ui.galleryOpen(), menu: JX.ui.menuOpen(), modal: JX.ui.modal })));

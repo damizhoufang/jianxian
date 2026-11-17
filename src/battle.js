@@ -1,7 +1,7 @@
 /* 战斗。行动条排先后，时令轮转四季；敌人下一手会先露出架势，挡还是闪由你定。
    人物就站在当前场景里打，不另切画面。每一场战斗是一份定义（def），交给 JX.battle.run：
      allies / foes   各方的人：ent（场景里的人）、name、hp、spd、atk、def、season（0 春 1 夏 2 秋 3 冬）、cmds 或 ai
-     allow(b,u)      这一手只许用哪几个指令（教学时用），返回 { ids, hint }
+     allow(b,u)      这一手的提示，返回 { ids, hint, pick }：ids 只许用哪几个指令（教学时用），hint 一句话，pick 建议用哪个（指引开着时光标先落在它上面）
      resolve(...)    一下打出去之后改写结果（各场战斗自己的规矩）
      after(b,u)      每一手之后：插对白、数回合
      end(b)          返回 'win' / 'lose' 就结束；不写则打到一方全倒
@@ -55,6 +55,7 @@
     return new Promise(res => {
       const box = b.box.querySelector('.cmd'), ok = c => (!allow || !allow.ids || allow.ids.includes(c.id)) && !c.off;
       let sel = Math.max(0, items.findIndex(ok));
+      if (allow && allow.pick && JX.settings.guide) { const k = items.findIndex(c => c.id === allow.pick && ok(c)); if (k >= 0) sel = k; }      // 指引开着：光标先落在建议的那一手上，照着按回车就能打过去
       const paint = () => { box.innerHTML = '<div class="who">' + title + '</div><div class="list">' + items.map((c, i) => '<div class="c jx-clickable' + (i === sel ? ' on' : '') + (ok(c) ? '' : ' off') + '" data-i="' + i + '"><b>' + (i + 1) + '</b>' + c.name + '</div>').join('') + '</div><div class="d">' + (allow && allow.hint ? '<em>' + allow.hint + '</em>' : '') + (items[sel].desc || '') + '</div>'; };
       const hs = JX._upd = JX._upd || [], off = () => { const k = hs.indexOf(tick); if (k >= 0) hs.splice(k, 1); box.classList.add('hide'); box.onclick = box.onmousemove = null; };
       const pick = i => { if (!ok(items[i])) { JX.audio.sfx('wrong'); return; } JX.audio.sfx('tick'); off(); res(items[i]); };

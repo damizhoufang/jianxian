@@ -1,13 +1,14 @@
 // 生成各场开头的进度快照 data/checkpoints.js（菜单“场次”跳场用）。
 // 自动通玩一遍，把每一场开头那次自动存档记下来。剧本或演出改了旗标，就重新跑一次：node tools/checkpoints.js
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
+const go = require('./_go');
 const path = require('path'), fs = require('fs');
 (async () => {
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.addInitScript(() => { const s = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === 'jx.save') (window.__cps = window.__cps || []).push(v); return s.apply(this, arguments); }; });
-  await page.goto('file://' + path.resolve('index.html') + '#auto');
+  await go(page, 'file://' + path.resolve('index.html') + '#auto');
   await page.waitForFunction(() => window.JX && (JX.ended || JX.lastError), null, { timeout: 420000 });
   const out = await page.evaluate(() => ({ err: JX.lastError || null, cps: window.__cps || [], labels: JX.story.beats.filter(b => b.t === 'label').map(b => b.name) }));
   await browser.close();

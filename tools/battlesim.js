@@ -1,6 +1,7 @@
 // 战斗的胜率：在页面里把某一场战斗用“自带打法”连打 N 遍，闪避照实掷骰（不像自动通关那样必中）。
 // 用法：node tools/battlesim.js <alley|roof|hall> <演出名> [遍数]   例：node tools/battlesim.js roof 战三 60
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
+const go = require('./_go');
 const path = require('path');
 (async () => {
   const scene = process.argv[2] || 'roof', hook = process.argv[3] || '战三', n = +process.argv[4] || 40;
@@ -8,7 +9,7 @@ const path = require('path');
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));
-  await page.goto('file://' + path.resolve('index.html') + '#' + scene); await page.waitForTimeout(1500);
+  await go(page, 'file://' + path.resolve('index.html') + '#' + scene); await page.waitForTimeout(1500);
   const out = await page.evaluate(async ({ hook, n, stage, scene }) => {
     const W = JX.world, B = JX.battle, H = JX.story.hooks, st = JX.state; st.stage = stage; st.flags.saber = true; st.flags.follow = false;
     JX.auto = true; JX.honest = true;

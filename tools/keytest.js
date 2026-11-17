@@ -1,5 +1,6 @@
 // 真按键测试：走动、转向、互动、出口、俯瞰点地、菜单、声音
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
+const go = require('./_go');
 const path = require('path');
 (async () => {
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
@@ -7,7 +8,7 @@ const path = require('path');
   const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   const pos = () => page.evaluate(() => ({ x: Math.round(JX.world.player.x), y: Math.round(JX.world.player.y), dir: JX.world.player.dir, scene: JX.world.id, god: JX.world.godOn, modal: JX.ui.modal }));
   const hold = async (k, ms) => { await page.keyboard.down(k); await page.waitForTimeout(ms); await page.keyboard.up(k); await page.waitForTimeout(80); };
-  await page.goto('file://' + path.resolve('index.html') + '#cellar'); await page.waitForTimeout(900);
+  await go(page, 'file://' + path.resolve('index.html') + '#cellar'); await page.waitForTimeout(900);
   console.log('起点', JSON.stringify(await pos()));
   await hold('ArrowRight', 700); console.log('→ 0.7 秒', JSON.stringify(await pos()));
   await hold('ArrowUp', 400); console.log('↑ 0.4 秒', JSON.stringify(await pos()));

@@ -1,10 +1,10 @@
-/* 启动：标题画面 → 新的故事或接着上回 → 跑剧本 */
+/* 启动：标题画面 → 新的故事或接着上回 → 跑剧本。入口是 JX.boot，由 index.html 里的载入器在全部脚本到齐后调用 */
 'use strict';
 (function () {
   const JX = window.JX, W = JX.world, UI = JX.ui;
   JX.game = { playing: false };
-  window.addEventListener('DOMContentLoaded', async () => {
-    JX.initStage(); UI.init(); JX.bindPointer(); JX.start();
+  JX.boot = async () => {                                          // 载入器把脚本都执行完以后来叫
+    JX.initStage(); UI.init(); JX.bindPointer(); JX.start(); JX.booted = true;
     const hash = (location.hash || '').slice(1);
     if (hash.indexOf('auto') === 0) { JX.auto = true; JX.autoDelay = hash === 'autoslow' ? 0.5 : 0.03; JX.fast = hash === 'autoslow' ? 2.2 : 5; JX.autoLoad = hash === 'autoload'; }
     if (hash.indexOf('gallery') === 0) UI.openGalleryAt = parseInt(hash.split('-')[1], 10) || 0;      // 直接打开图鉴
@@ -30,5 +30,5 @@
     let label = null;
     if (act === 'load') { const s = JX.store.get('save'); if (s) { label = s.label; JX.state.money = s.money || 0; JX.state.maxed = !!s.maxed; JX.state.flags = s.flags || {}; } }
     JX.story.run(window.JX_SCRIPTS.prologue, label);
-  });
+  };
 })();

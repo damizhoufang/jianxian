@@ -18,6 +18,9 @@
   #ui > * { position: absolute; }
   #fade { position: absolute; inset: 0; background: #000; opacity: 1; pointer-events: none; }
   .hide { display: none !important; }
+  #boot { position: fixed; left: 0; right: 0; top: 46%; z-index: 99; text-align: center; font: 22px/1.8 "Kaiti SC", "STKaiti", "KaiTi", serif; letter-spacing: .2em; color: rgba(228,207,154,.55); pointer-events: none; }
+  #boot.bad { top: 38%; letter-spacing: .05em; color: #f6e9c8; pointer-events: auto; }
+  #boot.bad span { display: inline-block; margin-top: 18px; padding: 8px 30px; border: 1.5px solid #d7a544; border-radius: 6px; cursor: pointer; }
   .jx-clickable { pointer-events: auto; cursor: pointer; }
 
   /* 指引与提示 */
@@ -209,23 +212,58 @@
   <div id="fade"></div>
   <div id="ui"></div>
 </div>
-<script src="src/core.js"></script>
-<script src="src/paint.js"></script>
-<script src="src/figures.js"></script>
-<script src="src/portraits.js"></script>
-<script src="src/portraits2.js"></script>
-<script src="src/portraits3.js"></script>
-<script src="src/world.js"></script>
-<script src="src/scenes1.js"></script>
-<script src="src/scenes2.js"></script>
-<script src="src/scenes3.js"></script>
-<script src="src/audio.js"></script>
-<script src="src/ui.js"></script>
-<script src="src/gallery.js"></script>
-<script src="src/battle.js"></script>
-<script src="data/prologue.js"></script>
-<script src="data/checkpoints.js"></script>
-<script src="src/story.js"></script>
-<script src="src/main.js"></script>
+<div id="boot">载入中……</div>
+<script>
+/* 载入器。脚本一个接一个执行：前一个没到，后一个不动。
+   服务器偶尔会对某一个文件回 503（0.5.1 时场次表就这样丢过），取不到就自己重试；
+   试了几回还不行，把话说在屏幕上，不留一块黑屏。
+   地址后面带版本号，换了版本浏览器就不会拿旧文件来凑。 */
+(function () {
+  var V = window.JX_V = '0.5.2';
+  var FILES = [
+    'src/core.js',
+    'src/paint.js',
+    'src/figures.js',
+    'src/portraits.js',
+    'src/portraits2.js',
+    'src/portraits3.js',
+    'src/world.js',
+    'src/scenes1.js',
+    'src/scenes2.js',
+    'src/scenes3.js',
+    'src/audio.js',
+    'src/ui.js',
+    'src/gallery.js',
+    'src/battle.js',
+    'data/prologue.js',
+    'data/checkpoints.js',
+    'src/story.js',
+    'src/main.js'
+  ];
+  var boot = document.getElementById('boot'), TRIES = 5;
+  function fail(src) {
+    boot.className = 'bad';
+    boot.innerHTML = '有一个文件没有取到（' + src + '）。<br>多半是网络或服务器一时的问题。<br><span>重新载入</span>';
+    boot.querySelector('span').onclick = function () { location.reload(); };
+  }
+  function load(src, n) {
+    return new Promise(function (res, rej) {
+      var el = document.createElement('script');
+      el.src = src + '?v=' + V + (n ? '&retry=' + n : '');
+      el.onload = function () { res(); };
+      el.onerror = function () {
+        el.remove();
+        if (n + 1 >= TRIES) rej(src);
+        else setTimeout(function () { load(src, n + 1).then(res, rej); }, 350 * (n + 1));
+      };
+      document.head.appendChild(el);
+    });
+  }
+  FILES.forEach(function (f) { var l = document.createElement('link'); l.rel = 'preload'; l.as = 'script'; l.href = f + '?v=' + V; document.head.appendChild(l); });   // 先并排取着，执行时还是按顺序
+  window.JX_LOADING = FILES.reduce(function (p, f) { return p.then(function () { return load(f, 0); }); }, Promise.resolve())
+    .then(function () { boot.remove(); return window.JX.boot(); })
+    .catch(function (e) { document.body.appendChild(boot); if (typeof e === 'string') fail(e); else { boot.className = 'bad'; boot.textContent = '启动时出了错：' + (e && e.message || e); throw e; } });
+})();
+</script>
 </body>
 </html>

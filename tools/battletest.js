@@ -1,6 +1,7 @@
 // 用真按键打一场战斗：读某一场的存档，一路回车到战斗；每到选指令就按这场战斗自带的打法（没有就选第一个能用的）按数字键加回车，
 // 打完后剧情要能接着走。用法：node tools/battletest.js ["第六场　十二碗面" | "第八场　后巷" | "第九场　屋顶"]
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
+const go = require('./_go');
 const path = require('path');
 (async () => {
   const label = process.argv[2] || '第六场　十二碗面';
@@ -8,11 +9,11 @@ const path = require('path');
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   const errs = []; page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); page.on('pageerror', e => errs.push('pageerror: ' + e.message));
   const url = 'file://' + path.resolve('index.html');
-  await page.goto(url + '#auto');
+  await go(page, url + '#auto');
   await page.waitForFunction(l => JX.state && JX.state.label === l, label, { timeout: 240000 });
   const save = await page.evaluate(() => localStorage.getItem('jx.save'));
-  await page.goto('about:blank'); await page.goto(url + '#gallery-0'); await page.evaluate(s => localStorage.setItem('jx.save', s), save);
-  await page.goto('about:blank'); await page.goto(url); await page.waitForTimeout(1500);
+  await go(page, 'about:blank'); await go(page, url + '#gallery-0'); await page.evaluate(s => localStorage.setItem('jx.save', s), save);
+  await go(page, 'about:blank'); await go(page, url); await page.waitForTimeout(1500);
   await page.click('#title [data-a="load"]');
   let shots = 0, picks = 0, fought = false, lost = 0, bad = 0, log = [];
   const t0 = Date.now();

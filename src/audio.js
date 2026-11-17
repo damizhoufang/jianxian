@@ -16,7 +16,10 @@
   }
   A.applyVolume = function () { if (!A.ctx) return; musicGain.gain.value = JX.settings.music * 0.9; sfxGain.gain.value = JX.settings.sfx; };
   function b64buf(b64) { const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; }
-  function loadScript(src) { return new Promise(res => { const s = document.createElement('script'); s.src = src; s.onload = () => res(true); s.onerror = () => res(false); document.head.appendChild(s); }); }
+  function loadScript(src, n) {                                  // 取不到（服务器偶尔回 503）就隔一会儿再试，最多三回
+    n = n || 0;
+    return new Promise(res => { const s = document.createElement('script'); s.src = src + (n ? '?retry=' + n : ''); s.onload = () => res(true); s.onerror = () => { s.remove(); if (n >= 2) res(false); else setTimeout(() => loadScript(src, n + 1).then(res), 600 * (n + 1)); }; document.head.appendChild(s); });
+  }
   async function getMusic(id) {
     if (A.bufs[id]) return A.bufs[id];
     if (!window.JX_MUSIC[id]) await loadScript('music/' + id + '.js');

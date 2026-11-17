@@ -210,6 +210,18 @@
       let moved = false;
       if (free(nx, p.y, p)) { p.x = nx; moved = moved || !!mx; }
       if (free(p.x, ny, p)) { p.y = ny; moved = moved || !!my; }
+      /* 蹭到桌角、凳角走不动的时候：只按着一个方向，就往旁边让一让，顺着角滑过去（不然得自己松手、挪半步、再按） */
+      if (!moved && (!mx || !my)) {
+        const ax = mx ? 1 : 0, sx = Math.sign(mx), sy = Math.sign(my), g = W.guide && W.guide.path && W.guide.path[0];
+        for (const d of [6, 12, 18, 24, 30, 38, 46]) {
+          const okA = ax ? free(p.x + sx * 6, p.y - d, p) && free(p.x, p.y - Math.min(d, sp), p) : free(p.x - d, p.y + sy * 6, p) && free(p.x - Math.min(d, sp), p.y, p);
+          const okB = ax ? free(p.x + sx * 6, p.y + d, p) && free(p.x, p.y + Math.min(d, sp), p) : free(p.x + d, p.y + sy * 6, p) && free(p.x + Math.min(d, sp), p.y, p);
+          if (!okA && !okB) continue;
+          let side = okA && okB ? (g ? ((ax ? g.y - p.y : g.x - p.x) < 0 ? -1 : 1) : -1) : okA ? -1 : 1;      // 两边都让得开，就往路标那一边让
+          if (ax) p.y += side * Math.min(d, sp); else p.x += side * Math.min(d, sp);
+          moved = true; break;
+        }
+      }
       p.moving = moved;
     } else if (!p.path) p.moving = false;
   }

@@ -329,73 +329,42 @@
     const vg = c.createRadialGradient(650, 320, 300, 650, 320, 780); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.7)'); c.fillStyle = vg; c.fillRect(0, 0, w, h);
   }
 
-  /* ---------- 行菜 ---------- */
-  const ROUNDS = {
-    1: { orders: { 7: 'a', 9: 'b' }, trays: [['a', '皇都春一角', '洗手蟹', '宋嫂鱼羹（免芫荽）'], ['c', '蓬莱春一角', '洗手蟹', '宋嫂鱼羹（加芫荽）'], ['b', '琼花露一角', '鹌子水晶脍', '酒炊淮白鱼']] },
-    2: { orders: { 3: 'd', 5: 'e', 11: 'f' }, calls: [[3, '蟹酿橙，两碗圆子，\n酒要蓬莱春！'], [5, '洗手蟹，一碟决明兜子，\n酒也要蓬莱春！'], [11, '鱼兜子，宋嫂鱼羹，\n酒要皇都春！']],
-      trays: [['e', '蓬莱春一角', '洗手蟹', '决明兜子'], ['g', '蓬莱春一角', '洗手蟹', '圆子两碗'], ['f', '皇都春一角', '鱼兜子', '宋嫂鱼羹'], ['d', '蓬莱春一角', '蟹酿橙', '圆子两碗']] },
-  };
+  /* 一场战斗输了两回以后，问一句要不要跳过（跳过就按打赢了往下演）。自动测试时总是“再来一次”。 */
+  async function giveUp(lost) { return lost >= 2 && (await UI.choice('这一战打了 ' + lost + ' 回还没过。', ['再来一次', '跳过这一战，接着看故事'])) === 1; }
+
+  /* ---------- 行菜 ----------
+     0.5.2 起是最简单的样子：到出菜口端一回，先后送到两桌，走到跟前就算，不用按键、不用挑、不会错。
+     （原来要记谁点了什么、从几盘里挑、还有第二轮，第一位试玩的人卡在这里过不去。） */
+  const SERVE = [[7, '皇都春一角、洗手蟹、宋嫂鱼羹（免芫荽）'], [9, '琼花露一角、鹌子水晶脍、酒炊淮白鱼']];
   function tableAnchor(n) { const t = JX.hallTables[n - 1]; return W.byId['ta' + n] || W.add('ta' + n, { h: 150 }, t.x, t.y - 116, { vis: false, solid: false, pose: 'sit' }); }
-  function serveRound(no) {
-    const R = ROUNDS[no], st = JX.state, served = {}; let carry = null, mist = 0, panel = null;
+  function serveRound() {
+    const st = JX.state, pass = W.hots.find(h => h.id === 'pass'); let step = 0;      // 0：去出菜口；1、2：送第一、第二桌
+    const cn = n => (n <= 10 ? '一二三四五六七八九十'[n - 1] : '十' + '一二三四五六七八九'[n - 11]) + '号桌';
     return new Promise(done => {
-      /* 左上角的提示。指引开着：把阿蛰心里那张单子写出来，端对了就指给你是哪一桌；指引关着：自己记。 */
-      const left = () => Object.keys(R.orders).filter(n => !served[n]);
-      const trayOf = code => R.trays.find(t => t[0] === code);
-      const cn = n => (n <= 10 ? '一二三四五六七八九十'[n - 1] : '十' + '一二三四五六七八九'[n - 11]) + '号桌';
-      let gWas = null;
+      pass.gx = pass.x; pass.gy = pass.y + 40; const passR = pass.r;                  // 路标领到出菜口跟前
+      const hots = SERVE.map(([n]) => { const t = JX.hallTables[n - 1], h = { id: 'tb' + n, x: t.x, y: t.y - 30, r: 170, up: 170, verb: '上菜', n, gx: t.x - 140, gy: t.y - 30 }; W.hots.push(h); return h; });
+      const target = () => (step === 0 ? pass : hots[step - 1]);
       const setObj = () => {
-        const g = gWas = JX.settings.guide;
-        if (carry) {
-          const n = left().find(n => R.orders[n] === carry), hand = ['手上：' + trayOf(carry).slice(1).join('、')];
-          if (!g) { W.objective = { text: '把这一盘送到点它的那一桌', at: {}, how: '走到桌边按回车上菜。记不清就按 H 打开指引' }; }
-          else if (n) { W.objective = { text: '把这一盘送到' + cn(+n), at: { hall: { hot: 'tb' + n } }, how: '跟着地上的金色路标走到桌边，按回车上菜' }; }
-          else { W.objective = { text: '这一盘没有人点，回出菜口换一盘', at: { hall: { hot: 'pass' } }, how: '跟着路标回出菜口，按回车放下重挑' }; }
-          UI.objective(W.objective.text, hand);
-        } else {
-          W.objective = { text: '到出菜口端菜', at: { hall: { hot: 'pass' } } };
-          UI.objective('到出菜口端菜', g ? ['还没上的——'].concat(left().map(n => cn(+n) + '　' + trayOf(R.orders[n]).slice(1).join('、'))) : ['客人点的菜要自己记。记不清就按 H 打开指引']);
-        }
+        if (step === 0) { W.objective = { text: '到出菜口端菜', at: { hall: { hot: 'pass' } }, how: '跟着地上的金色路标走过去就行，不用按键' }; UI.objective(W.objective.text, ['七号桌、九号桌的菜，一趟端齐']); }
+        else { const [n, items] = SERVE[step - 1]; W.objective = { text: (step === 1 ? '把菜送到' : '再送到') + cn(n), at: { hall: { hot: 'tb' + n } }, how: '跟着地上的金色路标走到桌边就行，不用按键' }; UI.objective(W.objective.text, [items]); }
+        pass.r = step === 0 ? passR : 0; hots.forEach((h, i) => { h.r = step === i + 1 ? 170 : 0; });      // 只有眼下要去的那一处才显示“回车”的小牌子
         W.guideAt = 0;
       };
-      const watch = () => { if (JX.settings.guide !== gWas) setObj(); };      // 中途按 H 开关指引，提示跟着换
-      (JX._upd = JX._upd || []).push(watch);
-      const pass = W.hots.find(h => h.id === 'pass');
-      const closePanel = () => { if (panel) { panel.remove(); panel = null; UI.modal--; } };
-      pass.act = () => {
-        if (carry) { carry = null; W.player.carry = null; JX.audio.sfx('tick'); setObj(); }      // 手上那盘先放回去，重新挑（不扣钱）
-        UI.modal++; panel = UI.root().appendChild(JX.el('div', 'panel')); panel.id = 'mini';
-        panel.innerHTML = '<h2>出菜口</h2><p>端哪一盘？（数字键或鼠标选，Esc 先不端）</p>' + (JX.settings.guide ? '<p class="memo">还没上的——<br>' + left().map(n => '<b>' + cn(+n) + '</b>　' + JX.esc(trayOf(R.orders[n]).slice(1).join('、'))).join('<br>') + '</p>' : '') + '<div class="trays">' + R.trays.map((t, i) => '<div class="tray jx-clickable' + (Object.values(served).includes(t[0]) ? ' gone' : '') + '" data-i="' + i + '"><b>' + '第' + '一二三四'[i] + '盘</b>' + t.slice(1).map(JX.esc).join('<br>') + '</div>').join('') + '</div>';
-        const pick = i => { const t = R.trays[i]; if (Object.values(served).includes(t[0])) return; closePanel(); off(); carry = t[0]; W.player.carry = 'tray'; JX.audio.sfx('tick'); setObj(); };
-        panel.onclick = e => { const d = e.target.closest('[data-i]'); if (d) pick(+d.dataset.i); };
-        const tick = () => {
-          if (JX.auto) { const want = Object.keys(R.orders).find(n => !served[n]); return pick(R.trays.findIndex(t => t[0] === R.orders[want])); }
-          for (let i = 0; i < R.trays.length; i++) if (JX.input.hit('Digit' + (i + 1)) || JX.input.hit('Numpad' + (i + 1))) return pick(i);
-          if (JX.input.hit('cancel')) { JX.input.eat('cancel'); JX.input.eat('menu'); closePanel(); off(); }
-        };
-        const hs = JX._upd = JX._upd || []; hs.push(tick); const off = () => { const k = hs.indexOf(tick); if (k >= 0) hs.splice(k, 1); };
+      const arrive = () => {
+        if (step === 0) { W.player.carry = 'tray'; JX.audio.sfx('tick'); step = 1; setObj(); return; }
+        const n = SERVE[step - 1][0]; st.money += 30; UI.purse(st.money); JX.audio.sfx('coin'); W.bubble(tableAnchor(n), '对了对了！赏你的。', 2.2);
+        if (++step > SERVE.length) { W.player.carry = null; finish(); } else setObj();
       };
-      const hots = JX.hallTables.map(t => {
-        const h = { id: 'tb' + t.n, x: t.x, y: t.y - 30, r: 150, up: 170, verb: '上菜', n: t.n, gx: t.x - 140, gy: t.y - 30 };      // gx、gy：路标领到桌子左手边（桌子本身走不上去）
-        h.act = () => {
-          const a = tableAnchor(t.n);
-          if (!carry) { if (mist >= 2 && R.orders[t.n] && !served[t.n]) { const tr = R.trays.find(x => x[0] === R.orders[t.n]); W.bubble(a, '我点的是：\n' + tr.slice(1).join('、').replace(/、([^、]*)$/, '，\n$1'), 3.5); } else W.bubble(W.player, '手上没有菜。', 1.4); return; }
-          if (!R.orders[t.n] || served[t.n]) { W.bubble(a, served[t.n] ? '菜齐了，不用再上。' : '我们这桌没叫菜。', 2); return; }
-          W.player.carry = null;
-          if (R.orders[t.n] === carry) { served[t.n] = carry; st.money += 12; W.bubble(a, '对了对了！赏你的。', 2.2); JX.audio.sfx('coin'); UI.purse(st.money); }
-          else { mist++; st.money = Math.max(0, st.money - 5); W.bubble(a, '错了！这不是我点的。', 2.2); JX.audio.sfx('wrong'); UI.purse(st.money); if (mist === 2 && !JX.settings.guide) UI.toast('记不清了？按 H 打开指引，左上角会写出谁点了什么。', 4.5); }
-          carry = null; setObj();
-          if (Object.keys(served).length === Object.keys(R.orders).length) finish();
-        };
-        W.hots.push(h); return h;
-      });
-      function finish() { hots.forEach(h => W.hots.splice(W.hots.indexOf(h), 1)); JX._upd.splice(JX._upd.indexOf(watch), 1); pass.act = null; W.objective = null; UI.objective(null); W.autoPilot = null; W.locked = true; UI.roam(false); W.player.path = null; W.player.moving = false; setTimeout(() => done(mist), 0); }
+      pass.act = () => { if (step === 0) arrive(); };
+      hots.forEach((h, i) => { h.act = () => { if (step === i + 1) arrive(); }; });
+      const tick = () => {                                                             // 走到跟前就算
+        const p = W.player, t = target(); if (!p || W.locked || UI.modal) return;
+        if (JX.dist(p.x, p.y, t.gx, t.gy) < (step === 0 ? 80 : 90) || (step > 0 && JX.dist(p.x, p.y, t.x, t.y) < 150)) arrive();
+        else if (JX.auto && !p.path) p.path = W.findPath(p.x, p.y, t.gx, t.gy);       // 自动测试：自己走过去
+      };
+      (JX._upd = JX._upd || []).push(tick);
+      function finish() { hots.forEach(h => W.hots.splice(W.hots.indexOf(h), 1)); JX._upd.splice(JX._upd.indexOf(tick), 1); pass.act = null; pass.r = passR; W.objective = null; UI.objective(null); W.locked = true; UI.roam(false); W.player.path = null; W.player.moving = false; setTimeout(done, 0); }
       setObj(); W.locked = false; UI.roam(true); UI.purse(st.money);
-      if (JX.auto) W.autoPilot = () => {                           // 自动测试：自己去端、自己去送
-        const p = W.player; if (p.path || UI.modal || W.locked) return;
-        if (!carry) { if (JX.dist(p.x, p.y, pass.x, pass.y + 40) < 30) pass.act(); else p.path = W.findPath(p.x, p.y, pass.x, pass.y + 40); }
-        else { const n = +Object.keys(R.orders).find(n => R.orders[n] === carry), h = hots.find(h => h.n === n), gx = h.x - 140, gy = h.y; if (JX.dist(p.x, p.y, gx, gy) < 60) h.act(); else p.path = W.findPath(p.x, p.y, gx, gy); }
-      };
     });
   }
   JX.on('update', () => { if (W.autoPilot) W.autoPilot(); });
@@ -428,12 +397,7 @@
     async 四娘回堂() { JX.state.flags.s1done = true; delete W.exitsOff['kitchen:hall']; W.walk('siniang', 1800, 680, { speed: 240 }).then(() => W.remove('siniang')); },
     async 入场二() { const st = JX.state; st.stage = 2; if (!W.player) W.setPlayer('jingzhe'); W.player.carry = null; UI.tone(null); },
     async 叫菜() { W.bubble('shikeA', '小二哥！', 1.6); JX.audio.sfx('tick'); await JX.sleep(JX.auto ? 0.02 : 0.8); },
-    async 行菜(no) {
-      no = +no;
-      if (no === 2) { W.locked = true; for (const [n, text] of ROUNDS[2].calls) { const a = tableAnchor(n); W.focus = { x: a.x, y: a.y + 80 }; await JX.sleep(JX.auto ? 0.02 : 0.7); W.bubble(a, text, JX.auto ? 0.1 : 3.4); JX.audio.sfx('tick'); await JX.sleep(JX.auto ? 0.02 : 3.6); } W.focus = null; await JX.sleep(JX.auto ? 0.02 : 0.5); }
-      const mist = await serveRound(no);
-      await UI.narrate(mist === 0 ? (no === 1 ? '两桌都送对了。' : '三桌一盘没错。满堂二十个菜报一遍就记住——这是阿蛰吃饭的本事。') : '菜是送到了，中间错了 ' + mist + ' 回。');
-    },
+    async 行菜() { await serveRound(); await UI.narrate('两桌都送对了。'); },
     async 范抬头() { const f = W.byId.fan; if (f) { f.pose = 'sit'; f.seat = 34; } },
     async 范趴下() { const f = W.byId.fan; if (f) f.pose = 'slump'; },
     async 入场三() { const st = JX.state; st.stage = 3; st.flags.daoGone = false; if (!W.player) W.setPlayer('jingzhe'); delete W.exitsOff['hall:door']; UI.purse(st.money); UI.tone(null); if (W.id === 'hall' && W.byId.siniang) W.face('siniang', W.player); },
@@ -577,7 +541,7 @@
     async 战二() {
       const B = JX.battle, p = W.player, x = W.byId.xiali, ids = ['heiyi', 'heiyi2', 'heiyi3'];
       const quick = { name: '快刀', tell: '刀尖晃着——快刀，要抢先手', type: 'light', pow: 1 }, chop = { name: '重劈', tell: '双手举刀过顶——要重劈下来', type: 'heavy', pow: 1.9, delay: 1.2 };
-      for (;;) {
+      for (let lost = 0; ;) {
         p.x = 1040; p.y = 760; p.dir = 3; p.pose = null; p.carry = 'staff'; x.x = 980; x.y = 650; x.dir = 3; x.pose = null; x.carry = 'saber';
         ids.forEach((id, i) => { const e = W.byId[id]; e.x = 1340 + (i === 1 ? 70 : 0); e.y = 640 + i * 90; e.dir = 1; e.vis = true; e.alpha = 1; });
         const r = await B.run({
@@ -587,6 +551,7 @@
         });
         if (r.result === 'win') break;
         await UI.narrate('眼前一黑。——不对，这一场还没完，再来。');
+        if (await giveUp(++lost)) break;
       }
       JX.state.flags.won2 = true; p.carry = null; ids.forEach(id => W.remove(id)); W.focus = null; p.dir = 2; x.dir = 0;
     },
@@ -609,15 +574,24 @@
       const B = JX.battle, p = W.player, x = W.byId.xiali, k = W.byId.xieke, STEP = 150;
       const jab = { name: '直拳', tell: '左拳虚晃——直拳，快', type: 'light', pow: 0.7 };
       const hook = { name: '重拳', tell: '沉腰，右拳收到肋下——要出重拳', type: 'heavy', pow: 2.1, delay: 1.15, pick: (b, pool) => pool.find(u => u.key === 'jingzhe') || pool[0] };
-      for (;;) {
-        p.x = 600; p.y = 720; p.dir = 3; p.pose = null; p.carry = 'staff'; x.x = 540; x.y = 610; x.dir = 3; x.pose = null; x.carry = 'saber'; k.x = 1130; k.y = 660; k.dir = 1; k.vis = true; k.alpha = 1;
+      /* 每一手的提示和建议（指引开着时光标先落在建议上）：没晃的时候，重拳来了就闪；晃了就打 */
+      const rec = (b, u) => {
+        const boss = b.units.find(q => q.key === 'xieke'), me = u.key === 'jingzhe';
+        if (boss.stun) return { pick: me ? 'dian' : 'zhan', hint: '他站不稳了——趁现在打！' };
+        if (!me) return { pick: 'ge', hint: '铁臂打不动。先格挡，等他站不稳。' };
+        return boss.intent === hook ? { pick: 'bu', hint: '他要出重拳——用踏潮步闪开，把他往灯索那边引。' } : { pick: 'dian', hint: '铁臂打不动。这一手是直拳，等他出重拳再闪。' };
+      };
+      const place = () => { p.x = 600; p.y = 720; p.dir = 3; p.pose = null; p.carry = 'staff'; x.x = 540; x.y = 610; x.dir = 3; x.pose = null; x.carry = 'saber'; k.x = 1130; k.y = 660; k.dir = 1; k.vis = true; k.alpha = 1; };
+      for (let lost = 0; ;) {
+        place();
         let pos = 0, cup = false;
         const note = () => (pos >= 2 ? '脚下就是灯索' : '离灯索还有 ' + '两一'[pos] + ' 步');
         const r = await B.run({
           goal: '铁臂打不动。闪开重拳，把他引到灯索旁', music: 'jiaofeng', season: 0, seasonEvery: 5, zoom: 1.12, focus: { x: 1000, y: 640 },
           allies: fighters(p, x),
           foes: [{ ent: k, key: 'xieke', name: '蟹壳青', hp: 300, spd: 9.5, atk: 30, def: 10, boss: true, keep: true, n: 0, note: note(), ai: (b, u) => (++u.n % 2 ? jab : hook) }],
-          autoPick(b, u, cmds) { const boss = b.units.find(q => q.key === 'xieke'), id = boss.stun ? (u.key === 'jingzhe' ? 'dian' : 'zhan') : u.key === 'jingzhe' ? (boss.intent === hook ? 'bu' : 'dian') : 'ge'; return cmds.find(c => c.id === id); },
+          allow: rec,
+          autoPick(b, u, cmds) { const id = rec(b, u).pick; return cmds.find(c => c.id === id); },
           end(b) { return b.units.find(q => q.key === 'jingzhe').hp <= 0 ? 'lose' : null; },      // 只有他引得动蟹壳青；他倒了，这一场就算输，重来
           resolve(b, a, m, t, r2) {
             if (t.key === 'xieke' && !t.stun) return { evade: false, block: true, dmg: 0, iron: '铁臂' };
@@ -645,7 +619,8 @@
         });
         if (r.result === 'win') break;
         await UI.narrate('眼前一黑。——不对，这一场还没完，再来。');
-        await UI.tutorial('再来一次', '他一<b>沉腰收拳</b>，阿蛰就用<b>踏潮步</b>；直拳来的那一手，再还手。<br>重拳打空三回，他就踩到<b>灯索</b>上了——那两手，两个人一起打。');
+        if (await giveUp(++lost)) { place(); break; }
+        await UI.tutorial('再来一次', '他一<b>沉腰收拳</b>，阿蛰就用<b>踏潮步</b>；直拳来的那一手，再还手。<br>重拳打空三回，他就踩到<b>灯索</b>上了——那两手，两个人一起打。<br>指令框里那行红字是这一手的提示；光标已经落在建议的指令上，照着按回车就行。');
       }
       W.focus = { x: 1300, y: 660 };
     },

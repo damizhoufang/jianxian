@@ -1,6 +1,7 @@
 // 用真回车把某一场从存档点按到底（没有战斗的场次用；要自己走路的地方借自动走一小段）。
 // 用法：node tools/entertest.js "第十场　三天" [到第几拍为止，默认按到试玩结束]
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
+const go = require('./_go');
 const path = require('path');
 (async () => {
   const label = process.argv[2] || '第十场　三天', until = +process.argv[3] || 0;
@@ -8,11 +9,11 @@ const path = require('path');
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   const errs = []; page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); page.on('pageerror', e => errs.push('pageerror: ' + e.message));
   const url = 'file://' + path.resolve('index.html');
-  await page.goto(url + '#auto');
+  await go(page, url + '#auto');
   await page.waitForFunction(l => JX.state && JX.state.label === l, label, { timeout: 240000 });
   const save = await page.evaluate(() => localStorage.getItem('jx.save'));
-  await page.goto('about:blank'); await page.goto(url + '#gallery-0'); await page.evaluate(s => localStorage.setItem('jx.save', s), save);
-  await page.goto('about:blank'); await page.goto(url); await page.waitForTimeout(1500);
+  await go(page, 'about:blank'); await go(page, url + '#gallery-0'); await page.evaluate(s => localStorage.setItem('jx.save', s), save);
+  await go(page, 'about:blank'); await go(page, url); await page.waitForTimeout(1500);
   await page.click('#title [data-a="load"]');
   const t0 = Date.now(); let presses = 0, st;
   for (;;) {

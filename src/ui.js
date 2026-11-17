@@ -189,6 +189,7 @@
     } else if (tab === 3) {
       const all = JX.story.scenes(), cur = JX.game.playing ? all.indexOf(st.label) : -1, nx = all[cur + 1];
       h += '<p style="font-size:25px;line-height:1.5">测试用：直接跳到某一场的开头。跳过去以后，前面的事都按“做对了”算，赏钱按 60 文算。<br>游戏里随时可以按 <kbd>]</kbd> 跳到下一场、<kbd>[</kbd> 回上一场。</p>' +
+        (all.length ? '' : '<p style="color:#8e2a20">场次表没有载入到。<span class="btn small jx-clickable" data-act="title">重新载入页面</span></p>') +
         '<div class="scenes">' + all.map((l, i) => '<div class="sc jx-clickable' + (i === cur ? ' on' : '') + '" data-jump="' + i + '">' + JX.esc(l) + (i === cur ? '<i>现在</i>' : '') + '</div>').join('') + '</div>' +
         (cur >= 0 ? '<div class="btn small jx-clickable' + (nx ? '' : ' off') + '" data-act="next">' + (nx ? '跳到下一场 ▶　' + JX.esc(nx) : '已经是最后一场') + '</div><div class="btn small jx-clickable" data-act="again">这一场从头再来</div>' : '');
     } else {

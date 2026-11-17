@@ -1,5 +1,6 @@
 // 自动从头玩一遍：node tools/play.js [auto|autoslow] [截图间隔毫秒] [最长秒数]
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
+const go = require('./_go');
 const path = require('path');
 (async () => {
   const [, , mode = 'auto', every = '0', maxSec = '240'] = process.argv;
@@ -8,7 +9,7 @@ const path = require('path');
   const errs = [];
   page.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
   page.on('pageerror', e => errs.push('pageerror: ' + e.message));
-  await page.goto('file://' + path.resolve('index.html') + '#' + mode);
+  await go(page, 'file://' + path.resolve('index.html') + '#' + mode);
   const t0 = Date.now(); let n = 0, lastLabel = '';
   for (;;) {
     await page.waitForTimeout(+every > 0 ? +every : 500);

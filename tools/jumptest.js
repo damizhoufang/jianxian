@@ -1,13 +1,14 @@
 // 跳场检查：逐场用菜单里的“跳到这一场”跳过去，再自动走到下一场开头（最后一场走到结尾），看每一份快照都接得上。
 // 用法：node tools/jumptest.js
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
+const go = require('./_go');
 const path = require('path');
 (async () => {
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   const url = 'file://' + path.resolve('index.html');
-  await page.goto(url); await page.waitForTimeout(1500);
+  await go(page, url); await page.waitForTimeout(1500);
   const all = await page.evaluate(() => JX.story.scenes()); let bad = 0;
   for (let i = 0; i < all.length; i++) {
     const t0 = Date.now();
