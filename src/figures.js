@@ -227,6 +227,9 @@
   }
   function carried(ctx, what) {
     if (what === 'pipa') { miniPipa(ctx, -4, -62, 0.42, 1.2); return; }
+    if (what === 'saber') { ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(8, -86); ctx.quadraticCurveTo(34, -116, 24, -152); ctx.stroke(); ctx.strokeStyle = '#e4eaee'; ctx.lineWidth = 3; ctx.stroke(); seg(ctx, 2, -80, 9, -88, 5.4, '#5a3a22'); seg(ctx, 3, -90, 13, -84, 2.4, '#c9a24a'); ctx.lineCap = 'butt'; return; }
+    if (what === 'staff') { seg(ctx, -26, -36, 28, -152, 5, INK); seg(ctx, -26, -36, 28, -152, 3.2, '#b08a52'); return; }
+    if (what === 'blade') { seg(ctx, 6, -86, 30, -146, 4.6, INK); seg(ctx, 6, -86, 30, -146, 2.8, '#cfd6da'); seg(ctx, 2, -80, 8, -89, 5, '#2a2420'); return; }
     if (what === 'bow') {
       ctx.strokeStyle = 'rgba(245,240,225,0.9)'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.moveTo(-27, -128); ctx.lineTo(25, -44); ctx.stroke();
       ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 5.4; ctx.beginPath(); ctx.moveTo(-27, -128); ctx.bezierCurveTo(-34, -112, -22, -100, -12, -88); ctx.bezierCurveTo(-2, -76, 6, -60, 25, -44); ctx.stroke();
@@ -316,7 +319,7 @@
     if (!back && sp.towel) { ctx.beginPath(); ctx.moveTo(d.sh - 12, -116); ctx.lineTo(d.sh - 2, -113); ctx.lineTo(d.sh - 5, -84); ctx.lineTo(d.sh - 15, -86); ctx.closePath(); fillStroke(ctx, '#efe9da', 1); seg(ctx, d.sh - 14, -90, d.sh - 5.5, -88.4, 1, 'rgba(90,110,140,0.6)'); }
     if (back && sp.towel) { ctx.beginPath(); ctx.moveTo(-d.sh + 12, -116); ctx.lineTo(-d.sh + 2, -113); ctx.lineTo(-d.sh + 4, -94); ctx.lineTo(-d.sh + 14, -96); ctx.closePath(); fillStroke(ctx, '#efe9da', 1); }
     if (back) { headBack(ctx, sp); if (o.carry) { /* 背对时手里的东西被身子挡住 */ } }
-    else { if (!back && sp.pole) seg(ctx, -62, -110, 62, -112, 4, '#7a5a34'); faceFront(ctx, sp, o); if (o.carry) carried(ctx, o.carry); }
+    else { if (!back && sp.pole) seg(ctx, -62, -110, 62, -112, 4, '#7a5a34'); faceFront(ctx, sp, o); if (sp.mask) { ctx.fillStyle = sp.mask; ctx.beginPath(); ctx.moveTo(-14.6, -130); ctx.lineTo(14.6, -130); ctx.lineTo(13, -117); ctx.quadraticCurveTo(0, -110, -13, -117); ctx.closePath(); ctx.fill(); } if (o.carry) carried(ctx, o.carry); }
     if (sp.pole) {                                              // 扁担两头的历日担子
       [-58, 58].forEach(x => { seg(ctx, x, -111, x - 6, -64, 1, '#3a2a1e'); seg(ctx, x, -111, x + 6, -64, 1, '#3a2a1e'); ctx.beginPath(); ctx.rect(x - 15, -64, 30, 26); fillStroke(ctx, '#b79a62', 1.2); for (let i = 0; i < 5; i++) { ctx.fillStyle = i % 2 ? '#e9dfc6' : '#d9c9a4'; ctx.fillRect(x - 12 + i * 5, -70, 4, 8); } P.shadow(ctx, x, -2, 18, 5, 0.3); });
     }
@@ -370,7 +373,7 @@
       ctx.beginPath(); ctx.moveTo(-4, -110); ctx.lineTo(6, -112); ctx.lineTo(24, -86); ctx.lineTo(17, -80); ctx.closePath(); fillStroke(ctx, P.dark(col, 0.06), 1.2);
       ctx.save(); ctx.translate(26, 0); carried(ctx, o.carry); ctx.restore(); P.ellipse(ctx, 21, -83, 4.3, 4.4, sp.skin || C.skin, INK, 1);
     } else if (!sit) arm(sw * 0.55 * mv, 0.04);
-    headSide(ctx, sp, o);
+    headSide(ctx, sp, o); if (sp.mask) { ctx.fillStyle = sp.mask; ctx.beginPath(); ctx.moveTo(-4, -130); ctx.lineTo(15.4, -130); ctx.lineTo(14, -117); ctx.quadraticCurveTo(6, -111, -4, -116); ctx.closePath(); ctx.fill(); }
   }
 
   /* 画一个人。ctx 的原点应已移到脚底。 */
@@ -443,6 +446,8 @@
     he: { name: '贺元度', h: 154, kind: 'robe', robe: '#473c5a', trim: '#221c2e', inner: '#f2ecde', hair: 'gaojin', beard: 'black', wide: 1.7, sash: '#1a1522', jade: true, skin: '#f0dac2', shoe: '#191513' },
     xieke: { name: '蟹壳青', h: 174, fat: 1.3, kind: 'short', robe: '#3f5658', trim: '#1c2628', pants: '#2c3638', hair: 'bald', hairCol: '#c0906a', band: '#4f6b6c', skin: '#c99a72', beard: 'stubble', brow: 1.4, sash: '#2a211c' },
     zhong: { name: '钟推官', h: 152, kind: 'robe', robe: '#4d6b4a', trim: '#2c3f2b', hair: 'zhanjiao', beard: 'black', wide: 1.6, sash: '#17130f', shoe: '#17130f' },
+    heiyi: { name: '黑衣人', h: 156, kind: 'short', robe: '#1e1e26', trim: '#0e0e12', pants: '#191920', hairCol: '#0e0e12', band: '#0e0e12', mask: '#15151b', sash: '#3a2a2a', skin: '#d6b08a' },
+    chaiyi: { name: '差役', h: 158, kind: 'short', robe: '#3d4a5c', trim: '#1e2630', pants: '#2a323c', hair: 'futou', sash: '#8e2a20', beard: 'black' },
     huyuan: { name: '护院', h: 162, fat: 1.12, kind: 'short', robe: '#4a4038', trim: '#241e1a', pants: '#3a3430', beard: 'black', brow: 1.2, sash: '#8e2a20' },
     luoer: { name: '罗二', h: 152, kind: 'short', robe: '#6a6456', trim: '#3a362e', pants: '#4a463c', beard: 'stubble', band: '#5a5548', skin: '#d9b28a' },
     baoqi: { name: '鲍七', h: 146, kind: 'short', robe: '#6a5a6a', trim: '#3d333d', pants: '#474049', beard: 'black' },

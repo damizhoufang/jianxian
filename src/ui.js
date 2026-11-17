@@ -19,7 +19,7 @@
     choiceBox = root.appendChild(el('div', 'hide')); choiceBox.id = 'choice';
     tut = root.appendChild(el('div', 'hide')); tut.id = 'tut';
     UI.applyText();
-    JX.on('sceneEnter', sc => { if (!UI.quiet) UI.banner(sc.name, sc.sub); });
+    JX.on('sceneEnter', sc => { if (!UI.quiet) UI.banner(sc.name, sc.sub); else { clearTimeout(UI._bt); banner.style.opacity = 0; } });      // 不打场景名的时候，把上一场还没退的那块也收掉
   };
   UI.applyText = () => { root.style.setProperty('--ts', JX.settings.text); root.style.setProperty('--da', JX.settings.dlgAlpha); UI.applyLook(); };
   /* 整体亮度与回忆的旧绢色调，都落在画布的滤镜上 */
@@ -102,11 +102,11 @@
     narr.classList.add('hide'); UI.modal--;
   };
   UI.caption = async function (text, sub, hold) {
-    UI.modal++;
+    UI.modal++; const shown = !purse.classList.contains('hide'); purse.classList.add('hide');      // 字幕是黑底上的一行字，赏钱先收起来
     cap.querySelector('.t').textContent = text; cap.querySelector('.s').textContent = sub || '';
     cap.style.opacity = 1; await JX.sleep(JX.auto ? 0.05 : 1.0);
     await Promise.race([waitConfirm(0.3), JX.sleep(hold || 4.2)]);
-    cap.style.opacity = 0; await JX.sleep(JX.auto ? 0.05 : 0.9); UI.modal--;
+    cap.style.opacity = 0; await JX.sleep(JX.auto ? 0.05 : 0.9); UI.modal--; if (shown) purse.classList.remove('hide');
   };
   UI.card = async function (head, lines, src) {
     UI.modal++;
@@ -208,7 +208,7 @@
       const s = JX.store.get('save');
       t.innerHTML = '<div class="name">剑仙情缘恩仇录</div><div class="sub">卷一　惊蛰　·　序章　青玉案</div><div class="seal">咸淳三年元夕</div>' +
         '<div class="menu"><div class="btn jx-clickable" data-a="new">新的故事</div>' + (s ? '<div class="btn jx-clickable" data-a="load">接着上回　<span style="font-size:22px;color:#7a5d3a">' + JX.esc(s.label) + '</span></div>' : '') + '<div class="btn jx-clickable" data-a="gallery">人物图鉴 · 配乐</div><div class="btn small jx-clickable" data-a="full" style="margin-top:18px">全屏显示（F）</div></div>' +
-        '<div class="ver">序章试玩 ' + JX.VERSION + '　·　第一至七场　·　建议用 Chrome</div>';
+        '<div class="ver">序章试玩 ' + JX.VERSION + '　·　序章全十场　·　建议用 Chrome</div>';
       const btns = [...t.querySelectorAll('.btn:not(.small)')]; let sel = s ? 1 : 0;
       const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel)); paint();
       const finish = a => { hs.splice(hs.indexOf(tick), 1); t.remove(); JX.audio && JX.audio.sfx('gong'); res(a); };

@@ -25,6 +25,9 @@
   /* ================= 二楼回廊 ================= */
   const STAGE = { x: 1200, y: 640, w: 400, d: 170 };              // 小台：x 是中心，y 是台面后沿
   S.floor2 = {
+    below(c) {      // 栏杆外是天井：一楼大堂的灯光漏上来，越往下越暗
+      const g = c.createLinearGradient(0, 1238, 0, 1500); g.addColorStop(0, '#7a5632'); g.addColorStop(0.35, '#4a3020'); g.addColorStop(1, '#120c09'); c.fillStyle = g; c.fillRect(-300, 1238, 3000, 280);
+    },
     name: '二楼回廊', sub: '醉春楼 · 词会', w: 2400, h: 1240, ambient: '#8a7468', music: 'yuanxi', muffle: 1300,
     walk: [[90, 350, 2310, 1150]],
     spawns: { fromHall: { x: 190, y: 430, dir: 0 }, fromUp: { x: 2210, y: 430, dir: 0 }, start: { x: 190, y: 430, dir: 0 } },
@@ -194,5 +197,111 @@
     anim(c, t) {                                                   // 湖上的灯船：一点一点地闪，慢慢地漂
       BOATS.forEach(b => { const a = 0.45 + 0.4 * Math.sin(t * (0.8 + b.s) + b.p), x = b.x + Math.sin(t * 0.05 + b.p) * 14, rad = 5 + b.s * 6; const g = c.createRadialGradient(x, b.y, 0, x, b.y, rad); g.addColorStop(0, 'rgba(' + b.c + ',' + a + ')'); g.addColorStop(1, 'rgba(' + b.c + ',0)'); c.fillStyle = g; c.fillRect(x - rad, b.y - rad, rad * 2, rad * 2); c.fillStyle = 'rgba(' + b.c + ',' + a * 0.25 + ')'; c.fillRect(x - 0.8, b.y + 3, 1.6, 10 + b.s * 8); });
     },
+  };
+})();
+
+/* 场景（三·续）：后厨的后门、后巷、屋顶。 */
+(function () {
+  const JX = window.JX, P = JX.P, C = P.C, Fig = JX.Fig, S = JX.scenes;
+  /* 后厨添一道后门（左下），平时闩着 */
+  S.kitchen.spawns.fromAlley = { x: 410, y: 980, dir: 2 };
+  S.kitchen.exits.push({ id: 'back', x: 310, y: 1026, w: 200, h: 30, to: 'alley', spawn: 'fromKitchen', label: '后门', ly: 960, back: [0, -34] });
+  S.kitchen.props.push({ x: 410, y: 1079, bw: 280, bh: 80, draw(g) {
+    g.fillStyle = '#0a0d16'; g.fillRect(-104, -42, 208, 42); const m = g.createLinearGradient(0, -42, 0, 0); m.addColorStop(0, 'rgba(120,150,210,0)'); m.addColorStop(1, 'rgba(120,150,210,0.4)'); g.fillStyle = m; g.fillRect(-104, -42, 208, 42);
+    g.fillStyle = '#3a241a'; g.fillRect(-118, -52, 16, 52); g.fillRect(102, -52, 16, 52); g.fillRect(-118, -56, 236, 10); g.strokeStyle = P.rgba(C.ink, 0.8); g.lineWidth = 1.2; g.strokeRect(-118, -56, 236, 10);
+  } });
+
+  /* ================= 后巷 ================= */
+  S.alley = {
+    name: '后巷', sub: '醉春楼背后 · 通清湖河', w: 2200, h: 1080, ambient: '#8a92b8', music: 'anliu', outside: '#05060a',
+    walk: [[130, 566, 1820, 860]],
+    spawns: { fromKitchen: { x: 262, y: 640, dir: 0 }, start: { x: 262, y: 640, dir: 0 } },
+    exits: [{ id: 'kitchen', x: 190, y: 552, w: 150, h: 24, to: 'kitchen', spawn: 'fromAlley', label: '回后厨', ly: 500, back: [0, 34] }],
+    marks: [{ t: '清湖河的石埠头', x: 1980, y: 640 }],
+    lights: [
+      { x: 262, y: 590, r: 430, c: '#ffc98a', a: 0.85, ey: 0.6, glow: 44, gx: 262, gy: 318, gc: '#ff9a5a', ga: 0.6 },
+      { x: 1210, y: 560, r: 360, c: '#ffd9a0', a: 0.4, ey: 0.6 },
+      { x: 1100, y: 700, r: 1300, c: '#c4d2f8', a: 0.75, ey: 0.5 }, { x: 2040, y: 720, r: 520, c: '#9db8e8', a: 0.6 },
+    ],
+    paint(c) {
+      const r = JX.rng(801);
+      P.flagstones(c, 0, 540, 2200, 340, { seed: 81 });
+      c.fillStyle = 'rgba(30,40,80,0.2)'; c.fillRect(0, 540, 2200, 340);
+      for (let i = 0; i < 9; i++) { const x = 200 + r() * 1500, y = 600 + r() * 220, w = 50 + r() * 110; const g = c.createRadialGradient(x, y, 0, x, y, w); g.addColorStop(0, 'rgba(130,160,220,0.2)'); g.addColorStop(1, 'rgba(130,160,220,0)'); c.save(); c.translate(x, y); c.scale(1, 0.3); c.translate(-x, -y); c.fillStyle = g; c.fillRect(x - w, y - w, w * 2, w * 2); c.restore(); }   // 积水映着月色
+      /* 醉春楼的后墙 */
+      P.plaster(c, 0, 110, 1860, 260, { seed: 82 }); c.fillStyle = 'rgba(30,40,80,0.26)'; c.fillRect(0, 110, 1860, 260);
+      P.brick(c, 0, 370, 1860, 170, { seed: 83 }); c.fillStyle = 'rgba(30,40,80,0.26)'; c.fillRect(0, 370, 1860, 170);
+      c.fillStyle = '#12141e'; c.fillRect(0, 0, 1860, 118); for (let x = 0; x < 1860; x += 34) { c.fillStyle = x % 68 ? '#1c2030' : '#161926'; c.fillRect(x, 20, 30, 92); P.ellipse(c, x + 15, 114, 13, 7, '#232838', 'rgba(0,0,0,0.6)', 1); }      // 屋檐
+      P.beam(c, 0, 108, 1860, 12, '#2a2026');
+      /* 后门：半掩，里头是后厨的光 */
+      c.fillStyle = P.vgrad(c, 190, 330, 210, [[0, '#f6c684'], [1, '#c8742e']]); c.fillRect(190, 330, 150, 210); c.fillStyle = '#4a2c1e'; c.fillRect(190, 330, 62, 210); c.strokeStyle = P.rgba(C.ink, 0.85); c.lineWidth = 1.6; c.strokeRect(190, 330, 62, 210);
+      P.post(c, 174, 310, 16, 230, '#3a241a'); P.post(c, 340, 310, 16, 230, '#3a241a'); P.beam(c, 168, 304, 194, 18, '#3a241a'); P.lantern(c, 262, 300, 16, { cord: 0, col: '#e06a36' });
+      /* 靠墙的空坛、竹竿、一扇高窗 */
+      for (let i = 0; i < 7; i++) { c.save(); c.translate(470 + i * 62 + (i % 2) * 8, 556 + (i % 3) * 5); P.jar(c, 0, 0, 0.82 + (i % 3) * 0.08, { seed: 90 + i, sealed: false }); c.restore(); }
+      for (let i = 0; i < 4; i++) P.line(c, 980 + i * 16, 548, 1040 + i * 10, 150, 5, i % 2 ? '#6a7a4a' : '#56683c');
+      P.lattice(c, 1150, 190, 120, 110, { seed: 84, sky: [[0, '#f8c478'], [1, '#c8742e']], lights: false, step: 13, grid: true, wood: '#3a241a' });
+      c.fillStyle = '#2a2f3e'; c.fillRect(1500, 120, 14, 420);                                                       // 落水管
+      P.ao(c, 0, 540, 1860, 70, 'top', 0.6);
+      /* 巷子对面的墙头 */
+      c.fillStyle = '#0a0c14'; c.fillRect(0, 880, 1860, 200); for (let x = 0; x < 1860; x += 40) P.ellipse(c, x + 20, 884, 19, 9, '#1a1e2c', 'rgba(0,0,0,0.7)', 1);
+      P.ao(c, 0, 800, 1860, 80, 'bottom', 0.5);
+      /* 尽头：石埠头与清湖河 */
+      const wg = c.createLinearGradient(1860, 0, 2200, 0); wg.addColorStop(0, '#16223e'); wg.addColorStop(1, '#0b1226'); c.fillStyle = wg; c.fillRect(1860, 0, 340, 1080);
+      for (let i = 0; i < 60; i++) { c.fillStyle = 'rgba(150,180,230,' + (0.06 + r() * 0.14) + ')'; c.fillRect(1870 + r() * 320, 20 + r() * 1040, 14 + r() * 50, 1.6); }
+      [[2100, 170, '255,196,120'], [2150, 420, '255,150,110'], [2080, 930, '255,206,140']].forEach(([x, y, col]) => { P.glow(c, x, y, 60, 'rgb(' + col + ')', 0.5); c.fillStyle = 'rgba(' + col + ',0.35)'; c.fillRect(x - 2, y + 6, 4, 70); });       // 对岸人家的灯
+      for (let i = 0; i < 4; i++) { c.fillStyle = P.mix('#6a7286', '#2e3446', i / 4); c.fillRect(1820 + i * 22, 560 + i * 4, 26, 300 - i * 8); c.strokeStyle = 'rgba(0,0,0,0.6)'; c.lineWidth = 1.2; c.strokeRect(1820 + i * 22, 560 + i * 4, 26, 300 - i * 8); }     // 石阶
+      c.fillStyle = '#0c0f18'; c.beginPath(); c.moveTo(1930, 760); c.quadraticCurveTo(2020, 800, 2130, 752); c.lineTo(2120, 730); c.lineTo(1940, 736); c.closePath(); c.fill(); c.fillStyle = '#161a26'; c.beginPath(); c.moveTo(1980, 738); c.quadraticCurveTo(2030, 676, 2084, 734); c.closePath(); c.fill();   // 系着的一条乌篷船
+      P.line(c, 1930, 756, 1884, 700, 1.6, '#3a3f50');
+      P.paper(c, 2200, 1080, 9, 0.4);
+    },
+    props: [
+      { x: 1660, y: 600, bw: 130, bh: 150, block: [-46, -26, 92, 34], draw(g) { for (let i = 0; i < 2; i++) { g.save(); g.translate(-22 + i * 46, i * 4); P.jar(g, 0, 0, 1.0, { seed: 97 + i }); g.restore(); } g.save(); g.translate(2, -72); P.jar(g, 0, 0, 0.9, { seed: 99 }); g.restore(); } },
+    ],
+  };
+
+  /* ================= 醉春楼屋顶 ================= */
+  const ROPE = { x: 1700, y: 760 };                                // 灯索桩的位置
+  S.roof = {
+    name: '屋顶', sub: '脚下是御街的灯河', w: 1920, h: 1080, ambient: '#9aa2c8', music: 'anliu', outside: '#05060a',
+    walk: [[200, 440, 1740, 850]],
+    spawns: { start: { x: 600, y: 720, dir: 3 } },
+    exits: [],
+    rope: ROPE,
+    lights: [{ x: 800, y: 560, r: 1500, c: '#d0dcff', a: 0.8, ey: 0.6 }, { x: 960, y: 1120, r: 900, c: '#ffc98a', a: 0.6, ey: 0.36 }, { x: 1760, y: 860, r: 420, c: '#ffb884', a: 0.6 }],
+    paint(c) {
+      const r = JX.rng(901);
+      const sky = c.createLinearGradient(0, 0, 0, 270); sky.addColorStop(0, '#0b1230'); sky.addColorStop(1, '#24366a'); c.fillStyle = sky; c.fillRect(0, 0, 1920, 270);
+      for (let i = 0; i < 90; i++) { c.fillStyle = 'rgba(240,244,255,' + (0.2 + r() * 0.6) + ')'; c.fillRect(r() * 1920, r() * 170, 1.6, 1.6); }
+      P.ellipse(c, 330, 96, 34, 34, '#f4efd8'); P.glow(c, 330, 96, 170, '#f4efd8', 0.35);
+      c.fillStyle = '#121a36'; c.beginPath(); c.moveTo(0, 214); c.bezierCurveTo(300, 150, 520, 190, 760, 200); c.bezierCurveTo(1000, 140, 1300, 170, 1920, 206); c.lineTo(1920, 232); c.lineTo(0, 232); c.closePath(); c.fill();
+      c.fillStyle = '#16244a'; c.fillRect(0, 226, 1920, 44); for (let i = 0; i < 46; i++) { const x = r() * 1920, y = 232 + r() * 30; P.glow(c, x, y, 7 + r() * 6, r() < 0.7 ? '#ffc478' : '#ff9a70', 0.7); }      // 远处湖上的船
+      /* 屋脊 */
+      c.fillStyle = '#10131e'; c.fillRect(0, 262, 1920, 74); for (let x = 0; x < 1920; x += 30) { c.fillStyle = x % 60 ? '#262b3c' : '#1c2030'; c.fillRect(x + 2, 272, 26, 22); } P.beam(c, 0, 296, 1920, 16, '#1a1e2c');
+      [[60, 1], [1860, -1]].forEach(([x, s]) => { c.fillStyle = '#161a28'; c.beginPath(); c.moveTo(x - s * 50, 300); c.quadraticCurveTo(x - s * 30, 210, x + s * 30, 196); c.quadraticCurveTo(x, 240, x + s * 40, 300); c.closePath(); c.fill(); c.strokeStyle = 'rgba(0,0,0,0.7)'; c.lineWidth = 1.6; c.stroke(); });   // 鸱吻
+      /* 瓦面：一垄一垄往下淌 */
+      const tg = c.createLinearGradient(0, 330, 0, 910); tg.addColorStop(0, '#4a5474'); tg.addColorStop(0.6, '#6e7898'); tg.addColorStop(1, '#8a8496'); c.fillStyle = tg; c.fillRect(0, 330, 1920, 580);
+      for (let x = 0; x < 1920; x += 46) {
+        c.fillStyle = 'rgba(14,18,36,0.34)'; c.fillRect(x + 30, 330, 16, 580); c.fillStyle = 'rgba(210,222,255,0.16)'; c.fillRect(x + 4, 330, 5, 580);
+        for (let y = 344; y < 910; y += 28) { c.strokeStyle = 'rgba(14,18,36,0.3)'; c.lineWidth = 1.5; c.beginPath(); c.arc(x + 15, y, 15, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke(); }
+      }
+      for (let i = 0; i < 26; i++) { const x = r() * 1920, y = 360 + r() * 520; c.fillStyle = 'rgba(60,90,70,' + (0.1 + r() * 0.16) + ')'; c.fillRect(x, y, 20 + r() * 40, 10 + r() * 16); }                    // 青苔
+      /* 檐口与檐下的灯河 */
+      for (let x = 0; x < 1920; x += 46) { P.ellipse(c, x + 15, 914, 15, 10, '#2c3146', 'rgba(0,0,0,0.7)', 1.2); P.ellipse(c, x + 15, 914, 7, 5, '#3c4258'); }
+      const st = c.createLinearGradient(0, 924, 0, 1080); st.addColorStop(0, '#2a1a14'); st.addColorStop(0.4, '#7a4a22'); st.addColorStop(1, '#d08a3a'); c.fillStyle = st; c.fillRect(0, 926, 1920, 154);
+      for (let i = 0; i < 150; i++) { const x = r() * 1920, y = 950 + r() * 124, k = r(); P.glow(c, x, y, 6 + k * 12, k < 0.6 ? '#ffd27a' : k < 0.85 ? '#ff8a4a' : '#fff0c0', 0.5 + r() * 0.4); }
+      for (let i = 0; i < 80; i++) { c.fillStyle = 'rgba(20,12,8,0.5)'; c.fillRect(r() * 1920, 990 + r() * 86, 5, 9); }
+      for (let k = 0; k < 3; k++) { const x0 = 180 + k * 520, y0 = 926; c.strokeStyle = 'rgba(20,14,10,0.8)'; c.lineWidth = 2; c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo(x0 + 130, 1040, x0 + 300, 1080); c.stroke(); for (let j = 1; j < 5; j++) { const t = j / 5, x = x0 + 2 * (1 - t) * t * 130 + t * t * 300, y = y0 + 2 * (1 - t) * t * 114 + t * t * 154; P.lantern(c, x, y + 4, 9 + j, { cord: 0, col: j % 2 ? '#e06a36' : '#d8432c' }); } }   // 檐下几条灯索
+      P.paper(c, 1920, 1080, 10, 0.4);
+    },
+    props: [
+      { x: ROPE.x, y: ROPE.y, bw: 80, bh: 150, block: [-14, -10, 28, 16], draw(g) { P.shadow(g, 0, 0, 18, 6, 0.5); g.fillStyle = '#3a241a'; g.fillRect(-6, -110, 12, 110); g.strokeStyle = P.rgba(C.ink, 0.85); g.lineWidth = 1.3; g.strokeRect(-6, -110, 12, 110); g.fillStyle = '#8e2a20'; g.fillRect(-9, -104, 18, 10); g.fillRect(-9, -84, 18, 6); } },
+    ],
+  };
+  /* 屋顶上那条灯索：从桩上牵到街对面。k 是断开的程度（0 完好） */
+  JX.drawRope = function (g, k) {
+    const a = 1 - k; if (a <= 0) return;
+    g.save(); g.globalAlpha = a; g.strokeStyle = 'rgba(20,14,10,0.9)'; g.lineWidth = 2.6; g.beginPath(); g.moveTo(0, -100); g.quadraticCurveTo(110, -20 + k * 200, 240, 150 + k * 300); g.stroke();
+    for (let j = 1; j <= 5; j++) { const t = j / 6, x = 2 * (1 - t) * t * 110 + t * t * 240, y = -100 * (1 - t) * (1 - t) + 2 * (1 - t) * t * (-20 + k * 200) + t * t * (150 + k * 300); P.lantern(g, x, y + 6 + k * j * 30, 13, { cord: 0, col: j % 2 ? '#e06a36' : '#d8432c' }); P.glow(g, x, y + 22 + k * j * 30, 44, '#ffb060', 0.35 * a); }
+    g.restore();
   };
 })();

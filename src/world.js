@@ -265,7 +265,7 @@
     const f = W.focus || p || { x: sc.w / 2, y: sc.h / 2 };
     const vw = JX.W / z, vh = JX.H / z;
     let cx = f.x - vw / 2, cy = f.y - 70 - vh / 2;
-    cx = sc.w <= vw ? (sc.w - vw) / 2 : JX.clamp(cx, 0, sc.w - vw); cy = sc.h <= vh ? (sc.h - vh) / 2 : JX.clamp(cy, 0, sc.h - vh);
+    cx = sc.w <= vw ? (sc.w - vw) / 2 : JX.clamp(cx, 0, sc.w - vw); cy = sc.h <= vh ? (sc.h - vh) / 2 : JX.clamp(cy, 0, sc.h - vh + (f.below || 0));      // focus.below：这一个镜头许它探出场景下沿多少（二楼栏杆外的天井）
     const k = W.camSnap ? 1 : Math.min(1, dt * 6);
     W.cam.x += (cx - W.cam.x) * k; W.cam.y += (cy - W.cam.y) * k; W.cam.z = z; W.camSnap = false;
     /* 路线指引：每 0.3 秒重算一次 */
@@ -333,6 +333,7 @@
     c.setTransform(S * z, 0, 0, S * z, -W.cam.x * S * z, -W.cam.y * S * z);
     c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
     c.drawImage(W.bg, 0, 0, sc.w, sc.h);
+    if (sc.below && W.cam.y + JX.H / z > sc.h + 1) sc.below(c, t, W);
     if (sc.under) sc.under(c, t, W);
     const list = [];
     W.sprites.forEach(s => list.push(s)); W.ents.forEach(e => list.push(e));

@@ -51,32 +51,35 @@
   B.talk = async function (fn) { B.quiet(true); try { await fn(); } finally { B.quiet(false); } };
 
   /* ---------- 选指令 ---------- */
-  function menu(b, title, items, allow, auto) {
+  function menu(b, title, items, allow, auto, grace) {
     return new Promise(res => {
       const box = b.box.querySelector('.cmd'), ok = c => (!allow || !allow.ids || allow.ids.includes(c.id)) && !c.off;
       let sel = Math.max(0, items.findIndex(ok));
       const paint = () => { box.innerHTML = '<div class="who">' + title + '</div><div class="list">' + items.map((c, i) => '<div class="c jx-clickable' + (i === sel ? ' on' : '') + (ok(c) ? '' : ' off') + '" data-i="' + i + '"><b>' + (i + 1) + '</b>' + c.name + '</div>').join('') + '</div><div class="d">' + (allow && allow.hint ? '<em>' + allow.hint + '</em>' : '') + (items[sel].desc || '') + '</div>'; };
       const hs = JX._upd = JX._upd || [], off = () => { const k = hs.indexOf(tick); if (k >= 0) hs.splice(k, 1); box.classList.add('hide'); box.onclick = box.onmousemove = null; };
       const pick = i => { if (!ok(items[i])) { JX.audio.sfx('wrong'); return; } JX.audio.sfx('tick'); off(); res(items[i]); };
+      const born = JX.time;
       const tick = () => {
         if (JX.auto) return pick(auto != null ? auto : items.findIndex(ok));
         if (UI.menuOpen && UI.menuOpen()) return;
+        const young = JX.time - born < (grace == null ? 0.4 : grace);       // 刚弹出来的一瞬只许挪光标、不收“确定”，免得连按对白时误选
         const mv = (JX.input.hit('right') || JX.input.hit('down') || JX.input.hit('KeyD') || JX.input.hit('KeyS') ? 1 : 0) - (JX.input.hit('left') || JX.input.hit('up') || JX.input.hit('KeyA') || JX.input.hit('KeyW') ? 1 : 0);
         if (mv) { sel = (sel + mv + items.length) % items.length; JX.audio.sfx('page'); paint(); }
-        for (let i = 0; i < items.length; i++) if (JX.input.hit('Digit' + (i + 1)) || JX.input.hit('Numpad' + (i + 1))) { if (sel === i) return pick(i); sel = i; paint(); return; }
-        if (JX.input.hit('confirm')) { JX.input.eat('confirm'); pick(sel); }
+        for (let i = 0; i < items.length; i++) if (JX.input.hit('Digit' + (i + 1)) || JX.input.hit('Numpad' + (i + 1))) { if (sel === i) { if (!young) pick(i); return; } sel = i; JX.audio.sfx('page'); paint(); return; }
+        if (JX.input.hit('confirm')) { JX.input.eat('confirm'); if (!young) pick(sel); }
       };
       box.onclick = e => { const d = e.target.closest('[data-i]'); if (d) pick(+d.dataset.i); };
       box.onmousemove = e => { const d = e.target.closest('[data-i]'); if (d && +d.dataset.i !== sel) { sel = +d.dataset.i; paint(); } };
+      b.m = { items, ok, get sel() { return sel; } };                 // 给检查脚本看的
       paint(); box.classList.remove('hide'); hs.push(tick);
     });
   }
   async function choose(b, u) {
-    const allow = b.def.allow ? b.def.allow(b, u) : null, cmds = u.cmds.filter(c => !c.when || c.when(b, u));
+    const allow = b.def.allow ? b.def.allow(b, u) : null, cmds = u.cmds.filter(c => !c.when || c.when(b, u)); b.actor = u;
     const auto = b.def.autoPick ? cmds.indexOf(b.def.autoPick(b, u, cmds)) : null;
     const c = await menu(b, u.name + '　这一手', cmds, allow, auto >= 0 ? auto : null);
     let t = null;
-    if (c.kind === 'attack' && !c.all) { const fs = alive(b, 'foe'); t = fs.length === 1 ? fs[0] : (await menu(b, c.name + '　打谁', fs.map(f => ({ id: f.key, name: f.name, desc: f.intent ? '架势：' + f.intent.tell : '', u: f })), null, null)).u; }
+    if (c.kind === 'attack' && !c.all) { const fs = alive(b, 'foe'); t = fs.length === 1 ? fs[0] : (await menu(b, c.name + '　打谁', fs.map(f => ({ id: f.key, name: f.name, desc: f.intent ? '架势：' + f.intent.tell : '', u: f })), null, null, 0.12)).u; }
     return { c, t };
   }
 
@@ -94,7 +97,7 @@
 
   function strike(b, a, m, t) {
     const res = { evade: false, block: false, dmg: 0 }, mul = (b.def.wheel !== false && a.season != null && a.season === b.season ? 1.25 : 1) * (t.stun ? 1.5 : 1) * (a.weak || 1);
-    if (t.stance === 'dodge' && !t.stun && (m.type !== 'light' || JX.auto || Math.random() < 0.5)) { res.evade = true; return res; }
+    if (t.stance === 'dodge' && !t.stun && (m.type !== 'light' || (JX.auto && !JX.honest) || Math.random() < 0.5)) { res.evade = true; return res; }
     let d = Math.max(1, Math.round((a.atk * (m.pow || 1) - t.def * 0.5) * mul * rnd(0.92, 1.08)));
     if (t.stance === 'guard') { if (m.type === 'grab') d = Math.round(d * 1.15); else { d = Math.round(d * (t.guardK == null ? 0.35 : t.guardK)); res.block = true; } }
     res.dmg = d; return res;
@@ -106,7 +109,7 @@
     else if (r.iron) { floater(t, r.iron, '#c9d2d8'); JX.audio.sfx('gong'); await wait(0.35); }
     else {
       t.hp = Math.max(0, t.hp - r.dmg); floater(t, r.dmg ? '−' + r.dmg : '接住', r.block ? '#f0dca8' : '#ff8a70'); JX.audio.sfx(r.block ? 'tick' : 'wrong'); refresh(b); await shake(t);
-      if (t.hp <= 0) { if (t.side === 'foe') { await tw(0.5, k => { t.ent.alpha = 1 - k; }); t.ent.vis = false; } else t.ent.pose = 'squat'; }
+      if (t.hp <= 0) { if (t.side === 'foe') { if (!t.keep) { await tw(0.5, k => { t.ent.alpha = 1 - k; }); t.ent.vis = false; } } else t.ent.pose = 'squat'; }
     }
     refresh(b);
   }
@@ -157,7 +160,7 @@
       if (!result) { if (!alive(b, 'foe').length) result = 'win'; else if (!alive(b, 'ally').length) result = 'lose'; }
     }
     await wait(0.4);
-    box.remove(); B.cur = null; UI.modal--; UI.purse(JX.state.money);
+    box.remove(); B.cur = null; B.result = result; UI.modal--; UI.purse(JX.state.money);
     W.zoom = zoom0; W.focus = null; JX.audio.hold = hold0; if (def.music && !hold0 && W.sc && W.sc.music) JX.audio.music(W.sc.music, W.sc.muffle);
     b.units.forEach(u => { u.ent.z = 0; u.ent.moving = false; });
     return { result, b };
