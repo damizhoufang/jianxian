@@ -661,6 +661,151 @@ def jiaofeng():
     return mx.render(t60=1.2, wet=0.75, level=0.2)
 
 
+# ---- 以下三首是 0.8.0 加的：白天的临安 ----
+SS_A = bars("5:1 6:0.5 1':0.5 2':1 1':0.5 6:0.5 | 5:1 3:0.5 5:0.5 6:2~ | 1':1 2':0.5 3':0.5 2':1 1':0.5 6:0.5 | 5:3~ 0:1 | 3:1 5:0.5 6:0.5 1':1 6:0.5 5:0.5 | 3:1 2:0.5 3:0.5 5:2~ | 6:0.5 1':0.5 6:0.5 5:0.5 3:1 2:1 | 5:3! 0:1")
+SS_B = bars("2':2~ 1':1 6:1 | 1':1 2':1 3':2~ | 5':1.5 3':0.5 2':1 1':1 | 2':3~ 0:1 | 6:1 1':1 2':1.5 1':0.5 | 6:1 5:1 3:2~ | 5:1 6:0.5 1':0.5 2':1 3':1^ | 2':2~ 5:2")
+
+
+def shisheng():
+    """《市声》：白天的临安街上。徵调，不快不慢地走着。筝弹旋律，阮一步一步垫着，碰铃和板点着拍子；中段笛子接过去。没有鼓。"""
+    bpm = 104
+    mel, beats = parse(SS_A + ' | ' + SS_B + ' | ' + SS_A, D4)
+    mx = Mix(beats, bpm, tail=4)
+    spb = 60 / bpm
+    for b, d, m, fl in mel:
+        sec = d * spb
+        mid = 32 <= b < 64
+        if not mid:
+            mx.add(pluck(m2f(m), sec + 1.1, 1.8 * (1.15 if '!' in fl else 1), bright=0.7, t60=2.2, glide=0.6 if d >= 2 else 0, vib=16 if '~' in fl else 4, seed=int(b * 61)), b, pan=-0.2, rev=0.35)
+            mx.add(pluck(m2f(m - 12), sec + 1.0, 0.85, bright=0.6, t60=2.4, seed=int(b * 67)), b, pan=-0.3, rev=0.35)
+            if b >= 64 and d >= 1:                              # 回来的时候，笛子在高处轻轻跟着长一点的音
+                mx.add(flute(m2f(m + 12 if m < 76 else m), sec * 0.9, 0.3, 'dizi', vib=14, seed=int(b * 71)), b, pan=0.35, rev=0.55)
+        else:                                                   # 中段：笛子吹旋律，筝退成分解和音
+            mx.add(flute(m2f(m), sec * 0.95, 0.46, 'dizi', grace=(2 if '^' in fl else 0), vib=18 if '~' in fl else 8, seed=int(b * 73)), b, pan=0.15, rev=0.4)
+            if d >= 2:
+                mx.add(pluck(m2f(m - 12), sec + 1.0, 0.8, bright=0.62, t60=2.4, vib=10, seed=int(b * 79)), b + 0.5, pan=-0.3, rev=0.4)
+    roots = [5, 5, 1, 5, 3, 5, 6, 5, 2, 1, 5, 2, 6, 3, 5, 2, 5, 5, 1, 5, 3, 5, 6, 5]
+    for bar, r in enumerate(roots):
+        a, c, e = CH[r]
+        b0 = bar * 4
+        mid = 8 <= bar < 16
+        for beat, off, amp in [(0, a - 24, 0.8), (1, c - 12, 0.34), (1.5, e - 12, 0.3), (2, e - 24, 0.6), (3, c - 12, 0.34), (3.5, e - 12, 0.3)]:      # 阮：走着
+            mx.add(pluck(m2f(D4 + off), 1.0, amp, bright=0.58, t60=1.2, pos=0.2, seed=bar * 11 + int(beat * 2), body=0.35), b0 + beat, pan=0.35, rev=0.22)
+        if mid:
+            for i, off in enumerate([a - 12, c - 12, e - 12, c, e - 12, c - 12, a, e - 12]):
+                mx.add(pluck(m2f(D4 + off), 1.2, 0.3 if i % 2 else 0.42, bright=0.68, t60=1.8, seed=bar * 13 + i), b0 + i * 0.5, pan=-0.3, rev=0.35)
+        mx.add(wood(1100, 0.08, 0.12), b0 + 1, pan=0.2, rev=0.3)
+        mx.add(wood(1100, 0.08, 0.1), b0 + 3, pan=0.2, rev=0.3)
+        if bar % 2 == 0:
+            mx.add(bell(1760, 1.4, 0.06), b0, pan=0.5, rev=0.6)                                          # 碰铃
+        if bar % 8 == 7:                                                                               # 句尾筝往上一刮
+            for j, off in enumerate([-5, -3, 0, 2, 4, 7, 9, 12, 14]):
+                mx.add(pluck(m2f(D4 + off), 1.4, 0.2 + j * 0.012, bright=0.72, t60=1.8, seed=9000 + j + bar), b0 + 3.45 + j * 0.05, pan=-0.6 + j * 0.12, rev=0.45)
+    return mx.render(t60=1.6, wet=0.9, level=0.18)
+
+
+WZ_A = bars("2:0.5 2:0.5 3:0.5 5:0.5 6:1 5:0.5 3:0.5 | 2:1 0:0.5 2:0.5 3:0.5 2:0.5 1:0.5 6,:0.5 | 2:0.5 3:0.5 5:0.5 6:0.5 1':1 6:0.5 5:0.5 | 6:1! 0:3 | 1':0.5 1':0.5 6:0.5 5:0.5 6:1 5:0.5 3:0.5 | 5:0.5 6:0.5 5:0.5 3:0.5 2:1 0:0.5 1:0.5 | 2:0.5 3:0.5 5:0.5 3:0.5 2:0.5 1:0.5 6,:0.5 1:0.5 | 2:2! 0:2")
+WZ_B = bars("5:1 6:1 1':1.5 2':0.5 | 3':1 2':0.5 1':0.5 2':2~ | 1':1 6:1 5:1.5 6:0.5 | 5:1 3:1 2:2~ | 3:0.5 5:0.5 6:0.5 1':0.5 2':1 1':1 | 6:0.5 1':0.5 6:0.5 5:0.5 3:1 5:1 | 6:1 5:0.5 3:0.5 2:1 3:0.5 5:0.5 | 2:3~ 0:1")
+
+
+def wazi():
+    """《瓦子》：北瓦。商调快板，说唱的路子：琵琶一句一顿，顿的地方锣鼓接话；中段笛子唱开；回来时笛子和琵琶齐奏。"""
+    bpm = 126
+    intro = 8.0
+    mel, beats = parse(WZ_A + ' | ' + WZ_B + ' | ' + WZ_A, G4)
+    mx = Mix(beats + intro, bpm, tail=3.5)
+    spb = 60 / bpm
+
+    def lg(b0, pat):                                            # b 板鼓、d 堂鼓、t 小锣、c 钹、k 大锣
+        for beat, what, amp in pat:
+            if what == 'b':
+                mx.add(drum(330, 0.12, amp, seed=int(beat * 9) + 1), b0 + beat, pan=-0.05, rev=0.15)
+            elif what == 'd':
+                mx.add(dagu(84, 0.6, amp, seed=int(beat * 7) + 2), b0 + beat, pan=-0.15, rev=0.2)
+            elif what == 't':
+                mx.add(gong(920, 0.5, amp, bend=0.1, seed=int(beat * 3) + 5), b0 + beat, pan=0.45, rev=0.28)
+            elif what == 'c':
+                mx.add(cymbal(0.3, amp, seed=int(beat * 5) + 4), b0 + beat, pan=0.3, rev=0.25)
+            elif what == 'k':
+                mx.add(gong(280, 2.0, amp, bend=-0.05, seed=int(beat) + 6), b0 + beat, pan=0.0, rev=0.4)
+    # 开场两小节：嗒嗒 嗒 台 嗒嗒 | 仓才 仓才 嗒嗒嗒嗒 仓
+    lg(0, [(0, 'b', 0.5), (0.5, 'b', 0.4), (1, 'b', 0.5), (2, 't', 0.4), (3, 'b', 0.4), (3.5, 'b', 0.44),
+           (4, 'c', 0.44), (4, 'd', 0.5), (4.5, 't', 0.3), (5, 'c', 0.4), (5, 'd', 0.46), (5.5, 't', 0.3), (6, 'b', 0.4), (6.25, 'b', 0.36), (6.5, 'b', 0.42), (6.75, 'b', 0.48), (7, 'k', 0.5), (7, 'c', 0.46), (7, 'd', 0.6)])
+    for b, d, m, fl in mel:
+        sec = d * spb
+        mid = 32 <= b < 64
+        acc = 1.25 if '!' in fl else 1
+        if not mid:
+            if d >= 1.5:                                        # 长音用轮指
+                mx.add(tremolo(m2f(m), sec * 0.9, 1.3 * acc, rate=14, seed=int(b * 107)), intro + b, pan=0.3, rev=0.25)
+            else:
+                mx.add(pluck(m2f(m), 0.55 if d <= 0.5 else 0.9, 2.1 * acc, bright=0.9, t60=0.8, pos=0.1, seed=int(b * 109), body=0.15), intro + b, pan=0.3, rev=0.18)
+            if b >= 64:                                         # 最后一遍笛子高八度齐奏
+                mx.add(flute(m2f(m + 12 if m < 74 else m), sec * (0.6 if d <= 0.5 else 0.9), 0.4 * acc, 'dizi', vib=0 if d < 1.5 else 16, seed=int(b * 113)), intro + b, pan=-0.1, rev=0.28)
+        else:
+            mx.add(flute(m2f(m), sec * 0.94, 0.46, 'dizi', grace=(2 if d >= 1 and int(b) % 3 == 0 else 0), vib=18 if '~' in fl else 8, seed=int(b * 127)), intro + b, pan=-0.05, rev=0.3)
+    roots = [2, 2, 5, 6, 1, 5, 2, 2, 5, 2, 6, 2, 3, 6, 5, 2, 2, 2, 5, 6, 1, 5, 2, 2]
+    for bar, r in enumerate(roots):
+        a, c, e = CH[r]
+        b0 = intro + bar * 4
+        mid = 8 <= bar < 16
+        k = bar % 8
+        mx.add(pluck(m2f(G4 + a - 24), 0.9, 0.7, bright=0.55, t60=1.0, pos=0.2, seed=bar * 7, body=0.35), b0, pan=-0.4, rev=0.2)                     # 阮：一、三拍
+        mx.add(pluck(m2f(G4 + e - 24), 0.9, 0.5, bright=0.55, t60=1.0, pos=0.2, seed=bar * 7 + 1, body=0.35), b0 + 2, pan=-0.4, rev=0.2)
+        if mid:
+            for i, off in enumerate([a - 12, e - 12, c, e - 12, a - 12, c, e - 12, c]):                                                               # 琵琶垫八分
+                mx.add(pluck(m2f(G4 + off), 0.6, 0.34 if i % 2 == 0 else 0.24, bright=0.86, t60=0.8, pos=0.1, seed=bar * 23 + i, body=0.15), b0 + i * 0.5, pan=0.4, rev=0.18)
+            lg(b0, [(0, 'b', 0.3), (1, 'b', 0.2), (2, 'b', 0.26), (3, 'b', 0.2), (3.5, 'b', 0.2)])
+            if k == 7:
+                lg(b0, [(3, 'b', 0.4), (3.25, 'b', 0.4), (3.5, 'b', 0.46), (3.75, 'b', 0.5)])
+        else:
+            mx.add(strum([G4 + a - 12, G4 + e - 12, G4 + a, G4 + c], 0.7, 0.42, seed=bar), b0, pan=0.4, rev=0.2)                                       # 句头扫一下
+            if k == 3:                                          # 琵琶只弹一拍，后三拍锣鼓接话：仓才 仓才 嗒嗒
+                lg(b0, [(0, 'b', 0.34), (1, 'c', 0.42), (1, 'd', 0.46), (1.5, 't', 0.3), (2, 'c', 0.4), (2.5, 't', 0.3), (3, 'b', 0.4), (3.5, 'b', 0.44)])
+            elif k == 7:                                        # 句尾：仓才 仓
+                lg(b0, [(0, 'b', 0.34), (1, 'b', 0.3), (2, 'c', 0.42), (2, 'd', 0.46), (2.5, 't', 0.32), (3, 'k', 0.44), (3, 'c', 0.4), (3, 'd', 0.5)])
+            else:
+                lg(b0, [(0, 'b', 0.36), (0.5, 'b', 0.2), (1, 'b', 0.3), (1.5, 'b', 0.2), (2, 'b', 0.34), (2.5, 'b', 0.2), (3, 'b', 0.3), (3.5, 'b', 0.24)])
+                mx.add(wood(1250, 0.07, 0.2), b0, pan=0.2, rev=0.2)
+                mx.add(wood(1250, 0.07, 0.14), b0 + 2, pan=0.2, rev=0.2)
+                if k in (1, 5):
+                    lg(b0, [(3, 't', 0.26)])
+    return mx.render(t60=1.1, wet=0.7, level=0.2)
+
+
+MC_A = bars("1:2~ 2:1 3:1 | 5:3~ 3:1 | 6:2 5:1 3:1 | 2:4~ | 3:2~ 5:1 6:1 | 1':3~ 6:1 | 5:1.5 3:0.5 2:1 3:1 | 1:4~")
+MC_B = bars("5:2~ 6:1 1':1 | 2':3~ 1':1 | 6:1 5:1 3:2~ | 5:4~ | 6:2 1':1 6:1 | 5:2~ 3:1 2:1 | 3:1 5:1 6:1.5 5:0.5 | 5:4~")
+
+
+def meichuang():
+    """《梅窗》：白天安静的屋子里。宫调慢板。古琴先弹，泛音点着；后半箫进来，古琴退到底下应着；句尾筝轻轻一拂。"""
+    bpm = 60
+    mel, beats = parse(MC_A + ' | ' + MC_B, D4)
+    mx = Mix(beats, bpm, tail=6)
+    half = beats / 2
+    for b, d, m, fl in mel:
+        sec = d * 60 / bpm
+        if b < half:
+            mx.add(pluck(m2f(m - 12), sec + 1.6, 1.8, bright=0.46, t60=4.2, pos=0.23, glide=0.9 if d >= 2 else 0, vib=24 if '~' in fl else 6, seed=int(b * 131)), b, pan=-0.12, rev=0.45)
+            if d >= 2:
+                mx.add(harmonic(m2f(m + 12), 2.8, 0.1), b + 1, pan=0.4, rev=0.85)
+        else:
+            mx.add(flute(m2f(m), sec * 0.96, 0.4, 'xiao', grace=(2 if d >= 3 else 0), vib=20 if '~' in fl else 9, seed=int(b * 137)), b, pan=0.12, rev=0.6)
+            if d >= 2:
+                mx.add(pluck(m2f(m - 12), sec + 1.2, 0.75, bright=0.42, t60=3.6, pos=0.23, vib=14, seed=int(b * 139)), b + 0.5, pan=-0.2, rev=0.5)
+    roots = [1, 5, 6, 2, 3, 1, 5, 1, 5, 2, 6, 5, 6, 5, 3, 5]
+    for bar, r in enumerate(roots):
+        a, c, e = CH[r]
+        mx.add(pluck(m2f(D4 + a - 24), 5.0, 0.5, bright=0.32, t60=5.2, pos=0.26, vib=8, seed=500 + bar), bar * 4, pan=-0.3, rev=0.45)                # 古琴的空弦垫底
+        mx.add(pluck(m2f(D4 + e - 24), 4.0, 0.26, bright=0.34, t60=4.4, pos=0.26, seed=540 + bar), bar * 4 + 2, pan=-0.25, rev=0.45)
+        if bar % 4 == 3:                                        # 句尾筝一拂，很轻
+            for j, off in enumerate([0, 2, 4, 7, 9, 12, 14]):
+                mx.add(pluck(m2f(D4 + off + 12), 2.0, 0.1 + j * 0.008, bright=0.7, t60=2.2, seed=9500 + j + bar), bar * 4 + 2.6 + j * 0.07, pan=0.2 + j * 0.08, rev=0.7)
+        if bar % 4 == 1:
+            mx.add(bell(1760, 2.0, 0.035), bar * 4 + 3, pan=-0.5, rev=0.8)
+    return mx.render(t60=3.0, wet=1.05, level=0.15)
+
+
 # ---------------------------------------------------------------- 音效
 def sfx():
     rng = np.random.default_rng(3)
@@ -688,13 +833,17 @@ def sfx():
     pp = noise(0.18, 120, 900, 0.035) * 1.2 + np.pad(drum(180, 0.15, 0.7, 4), (0, int(0.18 * SR) - int(0.15 * SR)))
     out['pop'] = enc(pp)
     out['wrong'] = enc(drum(95, 0.3, 1.0, 6) + wood(320, 0.3, 0.25)[:int(0.3 * SR)] if True else 0)
+    # 0.8.0 添的三样：一声弦（琵琶高音，带一点滑）、梆子两下、水声。排在最后，前面几样的随机数不受影响
+    out['xian'] = enc(pluck(988, 1.3, 1.0, bright=0.88, t60=1.0, glide=0.4, seed=7))
+    bg = wood(620, 0.13, 0.7); out['bang'] = enc(np.concatenate([bg, np.zeros(int(0.24 * SR)), bg * 0.85]))
+    sp = noise(0.55, 180, 2600, 0.15); sp[:400] *= np.linspace(0, 1, 400); out['splash'] = enc(sp * 0.6)
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, 'sfx.js'), 'w') as f:
         f.write('window.JX_SFX=' + json.dumps(out) + ';\n')
     print('音效：', ', '.join(out.keys()), '，共 %.0f KB' % (os.path.getsize(os.path.join(OUT, 'sfx.js')) / 1024))
 
 
-TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng}
+TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang}
 if __name__ == '__main__':
     want = sys.argv[1:] or list(TRACKS) + ['sfx']
     for name in want:

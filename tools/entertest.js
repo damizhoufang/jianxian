@@ -1,5 +1,5 @@
 // 用真回车把某一场从存档点按到底（没有战斗的场次用；要自己走路的地方借自动走一小段）。
-// 用法：node tools/entertest.js "第十场　三天" [到第几拍为止，默认按到试玩结束]
+// 用法：node tools/entertest.js "第十场　三天" [到第几拍为止，默认按到试玩结束]　　序章第十场到 410 拍为止（后面接着是第一章，有战斗）
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const go = require('./_go');
 const path = require('path');

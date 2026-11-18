@@ -36,7 +36,7 @@
     P.vtext(c, text, x + 26, y + 10, 26, tc || '#f3e3b4', '600');
   }
   S.beiwa = {
-    name: '北瓦', sub: '正月十六 · 午后', w: 2800, h: 1080, ambient: '#c2b8a6', music: 'dengshi', outside: '#2a2620',
+    name: '北瓦', sub: '正月十六 · 午后', w: 2800, h: 1080, ambient: '#c2b8a6', music: 'wazi', outside: '#2a2620',
     walk: [[110, 640, 2700, 880]],
     blocks: [[1830, 560, 740, 172]],                                // 露台和围着看的人
     spawns: { start: { x: 230, y: 790, dir: 3 }, stage: { x: 2200, y: 800, dir: 2 } },
@@ -149,7 +149,7 @@
      墙上挂着她自己抄的半首词；窗下条案上搁着琵琶匣。 */
   const SHANG = ['不是爱风尘', '似被前缘误', '花落花开自有时', '总赖东君主'];
   S.ruanhong = {
-    name: '软红院', sub: '抱剑营街 · 临水的小楼', w: 2200, h: 1080, ambient: '#aba294', music: 'lanshan',
+    name: '软红院', sub: '抱剑营街 · 临水的小楼', w: 2200, h: 1080, ambient: '#aba294', music: 'meichuang',
     walk: [[96, 640, 2110, 880]],
     spawns: { start: { x: 300, y: 790, dir: 3 }, room: { x: 1330, y: 760, dir: 3 } },
     exits: [{ id: 'down', x: 110, y: 680, w: 90, h: 190, label: '下楼', lx: 150, ly: 520, back: [60, 0] }],
@@ -225,11 +225,11 @@
         [[-44, -68], [40, -62], [-30, -56]].forEach(([x, y]) => { P.ellipse(g, x, y, 9, 4, '#d8ece0', INK(0.7), 1); P.ellipse(g, x, y - 1, 6, 2.4, '#8a6a3a'); });
       } },
       { x: 930, y: 800, bw: 70, bh: 70, block: [-24, -14, 48, 18], draw(g) { P.shadow(g, 0, 0, 30, 9, 0.4); g.fillStyle = P.hgrad(g, -26, 0, 52, [[0, '#6a7f8a'], [0.5, '#a9c0c8'], [1, '#5a6f7a']]); g.beginPath(); g.moveTo(-20, -50); g.lineTo(20, -50); g.quadraticCurveTo(32, -26, 20, 0); g.lineTo(-20, 0); g.quadraticCurveTo(-32, -26, -20, -50); g.closePath(); g.fill(); g.strokeStyle = INK(); g.lineWidth = 1.4; g.stroke(); P.ellipse(g, 0, -50, 20, 6, '#c9d8dc', INK(), 1.2); } },
-      /* 窗下的条案：琵琶匣、一册蓝布函套的书 */
+      /* 窗下的条案：琵琶匣（那册书是单摆的，见 story.js） */
       { x: 1580, y: 640, bw: 330, bh: 120, block: [-150, -20, 300, 24], draw(g) {
         P.table(g, 0, 0, 300, 34, 46, { col: '#5a3a28', seed: 11 });
         g.save(); g.translate(-40, -84); g.rotate(-0.03); g.fillStyle = '#2e2420'; g.beginPath(); g.moveTo(-96, -12); g.lineTo(60, -16); g.quadraticCurveTo(100, -18, 104, 0); g.quadraticCurveTo(100, 16, 60, 14); g.lineTo(-96, 10); g.closePath(); g.fill(); g.strokeStyle = '#d7a544'; g.lineWidth = 1.4; g.stroke(); P.line(g, -40, -13, -40, 11, 2, '#d7a544'); P.line(g, 30, -15, 30, 13, 2, '#d7a544'); g.restore();   // 琵琶匣
-        g.fillStyle = '#3f5a78'; g.fillRect(84, -96, 46, 14); g.strokeStyle = INK(0.8); g.lineWidth = 1; g.strokeRect(84, -96, 46, 14); g.fillStyle = '#efe6cc'; g.fillRect(90, -93, 9, 8);                                                               // 那册书
+        /* 那册蓝布函套的书不画在这里：它会被拿走（第五场她拿起来递给他），由 story.js 按场次摆 */
       } },
       /* 楼梯口靠外的一道栏杆（人从它后面走过） */
       { x: 134, y: 892, bw: 200, bh: 100, draw(g) { P.line(g, -94, -92, 92, -92, 7, '#6a4630'); P.line(g, -94, -92, 92, -92, 2, 'rgba(255,236,200,0.2)'); for (let x = -88; x <= 88; x += 35) P.line(g, x, 0, x, -92, 5, '#5a3a28'); P.line(g, -94, -46, 92, -46, 3, '#5a3a28'); } },

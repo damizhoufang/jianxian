@@ -243,6 +243,28 @@
       ctx.save(); ctx.translate(0, -88); ctx.rotate(-0.08); ctx.fillStyle = '#3f5a78'; ctx.fillRect(-13, -9, 26, 18); ctx.strokeStyle = INK; ctx.lineWidth = 1; ctx.strokeRect(-13, -9, 26, 18); ctx.fillStyle = '#efe6cc'; ctx.fillRect(-10, -7, 5, 14); ctx.restore();
       return;
     }
+    if (what === 'lantern') {                                     // 提灯：短杆挑着一只纸灯笼，带一团暖光
+      const fl = 1 + 0.06 * Math.sin((JX.time || 0) * 7);
+      seg(ctx, 6, -86, 23, -93, 2.8, INK); seg(ctx, 6, -86, 23, -93, 1.5, '#5a3a22'); seg(ctx, 23, -93, 23, -80, 1, INK);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createRadialGradient(23, -66, 0, 23, -66, 130); gr.addColorStop(0, 'rgba(255,200,120,' + (0.2 * fl) + ')'); gr.addColorStop(1, 'rgba(255,170,80,0)'); ctx.fillStyle = gr; ctx.fillRect(-110, -200, 270, 270); ctx.restore();
+      P.ellipse(ctx, 23, -66, 10, 13, '#ffd98a', INK, 1); P.ellipse(ctx, 23, -66, 5, 8, '#fff4cf'); ctx.fillStyle = '#3a2a1e'; ctx.fillRect(18, -81, 10, 3); ctx.fillRect(19, -54, 8, 3);
+      return;
+    }
+    if (what === 'case') {                                        // 琵琶匣：竖着抱在怀里
+      ctx.save(); ctx.translate(5, -92); ctx.rotate(0.1);
+      ctx.beginPath(); ctx.moveTo(-9, 44); ctx.lineTo(-9, -34); ctx.quadraticCurveTo(-8, -58, 0, -60); ctx.quadraticCurveTo(8, -58, 9, -34); ctx.lineTo(13, 20); ctx.quadraticCurveTo(14, 46, 0, 48); ctx.quadraticCurveTo(-12, 48, -9, 44); ctx.closePath(); fillStroke(ctx, '#2e2420', 1.2);
+      ctx.strokeStyle = '#d7a544'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-9, -20); ctx.lineTo(9, -20); ctx.moveTo(-10, 18); ctx.lineTo(13, 18); ctx.stroke(); ctx.restore();
+      return;
+    }
+    if (what === 'basket') {                                      // 竹篮：面上是梅枝和山茶
+      ctx.strokeStyle = INK; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(-2, -76); ctx.quadraticCurveTo(12, -110, 26, -76); ctx.stroke(); ctx.strokeStyle = '#a8864a'; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-5, -78); ctx.lineTo(29, -78); ctx.quadraticCurveTo(28, -57, 12, -56); ctx.quadraticCurveTo(-4, -57, -5, -78); ctx.closePath(); fillStroke(ctx, P.hgrad(ctx, -5, 0, 34, [[0, '#8a6a3a'], [0.5, '#c9a86a'], [1, '#7a5a30']]), 1.1);
+      for (let i = 0; i < 4; i++) seg(ctx, i * 8, -77, 2 + i * 7, -59, 0.8, 'rgba(60,40,20,0.5)');
+      seg(ctx, 6, -80, 0, -97, 1.2, '#3a2a1e'); seg(ctx, 18, -80, 27, -99, 1.2, '#3a2a1e');
+      [[2, -82, '#e9a6b4'], [9, -86, '#f6e9ec'], [16, -83, '#c8362e'], [22, -85, '#e9a6b4'], [12, -80, '#f6e9ec'], [0, -98, '#e9a6b4'], [27, -100, '#f6e9ec']].forEach(q => P.ellipse(ctx, q[0], q[1], 3.4, 3.2, q[2], INK, 0.6));
+      return;
+    }
+    if (what === 'pole') { seg(ctx, -24, 4, 30, -204, 5, INK); seg(ctx, -24, 4, 30, -204, 3, '#8a9a5a'); return; }
     if (what === 'staff') { seg(ctx, -26, -36, 28, -152, 5, INK); seg(ctx, -26, -36, 28, -152, 3.2, '#b08a52'); return; }
     if (what === 'blade') { seg(ctx, 6, -86, 30, -146, 4.6, INK); seg(ctx, 6, -86, 30, -146, 2.8, '#cfd6da'); seg(ctx, 2, -80, 8, -89, 5, '#2a2420'); return; }
     if (what === 'bow') {
@@ -475,6 +497,11 @@
     lumu: { name: '母亲', h: 142, kind: 'dress', female: true, hair: 'female', robe: '#8a94a0', trim: '#e2d9c2', skirt: '#59606c', inner: '#eee6d4', sash: '#b9b2a0' },
     bushu: { name: '部署', h: 150, kind: 'robe', robe: '#4a5f58', trim: '#26332f', hair: 'futou', beard: 'grey', wide: 1.3, sash: '#8e2a20' },
     zhuangdaoshan: { name: '撞倒山', h: 178, fat: 1.55, kind: 'short', robe: '#c99a72', trim: '#b08058', inner: '#c99a72', pants: '#3a3430', hair: 'bald', hairCol: '#c0906a', skin: '#c99a72', sash: '#8e2a20', band: '#8e2a20', beard: 'stubble', brow: 1.3, bare: true, topless: true },
+    chuanniang: { name: '船娘', h: 144, kind: 'dress', female: true, hair: 'female', robe: '#5f7a86', trim: '#2f4048', skirt: '#3f4c58', inner: '#e6dcc8', sash: '#8e2a20', skin: '#e2c19a' },
+    maihua: { name: '卖花女', h: 140, kind: 'dress', female: true, hair: 'female', robe: '#9fb08c', trim: '#e6d7b4', skirt: '#5d6a52', inner: '#efe6d2', sash: '#b8433a', blush: true },
+    meihuachi: { name: '梅花翅', h: 140, kind: 'dress', female: true, hair: 'female', robe: '#9fb08c', trim: '#e6d7b4', skirt: '#5d6a52', inner: '#efe6d2', sash: '#b8433a', blush: true },
+    xiaohuan: { name: '小丫头', h: 120, kind: 'dress', female: true, hair: 'twinbun', robe: '#b9a2aa', trim: '#e6d7b4', skirt: '#6a5a66', inner: '#efe6d2', blush: true },
+    shuli: { name: '书吏', h: 148, kind: 'robe', robe: '#6a6f66', trim: '#33382f', hair: 'futou', beard: 'grey', wide: 1.3, sash: '#2a2320' },
     baoqi: { name: '鲍七', h: 146, kind: 'short', robe: '#6a5a6a', trim: '#3d333d', pants: '#474049', beard: 'black' },
   };
   /* 路人和食客：按种子配一身衣裳 */

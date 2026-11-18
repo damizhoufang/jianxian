@@ -121,6 +121,7 @@
     const ts = m.all ? pool : [t && t.hp > 0 ? t : (m.pick ? m.pick(b, pool) : pool[Math.floor(Math.random() * pool.length)])];
     log(b, u.name + '：' + m.name);
     u.ent.dir = ts[0].ent.x > u.ent.x ? 3 : 1;
+    if (m.pre) await m.pre(b, u, ts[0]);                              // 出手之前的一段（暗器飞过去之类）
     await lunge(u, ts[0], m.reach == null ? 0.7 : m.reach);
     for (const x of ts) await land(b, u, m, x);
     if (m.fx) await m.fx(b, u, ts[0]);

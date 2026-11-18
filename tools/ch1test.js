@@ -1,4 +1,4 @@
-// 第一章头三场检查（走到第四场开头就停；四至七场用 tools/ch1btest.js）：真按键。对白按回车；要走路的地方只照地上的路标按方向键；到人和东西跟前按回车；顺路去看一眼题壁。
+// 第一章头三场检查（走到第四场开头就停；四至十二场用 tools/ch1btest.js）：真按键。对白按回车；要走路的地方只照地上的路标按方向键；到人和东西跟前按回车；顺路去看一眼题壁。
 // 用法：node tools/ch1test.js
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const go = require('./_go');

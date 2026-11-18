@@ -9,10 +9,11 @@
     const hash = (location.hash || '').slice(1);
     if (hash.indexOf('auto') === 0) { JX.auto = true; JX.autoDelay = hash === 'autoslow' ? 0.5 : 0.03; JX.fast = hash === 'autoslow' ? 2.2 : 5; JX.autoLoad = hash === 'autoload'; }
     if (hash.indexOf('gallery') === 0) UI.openGalleryAt = parseInt(hash.split('-')[1], 10) || 0;      // 直接打开图鉴
-    const dev = ['cellar', 'kitchen', 'hall', 'street', 'snow', 'floor2', 'tingchao', 'alley', 'roof', 'yamen', 'yaopu', 'beiwa', 'ruanhong', 'shufang'].find(s => hash === s || hash === s + '-god');
+    const dev = ['cellar', 'kitchen', 'hall', 'street', 'snow', 'floor2', 'tingchao', 'alley', 'roof', 'yamen', 'yaopu', 'beiwa', 'ruanhong', 'shufang', 'jiage', 'xihu', 'huafang', 'gongtang'].find(s => hash === s || hash === s + '-god');
     if (dev) {                                                    // 开发时直接落到某个场景里走走
-      UI.quiet = false; JX.state.stage = dev === 'street' ? 3 : dev === 'hall' ? 2 : dev === 'beiwa' ? 14 : dev === 'ruanhong' ? 15 : dev === 'shufang' ? 16 : 1; JX.state.flags = { aguiUp: true, jar: true, jarDone: true, s1done: true, daoGone: false };
+      UI.quiet = false; JX.state.stage = dev === 'street' ? 3 : dev === 'hall' ? 2 : dev === 'beiwa' ? 14 : dev === 'ruanhong' ? 15 : dev === 'shufang' ? 16 : dev === 'jiage' ? 18 : dev === 'xihu' ? 19 : dev === 'huafang' ? 20 : dev === 'gongtang' ? 21 : 1; JX.state.flags = { aguiUp: true, jar: true, jarDone: true, s1done: true, daoGone: false };
       W.setPlayer(dev === 'snow' || dev === 'shufang' ? 'child' : 'jingzhe', dev === 'snow' ? { carry: 'bundle' } : null); W.load(dev, 'start'); if (dev === 'snow' || dev === 'shufang') UI.tone('sepia');
+      if (dev === 'xihu') { W.player.draw = JX.story._drawPunt; W.player.face = 3; } if (dev === 'jiage') W.player.carry = 'lantern';
       W.locked = false; JX.game.playing = true; UI.roam(true); if (hash.endsWith('-god')) W.godOn = true; UI.fade(0, 0.4); return;
     }
     /* 标题画面的背景：灯市，镜头慢慢横移 */

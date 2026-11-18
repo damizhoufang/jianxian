@@ -1,11 +1,11 @@
 // 战斗的胜率：在页面里把某一场战斗用“自带打法”连打 N 遍，闪避照实掷骰（不像自动通关那样必中）。
-// 用法：node tools/battlesim.js <alley|roof|hall> <演出名> [遍数]   例：node tools/battlesim.js roof 战三 60
+// 用法：node tools/battlesim.js <alley|roof|hall|huafang> <演出名> [遍数]   例：node tools/battlesim.js roof 战三 60；node tools/battlesim.js huafang 战梅花 40
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const go = require('./_go');
 const path = require('path');
 (async () => {
   const scene = process.argv[2] || 'roof', hook = process.argv[3] || '战三', n = +process.argv[4] || 40;
-  const stage = { hall: 6, alley: 8, roof: 9 }[scene];
+  const stage = { hall: 6, alley: 8, roof: 9, huafang: 20 }[scene];
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));
@@ -15,7 +15,7 @@ const path = require('path');
     JX.auto = true; JX.honest = true;
     const run0 = B.run, all = []; let tries = 0;
     B.run = async def => { const r = await run0(def); all.push({ result: r.result, acts: r.b.acts, hp: r.b.units.filter(u => u.side === 'ally').map(u => u.hp) }); return r; };
-    for (let i = 0; i < n; i++) { st.flags.won2 = st.flags.fell = false; JX.populate(scene); await H[hook](); }
+    for (let i = 0; i < n; i++) { st.flags.won2 = st.flags.fell = false; JX.populate(scene); if (scene === 'huafang') { W.remove('maihua'); W.add('meihuachi', 'meihuachi', 2040, 746, { dir: 1, solid: false }); } await H[hook](); }      // 画舫那一战：卖花女先换成梅花翅
     return all;
   }, { hook, n, stage, scene }).catch(e => ({ err: e.message }));
   if (out.err) console.log('出错', out.err, errs.join('\n'));

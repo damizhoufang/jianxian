@@ -199,12 +199,12 @@
   #gal .face span { display: block; margin-top: 3px; text-align: center; font: 20px var(--kai); color: #c9b282; }
   #gal .spr { left: 1290px; top: 124px; width: 580px; }
   #gal .spr canvas { display: block; width: 580px; height: 860px; background: linear-gradient(180deg, #efe4c8, #dfcfa6); border: 2px solid #3d2a1c; border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,.45), inset 0 0 0 2px rgba(168,54,42,.2); }
-  #gal .mus { left: 64px; right: 64px; top: 128px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 22px; }
-  #gal .trk { position: relative; height: 262px; padding: 22px 28px; color: var(--ink); background: linear-gradient(180deg, #f4ead2, #e2d2ac); border: 2px solid #3d2a1c; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.45), inset 0 0 0 2px rgba(168,54,42,.22); }
+  #gal .mus { left: 64px; right: 64px; top: 124px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 20px; }      /* 十二首：四列三行 */
+  #gal .trk { position: relative; height: 284px; padding: 20px 24px; color: var(--ink); background: linear-gradient(180deg, #f4ead2, #e2d2ac); border: 2px solid #3d2a1c; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.45), inset 0 0 0 2px rgba(168,54,42,.22); }
   #gal .trk.on { box-shadow: 0 0 34px rgba(215,165,68,.6), inset 0 0 0 4px #a8362a; }
-  #gal .trk b { font: 600 42px var(--kai); letter-spacing: .06em; color: #8e2a20; }
-  #gal .trk .w { margin: 4px 0 8px; font: 23px var(--kai); color: #7a5d3a; }
-  #gal .trk .h { font: 24px/1.5 var(--kai); }
+  #gal .trk b { font: 600 40px var(--kai); letter-spacing: .06em; color: #8e2a20; }
+  #gal .trk .w { margin: 4px 0 8px; font: 21px/1.4 var(--kai); color: #7a5d3a; }
+  #gal .trk .h { font: 22px/1.48 var(--kai); }
   #gal .trk .btn { position: absolute; right: 20px; top: 20px; margin: 0; }
   #gal .note { left: 64px; right: 64px; bottom: 30px; font: 23px var(--kai); color: #c9b282; }
 </style>
@@ -223,7 +223,7 @@
    试了几回还不行，把话说在屏幕上，不留一块黑屏。
    地址后面带版本号，换了版本浏览器就不会拿旧文件来凑。 */
 (function () {
-  var V = window.JX_V = '0.7.0';
+  var V = window.JX_V = '0.8.0';
   var FILES = [
     'src/core.js',
     'src/paint.js',
@@ -237,6 +237,7 @@
     'src/scenes3.js',
     'src/scenes4.js',
     'src/scenes5.js',
+    'src/scenes6.js',
     'src/audio.js',
     'src/ui.js',
     'src/gallery.js',
