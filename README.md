@@ -95,6 +95,7 @@ tools/battletest.js 用真按键打一场战斗，输了会按提示重来：nod
 tools/battlesim.js  把一场战斗照实掷骰连打几十遍，看胜率和剩下的气血：node tools/battlesim.js roof 战三 60
 tools/entertest.js  用真回车把没有战斗的一场从存档点按到底：node tools/entertest.js "第十场　三天"
 tools/capture.js    从某一场的存档点起慢速自动走，逐拍截图（看演出用）
+tools/beatshot.js   跳到某一场慢速自动走，演到含某几个关键字的那一拍各截一张 1920×1080 的图
 ```
 
 ## 续写剧本
