@@ -303,16 +303,17 @@
     W.locked = was; W.traveling = false;
   };
 
-  /* ---------- 粒子：雪、落灯花、微尘 ---------- */
+  /* ---------- 粒子：雪、雨、落灯花、微尘 ---------- */
   W.initParts = function (kind) {
     W.partKind = kind || null; W.parts = [];
-    const n = kind === 'snow' ? 230 : kind === 'embers' ? 70 : kind === 'dust' ? 46 : 0, r = JX.rng(99);
+    const n = kind === 'snow' ? 230 : kind === 'rain' ? 280 : kind === 'embers' ? 70 : kind === 'dust' ? 46 : 0, r = JX.rng(99);
     for (let i = 0; i < n; i++) W.parts.push({ x: r() * JX.W, y: r() * JX.H, s: 0.5 + r(), ph: r() * 6.28, v: 0.6 + r() * 0.8 });
   };
   function stepParts(dt) {
     const k = W.partKind; if (!k) return;
     W.parts.forEach(q => {
       if (k === 'snow') { q.y += (46 + q.s * 60) * q.v * dt; q.x += (Math.sin(JX.time * 0.7 + q.ph) * 16 - 22) * dt; }
+      else if (k === 'rain') { q.y += (900 + q.s * 520) * dt; q.x -= (170 + q.s * 90) * dt; }
       else if (k === 'embers') { q.y += (22 + q.s * 26) * q.v * dt; q.x += Math.sin(JX.time * 0.9 + q.ph) * 14 * dt; }
       else { q.y -= 5 * q.v * dt; q.x += Math.sin(JX.time * 0.4 + q.ph) * 6 * dt; }
       if (q.y > JX.H + 10) { q.y = -10; q.x = Math.random() * JX.W; } if (q.y < -12) q.y = JX.H + 8;
@@ -423,6 +424,7 @@
     if (W.partKind) {
       c.setTransform(S, 0, 0, S, 0, 0);
       if (W.partKind === 'snow') { c.fillStyle = '#f6f8fb'; W.parts.forEach(q => { c.globalAlpha = 0.35 + q.s * 0.4; c.beginPath(); c.arc(q.x, q.y, 1.4 + q.s * 2.4, 0, 6.3); c.fill(); }); }
+      else if (W.partKind === 'rain') { c.strokeStyle = '#e4eef2'; c.lineWidth = 1.3; W.parts.forEach(q => { c.globalAlpha = 0.22 + q.s * 0.2; c.beginPath(); c.moveTo(q.x, q.y); c.lineTo(q.x - 5 - q.s * 3, q.y + 26 + q.s * 16); c.stroke(); }); }
       else if (W.partKind === 'embers') { c.globalCompositeOperation = 'lighter'; const gs = glowSprite('#ffb866'); W.parts.forEach(q => { const tw = 0.5 + 0.5 * Math.sin(t * 3 + q.ph); c.globalAlpha = 0.25 + tw * 0.5; const r = 5 + q.s * 7; c.drawImage(gs, q.x - r, q.y - r, r * 2, r * 2); }); }
       else { c.globalCompositeOperation = 'lighter'; const gs = glowSprite('#ffe0a8'); W.parts.forEach(q => { c.globalAlpha = 0.1 + 0.12 * Math.sin(t + q.ph) ** 2; const r = 3 + q.s * 3; c.drawImage(gs, q.x - r, q.y - r, r * 2, r * 2); }); }
       c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';

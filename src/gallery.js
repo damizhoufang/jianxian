@@ -1,5 +1,6 @@
 /* 人物图鉴与配乐试听。标题画面和菜单里都能进；地址后面加 #gallery 直接打开（#gallery-3 是第四页）。
-   每位主角三套画：立绘（portraits2.js）、对话头像与表情（portraits.js）、场景里走动的小人与动作（figures.js）。 */
+   五位主角用画像（art/ 目录，见 artpack.js）：头像、半身、全身、三视图，点开放大；另有场景里走动的小人与动作（figures.js）。
+   配角还是程序画的三套：立绘（portraits3.js）、对话头像与表情、场景小人。 */
 'use strict';
 (function () {
   const JX = window.JX, UI = JX.ui, Fig = JX.Fig, Art = JX.Art, P = JX.P, el = JX.el;
@@ -49,7 +50,9 @@
     ['meichuang', '梅窗', '白天安静的屋子里：软红院、仁寿堂、公堂散后', '古琴先弹，泛音点着；后半箫进来，句尾筝轻轻一拂。宫调慢板。'],
   ];
   JX.TRACKS = TRACKS;
-  let box = null, page = 0, spr = null, onClose = null, playing = null;
+  const PICS = [['face', '头像'], ['half', '半身'], ['full', '全身'], ['sheet', '三视图']];
+  const painted = ch => !!(Art.painted && Art.painted(ch.id));
+  let box = null, page = 0, spr = null, onClose = null, playing = null, zoom = null;      // zoom：正在放大看第几张（没有就是 null）
 
   function stool(c) { c.fillStyle = '#6a3f26'; c.strokeStyle = '#231a14'; c.lineWidth = 1.4; c.beginPath(); c.moveTo(-17, -30); c.quadraticCurveTo(-23, -15, -16, 0); c.lineTo(16, 0); c.quadraticCurveTo(23, -15, 17, -30); c.closePath(); c.fill(); c.stroke(); P.ellipse(c, 0, -30, 18, 5.5, '#8a5634', '#231a14', 1.2); }
   function drawSprites(ch) {
@@ -73,17 +76,25 @@
     let h = '<div class="bar"><h2>图鉴</h2>' + tabs + '<div class="close jx-clickable" data-act="close">← → 翻页　Esc 返回</div></div>';
     spr = null;
     if (page < CHARS.length) {
-      const ch = CHARS[page], a = Art.chars[ch.id];
-      h += '<canvas class="port-bg" width="518" height="944"></canvas><canvas class="port" width="' + Art.PW * 2 + '" height="' + Art.PH * 2 + '"></canvas>' +
-        '<div class="info"><h3>' + a.name + '</h3><div class="ti">' + (a.support ? '' : a.season + '　·　') + a.title + '</div><p class="bio">' + ch.bio + '</p><p class="q">“' + a.line + '”</p></div>' +
-        '<div class="faces"><h4>对话头像 · 表情</h4><div class="g">' + MOODS.map((m, i) => '<div class="face"><canvas width="380" height="436" data-m="' + i + '"></canvas><span>' + m[1] + '</span></div>').join('') + '</div></div>' +
-        '<div class="spr"><h4>场景里的样子</h4><canvas width="1160" height="1720"></canvas></div>';
+      const ch = CHARS[page], a = Art.chars[ch.id], pt = painted(ch);
+      const info = '<div class="info"><h3>' + a.name + '</h3><div class="ti">' + (a.support ? '' : a.season + '　·　') + a.title + '</div><p class="bio">' + ch.bio + '</p><p class="q">“' + a.line + '”</p></div>';
+      if (pt) {                                                     // 主角：用画像。左边一张大的，底下四张小的，点哪张都放大看
+        h += '<div class="pic jx-clickable" data-zoom="1"><img src="' + Art.pic(ch.id, 'half') + '" alt=""></div>' +
+          '<div class="ths">' + PICS.map((k, i) => '<div class="th jx-clickable" data-zoom="' + i + '"><img src="' + Art.pic(ch.id, k[0]) + '" alt=""><span>' + k[1] + '</span></div>').join('') + '</div>' + info +
+          '<div class="sheet"><h4>三视图</h4><div class="f jx-clickable" data-zoom="3"><img src="' + Art.pic(ch.id, 'sheet') + '" alt=""></div></div>';
+      } else {
+        h += '<canvas class="port-bg" width="518" height="944"></canvas><canvas class="port" width="' + Art.PW * 2 + '" height="' + Art.PH * 2 + '"></canvas>' + info +
+          '<div class="faces"><h4>对话头像 · 表情</h4><div class="g">' + MOODS.map((m, i) => '<div class="face"><canvas width="380" height="436" data-m="' + i + '"></canvas><span>' + m[1] + '</span></div>').join('') + '</div></div>';
+      }
+      h += '<div class="spr"><h4>场景里的样子</h4><canvas width="1160" height="1720"></canvas></div>';
+      if (pt && zoom != null) h += '<div class="lb jx-clickable" data-zoom="x"><img src="' + Art.pic(ch.id, PICS[zoom][0]) + '" alt=""><div class="cap">' + a.name + '　·　' + PICS[zoom][1] + '　　← → 换一张　　点一下或按 Esc 收起</div></div>';
     } else {
       h += '<div class="mus">' + TRACKS.map(t => '<div class="trk' + (playing === t[0] ? ' on' : '') + '"><b>《' + t[1] + '》</b><div class="w">' + t[2] + '</div><div class="h">' + t[3] + '</div><div class="btn small jx-clickable" data-play="' + t[0] + '">' + (playing === t[0] ? '■ 停' : '▶ 试听') + '</div></div>').join('') + '</div>' +
         '<div class="note">十二首都是原创旋律，整首离线合成后装进游戏，游戏里只播放。一首一兆上下，点了才装载，头一回要等一两秒。</div>';
     }
     box.innerHTML = h;
-    if (page < CHARS.length) {
+    if (page < CHARS.length && painted(CHARS[page])) { spr = box.querySelector('.spr canvas'); drawSprites(CHARS[page]); }
+    else if (page < CHARS.length) {
       const ch = CHARS[page];
       const bg = box.querySelector('.port-bg').getContext('2d'), a = Art.chars[ch.id];                    // 立绘背后：一轮淡淡的光和一个季节的字
       bg.save(); bg.scale(1, 1.78); const gr = bg.createRadialGradient(259, 256, 10, 259, 262, 256); gr.addColorStop(0, 'rgba(240,222,180,.32)'); gr.addColorStop(0.55, 'rgba(240,222,180,.1)'); gr.addColorStop(1, 'rgba(240,222,180,0)'); bg.fillStyle = gr; bg.fillRect(0, 0, 518, 531); bg.restore();
@@ -102,6 +113,13 @@
   function tick() {
     if (!box) return;
     const n = CHARS.length + 1;
+    if (zoom != null) {                                             // 放大看的时候：左右换一张，Esc 收起
+      if (JX.input.hit('left') || JX.input.hit('a')) { zoom = (zoom + PICS.length - 1) % PICS.length; JX.audio.sfx('page'); render(); }
+      else if (JX.input.hit('right') || JX.input.hit('d')) { zoom = (zoom + 1) % PICS.length; JX.audio.sfx('page'); render(); }
+      else if (JX.input.hit('cancel') || JX.input.hit('menu') || JX.input.hit('confirm')) { JX.input.eat('cancel'); JX.input.eat('menu'); JX.input.eat('confirm'); zoom = null; render(); }
+      if (spr && page < CHARS.length) drawSprites(CHARS[page]);
+      return;
+    }
     if (JX.input.hit('left') || JX.input.hit('a')) { page = (page + n - 1) % n; JX.audio.sfx('page'); render(); }
     else if (JX.input.hit('right') || JX.input.hit('d')) { page = (page + 1) % n; JX.audio.sfx('page'); render(); }
     else if (JX.input.hit('cancel') || JX.input.hit('menu')) { JX.input.eat('cancel'); JX.input.eat('menu'); UI.closeGallery(); return; }
@@ -111,11 +129,12 @@
   UI.gallery = function (p, done) {
     if (box) return;
     if (p != null) page = Math.max(0, Math.min(CHARS.length, p));
-    onClose = done || null; UI.modal++;
+    onClose = done || null; zoom = null; UI.modal++;
     box = UI.root().appendChild(el('div')); box.id = 'gal';
     box.onclick = e => {
-      const t = e.target.closest('[data-p],[data-act],[data-play]'); if (!t) return;
-      if (t.dataset.p != null) { page = +t.dataset.p; JX.audio.sfx('page'); render(); }
+      const t = e.target.closest('[data-p],[data-act],[data-play],[data-zoom]'); if (!t) return;
+      if (t.dataset.zoom != null) { zoom = t.dataset.zoom === 'x' ? null : +t.dataset.zoom; JX.audio.sfx('page'); render(); }
+      else if (t.dataset.p != null) { zoom = null; page = +t.dataset.p; JX.audio.sfx('page'); render(); }
       else if (t.dataset.play) play(t.dataset.play);
       else UI.closeGallery();
     };

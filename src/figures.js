@@ -12,6 +12,15 @@
 
   /* ---------- 头 ---------- */
   const HAT = { futou: 1, cap: 1, gaojin: 1, zhanjiao: 1 };
+  /* 斗笠：戴在发髻外头（sp.hat === 'douli'）。正面、背面、侧面都是同一个尖顶宽檐 */
+  function douli(ctx, sp, side) {
+    if (sp.hat !== 'douli') return;
+    const col = sp.hatCol || '#c9b07a', dx = side ? 1.5 : 0;
+    ctx.beginPath(); ctx.moveTo(dx - 28, -141); ctx.quadraticCurveTo(dx, -150.5, dx + 28, -141); ctx.lineTo(dx + 4, -166.5); ctx.quadraticCurveTo(dx, -169, dx - 4, -166.5); ctx.closePath();
+    fillStroke(ctx, P.hgrad(ctx, dx - 28, 0, 56, [[0, P.dark(col, 0.3)], [0.42, P.light(col, 0.16)], [1, P.dark(col, 0.34)]]), 1.2);
+    for (let i = -3; i <= 3; i++) seg(ctx, dx + i * 1.1, -166, dx + i * 8.4, -143.6 - (3 - Math.abs(i)) * 1.1, 0.6, 'rgba(70,48,22,0.38)');
+    ctx.strokeStyle = 'rgba(70,48,22,0.4)'; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(dx - 16, -152); ctx.quadraticCurveTo(dx, -157, dx + 16, -152); ctx.stroke();
+  }
   function hairFront(ctx, sp) {
     const hc = sp.hairCol || C.hair, st = sp.hair || 'bun';
     if (st === 'beggar' || st === 'patchy') {
@@ -29,6 +38,7 @@
       P.ellipse(ctx, 0, -152.5, 7.6, 6.6, hc, INK, 1.1);
       ctx.fillStyle = sp.band || sp.trim || '#3a4a5a'; ctx.fillRect(-6.5, -148.6, 13, 3.2);
       if (st === 'dao') { seg(ctx, -12, -152.5, 12, -152.5, 2, '#9fb8a6'); }
+      if (sp.ribbon) { seg(ctx, -6, -149.5, -19, -143, 2.8, sp.ribbon); seg(ctx, -19, -143, -21, -131, 2.4, sp.ribbon); seg(ctx, -5, -148, -15, -136, 2.2, P.dark(sp.ribbon, 0.15)); }
     } else if (st === 'boy') {
       P.ellipse(ctx, -11, -150, 5.5, 5, hc, INK, 1); P.ellipse(ctx, 11, -150, 5.5, 5, hc, INK, 1);
       seg(ctx, -11, -146.5, -11, -145, 2.4, C.zhusha); seg(ctx, 11, -146.5, 11, -145, 2.4, C.zhusha);
@@ -82,7 +92,7 @@
     ctx.beginPath(); ctx.ellipse(0, -133, 15, 16.5, 0, 0, Math.PI * 2);
     fillStroke(ctx, P.hgrad(ctx, -15, 0, 30, [[0, P.dark(skin, 0.1)], [0.45, P.light(skin, 0.12)], [1, P.dark(skin, 0.14)]]), 1.3);
     if (sp.blush) { P.ellipse(ctx, -8.5, -127, 4, 2.6, 'rgba(214,110,96,0.32)'); P.ellipse(ctx, 8.5, -127, 4, 2.6, 'rgba(214,110,96,0.32)'); }
-    hairFront(ctx, sp);
+    hairFront(ctx, sp); douli(ctx, sp);
     const browCol = sp.hair === 'old' ? '#bdb7ad' : 'rgba(38,28,22,0.85)', ey = o.eyeY || 0;
     if (o.closed) { seg(ctx, -9, -131.6, -4, -131.2, 1.5, INK); seg(ctx, 4, -131.2, 9, -131.6, 1.5, INK); }
     else {
@@ -119,7 +129,7 @@
     ctx.restore();
     if (st === 'bun' || st === 'old' || st === 'dao') {
       P.ellipse(ctx, 0, -152.5, 7.6, 6.6, hc, INK, 1.1); ctx.fillStyle = sp.band || sp.trim || '#3a4a5a'; ctx.fillRect(-6.5, -148.6, 13, 3.2);
-      if (st === 'dao') seg(ctx, -12, -152.5, 12, -152.5, 2, '#9fb8a6'); else { seg(ctx, -2, -148, -5, -138, 2.2, sp.band || sp.trim || '#3a4a5a'); seg(ctx, 2, -148, 4, -139, 2.2, sp.band || sp.trim || '#3a4a5a'); }
+      if (st === 'dao') seg(ctx, -12, -152.5, 12, -152.5, 2, '#9fb8a6'); else if (sp.ribbon) { seg(ctx, -2, -148, -7, -126, 2.8, sp.ribbon); seg(ctx, 2, -148, 6, -130, 2.6, P.dark(sp.ribbon, 0.15)); } else { seg(ctx, -2, -148, -5, -138, 2.2, sp.band || sp.trim || '#3a4a5a'); seg(ctx, 2, -148, 4, -139, 2.2, sp.band || sp.trim || '#3a4a5a'); }
     } else if (st === 'boy') { P.ellipse(ctx, -11, -150, 5.5, 5, hc, INK, 1); P.ellipse(ctx, 11, -150, 5.5, 5, hc, INK, 1); }
     else if (st === 'gaojin') { ctx.beginPath(); ctx.moveTo(-13.5, -143); ctx.lineTo(-12, -173); ctx.lineTo(12, -173); ctx.lineTo(13.5, -143); ctx.closePath(); fillStroke(ctx, '#1d1714', 1); }
     else if (st === 'zhanjiao') { seg(ctx, -11, -153, -47, -154, 3, '#17120f'); seg(ctx, 11, -153, 47, -154, 3, '#17120f'); ctx.beginPath(); ctx.moveTo(-11.5, -147); ctx.lineTo(-10.5, -163); ctx.quadraticCurveTo(0, -166.5, 10.5, -163); ctx.lineTo(11.5, -147); ctx.closePath(); fillStroke(ctx, '#1d1714', 1); }
@@ -145,7 +155,7 @@
     ctx.beginPath(); ctx.moveTo(8, -149.5); ctx.bezierCurveTo(-6, -154, -15, -146, -13.2, -131); ctx.bezierCurveTo(-13, -124, -9, -120, -6, -119.6);
     ctx.lineTo(-3.6, -128); ctx.bezierCurveTo(-6, -137, 1, -142.5, 12, -143.5); ctx.closePath(); ctx.fillStyle = cap; ctx.fill();
     P.ellipse(ctx, -1.5, -131, 2.4, 3.8, skin, INK, 0.9);
-    if (st === 'bun' || st === 'old' || st === 'dao') { P.ellipse(ctx, -2, -152.6, 7.6, 6.6, hc, INK, 1.1); ctx.fillStyle = sp.band || sp.trim || '#3a4a5a'; ctx.fillRect(-8, -148.6, 12, 3.2); if (st === 'dao') seg(ctx, -12, -153, 9, -152, 2, '#9fb8a6'); }
+    if (st === 'bun' || st === 'old' || st === 'dao') { P.ellipse(ctx, -2, -152.6, 7.6, 6.6, hc, INK, 1.1); ctx.fillStyle = sp.band || sp.trim || '#3a4a5a'; ctx.fillRect(-8, -148.6, 12, 3.2); if (st === 'dao') seg(ctx, -12, -153, 9, -152, 2, '#9fb8a6'); if (sp.ribbon) { seg(ctx, -8, -149, -17, -140, 2.8, sp.ribbon); seg(ctx, -17, -140, -18, -127, 2.4, sp.ribbon); } }
     else if (st === 'boy') { P.ellipse(ctx, -4, -151, 6, 5.4, hc, INK, 1); seg(ctx, -4, -147, -4, -145.4, 2.4, C.zhusha); }
     else if (st === 'gaojin') { ctx.beginPath(); ctx.moveTo(-13, -143); ctx.lineTo(-11.5, -173); ctx.lineTo(9, -173); ctx.lineTo(11, -145); ctx.closePath(); fillStroke(ctx, '#1d1714', 1); }
     else if (st === 'zhanjiao') { ctx.beginPath(); ctx.moveTo(-13.5, -146); ctx.lineTo(-12.5, -163); ctx.quadraticCurveTo(-4, -166.5, 4.5, -164); ctx.lineTo(7, -148.5); ctx.closePath(); fillStroke(ctx, '#1d1714', 1); seg(ctx, -9, -153, -15, -153.5, 3.4, '#17120f'); }
@@ -192,7 +202,8 @@
       [[-9 * d.f, lL], [9 * d.f, lR]].forEach(([x, lift]) => {
         ctx.beginPath(); ctx.moveTo(x - 7.5, -64); ctx.lineTo(x + 7.5, -64); ctx.lineTo(x + 6, -8 - lift); ctx.lineTo(x - 6, -8 - lift); ctx.closePath();
         fillStroke(ctx, cloth(ctx, sp.pants || '#4a4a48', x - 8, x + 8), 1.2);
-        if (sp.boots) { ctx.fillStyle = sp.boots; ctx.fillRect(x - 6.6, -36 - lift, 13.2, 30); ctx.strokeStyle = INK; ctx.lineWidth = 1; ctx.strokeRect(x - 6.6, -36 - lift, 13.2, 30); if (sp.fur) P.ellipse(ctx, x, -36 - lift, 8, 3.4, '#f8f4ec', 'rgba(120,104,90,0.6)', 0.8); }
+        if (sp.boots) { ctx.fillStyle = sp.boots; ctx.fillRect(x - 6.6, -36 - lift, 13.2, 30); ctx.strokeStyle = INK; ctx.lineWidth = 1; ctx.strokeRect(x - 6.6, -36 - lift, 13.2, 30); if (sp.fur) P.ellipse(ctx, x, -36 - lift, 8, 3.4, sp.furCol || '#f8f4ec', sp.furEdge || 'rgba(120,104,90,0.6)', 0.8); }
+        else if (sp.wraps) { ctx.fillStyle = sp.wraps; ctx.fillRect(x - 6.2, -34 - lift, 12.4, 27); ctx.strokeStyle = INK; ctx.lineWidth = 0.9; ctx.strokeRect(x - 6.2, -34 - lift, 12.4, 27); for (let q = 0; q < 3; q++) { seg(ctx, x - 6, -30 + q * 8 - lift, x + 6, -24 + q * 8 - lift, 0.8, sp.wrapTie || 'rgba(30,30,40,0.45)'); seg(ctx, x + 6, -30 + q * 8 - lift, x - 6, -24 + q * 8 - lift, 0.8, sp.wrapTie || 'rgba(30,30,40,0.45)'); } }      // 绑腿：缠到小腿
         else { ctx.fillStyle = P.dark(sp.pants || '#4a4a48', 0.3); ctx.fillRect(x - 6, -15 - lift, 12, 3); }     // 绑腿口
         P.ellipse(ctx, x, -4 - lift, 7.6, 4.8, bare ? (sp.skin || C.skin) : sc, INK, 1.1);
       });
@@ -323,6 +334,7 @@
     else shoesFront(ctx, sp, d, sw, mv);
     if (back && sp.pole) seg(ctx, -62, -112, 62, -110, 4, '#7a5a34');
     torsoPath(ctx, d, sway); fillStroke(ctx, cloth(ctx, sp.robe, -d.hem, d.hem), 1.4);
+    if (sp.front && !back) { ctx.save(); ctx.clip(); ctx.beginPath(); ctx.moveTo(-8, -120); ctx.lineTo(8, -120); ctx.lineTo(13 + sway, d.hemY + 8); ctx.lineTo(-13 + sway, d.hemY + 8); ctx.closePath(); ctx.fillStyle = cloth(ctx, sp.front, -13, 13); ctx.fill(); ctx.strokeStyle = P.rgba('#1a120c', 0.4); ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); torsoPath(ctx, d, sway); }
     if (sp.lower) { ctx.save(); ctx.clip(); ctx.fillStyle = cloth(ctx, sp.lower, -d.hem, d.hem); ctx.fillRect(-60, -74, 120, 90); ctx.strokeStyle = P.rgba('#1a120c', 0.26); ctx.lineWidth = 1; for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.moveTo(i * 5, -74); ctx.lineTo(i * 8, d.hemY + 5); ctx.stroke(); } ctx.restore(); ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke(); }
     if (d.k !== 'short') {                                      // 衣褶
       ctx.strokeStyle = P.rgba('#1a120c', 0.22); ctx.lineWidth = 1;
@@ -336,7 +348,8 @@
     if (back) { seg(ctx, 0, -112, 0, -82, 1, P.rgba('#1a120c', 0.3)); ctx.strokeStyle = sp.inner || '#ece4d0'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -119, 8, 0.25, Math.PI - 0.25); ctx.stroke(); }
     else if (sp.topless) { ctx.strokeStyle = 'rgba(90,50,30,0.55)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(-d.sh + 4, -100); ctx.quadraticCurveTo(-d.sh * 0.5, -94, -1, -100); ctx.quadraticCurveTo(d.sh * 0.5, -94, d.sh - 4, -100); ctx.moveTo(0, -112); ctx.lineTo(0, -100); ctx.stroke(); P.ellipse(ctx, -d.sh * 0.5, -101, 1.4, 1.4, 'rgba(120,60,40,0.8)'); P.ellipse(ctx, d.sh * 0.5, -101, 1.4, 1.4, 'rgba(120,60,40,0.8)'); P.ellipse(ctx, 0, -86, 1.6, 2, 'rgba(90,50,30,0.6)'); }
     else collarFront(ctx, sp, d);
-    if (sp.fur) for (let i = -3; i <= 3; i++) P.ellipse(ctx, i * 6.6, -113.5 + Math.abs(i) * 1.5, 5.2, 4.4, '#f8f4ec', 'rgba(120,104,90,0.6)', 0.8);
+    if (sp.beads && !back) for (let i = -4; i <= 4; i++) { const u = i / 4; P.ellipse(ctx, u * 9.5, -110 + 22 * (1 - u * u), i ? 1.9 : 2.6, i ? 1.9 : 2.6, i ? sp.beads : P.light(sp.beads, 0.25), 'rgba(40,24,12,0.7)', 0.6); }
+    if (sp.fur) for (let i = -3; i <= 3; i++) P.ellipse(ctx, i * 6.6, -113.5 + Math.abs(i) * 1.5, 5.2, 4.4, sp.furCol || '#f8f4ec', sp.furEdge || 'rgba(120,104,90,0.6)', 0.8);
     if (sp.apron && !back) { ctx.beginPath(); ctx.moveTo(-d.wa + 2, -84); ctx.lineTo(d.wa - 2, -84); ctx.lineTo(d.hem - 3, -36); ctx.lineTo(-d.hem + 3, -36); ctx.closePath(); fillStroke(ctx, sp.apron, 1.1); seg(ctx, -6, -84, -4, -112, 1.6, sp.apron); seg(ctx, 6, -84, 4, -112, 1.6, sp.apron); }
     sashFront(ctx, sp, d, back);
     if (back && sp.knife) {                                     // 别在腰后的酒刀
@@ -356,7 +369,7 @@
     if (!back && sp.pipaBack && !o.carry) { seg(ctx, 15, -112, 22, -150, 3.4, '#4a2f1c'); seg(ctx, 20, -146, 28, -147, 1.6, '#2e1c10'); seg(ctx, 21, -140, 14, -142, 1.6, '#2e1c10'); }
     if (!back && sp.towel) { ctx.beginPath(); ctx.moveTo(d.sh - 12, -116); ctx.lineTo(d.sh - 2, -113); ctx.lineTo(d.sh - 5, -84); ctx.lineTo(d.sh - 15, -86); ctx.closePath(); fillStroke(ctx, '#efe9da', 1); seg(ctx, d.sh - 14, -90, d.sh - 5.5, -88.4, 1, 'rgba(90,110,140,0.6)'); }
     if (back && sp.towel) { ctx.beginPath(); ctx.moveTo(-d.sh + 12, -116); ctx.lineTo(-d.sh + 2, -113); ctx.lineTo(-d.sh + 4, -94); ctx.lineTo(-d.sh + 14, -96); ctx.closePath(); fillStroke(ctx, '#efe9da', 1); }
-    if (back) { headBack(ctx, sp); if (o.carry) { /* 背对时手里的东西被身子挡住 */ } }
+    if (back) { headBack(ctx, sp); douli(ctx, sp); if (o.carry) { /* 背对时手里的东西被身子挡住 */ } }
     else { if (!back && sp.pole) seg(ctx, -62, -110, 62, -112, 4, '#7a5a34'); faceFront(ctx, sp, o); if (sp.mask) { ctx.fillStyle = sp.mask; ctx.beginPath(); ctx.moveTo(-14.6, -130); ctx.lineTo(14.6, -130); ctx.lineTo(13, -117); ctx.quadraticCurveTo(0, -110, -13, -117); ctx.closePath(); ctx.fill(); } if (o.carry) carried(ctx, o.carry); }
     if (sp.pole) {                                              // 扁担两头的历日担子
       [-58, 58].forEach(x => { seg(ctx, x, -111, x - 6, -64, 1, '#3a2a1e'); seg(ctx, x, -111, x + 6, -64, 1, '#3a2a1e'); ctx.beginPath(); ctx.rect(x - 15, -64, 30, 26); fillStroke(ctx, '#b79a62', 1.2); for (let i = 0; i < 5; i++) { ctx.fillStyle = i % 2 ? '#e9dfc6' : '#d9c9a4'; ctx.fillRect(x - 12 + i * 5, -70, 4, 8); } P.shadow(ctx, x, -2, 18, 5, 0.3); });
@@ -380,7 +393,8 @@
       [[-1, 0.28], [1, 0]].forEach(([sg, shade]) => {
         ctx.save(); ctx.translate(0, -64); ctx.rotate(-sg * sw * 0.42 * mv);
         ctx.beginPath(); ctx.moveTo(-7.5, 0); ctx.lineTo(7.5, 0); ctx.lineTo(6, 56); ctx.lineTo(-6, 56); ctx.closePath(); fillStroke(ctx, P.dark(sp.pants || '#4a4a48', shade), 1.2);
-        if (sp.boots) { ctx.fillStyle = P.dark(sp.boots, shade); ctx.fillRect(-6.6, 28, 13.2, 28); ctx.strokeStyle = INK; ctx.lineWidth = 1; ctx.strokeRect(-6.6, 28, 13.2, 28); if (sp.fur) P.ellipse(ctx, 0, 28, 8, 3.2, '#f8f4ec', 'rgba(120,104,90,0.6)', 0.8); }
+        if (sp.boots) { ctx.fillStyle = P.dark(sp.boots, shade); ctx.fillRect(-6.6, 28, 13.2, 28); ctx.strokeStyle = INK; ctx.lineWidth = 1; ctx.strokeRect(-6.6, 28, 13.2, 28); if (sp.fur) P.ellipse(ctx, 0, 28, 8, 3.2, sp.furCol || '#f8f4ec', sp.furEdge || 'rgba(120,104,90,0.6)', 0.8); }
+        if (sp.wraps && !sp.boots) { ctx.fillStyle = P.dark(sp.wraps, shade); ctx.fillRect(-6.2, 30, 12.4, 26); ctx.strokeStyle = INK; ctx.lineWidth = 0.9; ctx.strokeRect(-6.2, 30, 12.4, 26); for (let q = 0; q < 3; q++) seg(ctx, -6, 34 + q * 8, 6, 39 + q * 8, 0.8, sp.wrapTie || 'rgba(30,30,40,0.45)'); }
         ctx.beginPath(); ctx.ellipse(3, 60, 9.5, 4.8, 0, 0, Math.PI * 2); fillStroke(ctx, sp.bare ? (sp.skin || C.skin) : (sp.shoe || '#231b17'), 1.1); ctx.restore();
       });
     } else {
@@ -395,13 +409,14 @@
     ctx.bezierCurveTo((d.k === 'short' ? 13 : 15) * f, d.hemY - 18, 11 * f, -60, 11 * f, -76);
     ctx.quadraticCurveTo(14.5 * f, -98, 8.5 * f, -114); ctx.quadraticCurveTo(0, -119, -9 * f, -113); ctx.closePath();
     fillStroke(ctx, cloth(ctx, col, -20, 18), 1.4);
+    if (sp.front) { ctx.save(); ctx.clip(); ctx.fillStyle = sp.front; ctx.fillRect(4.5, -118, 16, 130); ctx.restore(); }
     if (sp.lower) { ctx.save(); ctx.clip(); ctx.fillStyle = cloth(ctx, sp.lower, -20, 18); ctx.fillRect(-60, -74, 120, 90); ctx.strokeStyle = P.rgba('#1a120c', 0.26); ctx.lineWidth = 1; for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.moveTo(i * 5, -74); ctx.lineTo(i * 8, d.hemY + 5); ctx.stroke(); } ctx.restore(); ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke(); }
     if (d.k !== 'short') { ctx.strokeStyle = P.rgba('#1a120c', 0.22); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-4, -70); ctx.quadraticCurveTo(-8 + sway, -40, -8 + sway, d.hemY + 2); ctx.moveTo(5, -70); ctx.quadraticCurveTo(7 + sway, -40, 6 + sway, d.hemY + 2); ctx.stroke(); }
     if (d.k === 'dress') { ctx.fillStyle = sp.skirt || '#5b6b68'; ctx.beginPath(); ctx.moveTo(8, -112); ctx.lineTo(11.5 * f, -76); ctx.lineTo(16 * f + sway * 0.6, d.hemY); ctx.lineTo(9 + sway * 0.6, d.hemY + 2); ctx.lineTo(6, -76); ctx.closePath(); ctx.fill(); }
     else if (sp.topless) { ctx.strokeStyle = 'rgba(90,50,30,0.55)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(3 * f, -103); ctx.quadraticCurveTo(11 * f, -100, 10.5 * f, -94); ctx.moveTo(6 * f, -90); ctx.quadraticCurveTo(13.5 * f, -84, 9 * f, -82); ctx.stroke(); P.ellipse(ctx, 9 * f, -99, 1.3, 1.3, 'rgba(120,60,40,0.8)'); }
     else { ctx.strokeStyle = sp.trim || P.dark(col, 0.45); ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(6.5, -116); ctx.quadraticCurveTo(13, -104, 10, -82); ctx.stroke(); ctx.fillStyle = sp.inner || '#ece4d0'; ctx.fillRect(3, -118, 5, 3.2); }
     if (sp.apron) { ctx.beginPath(); ctx.moveTo(4, -84); ctx.lineTo(12 * f, -84); ctx.lineTo(15 * f, -36); ctx.lineTo(4, -36); ctx.closePath(); fillStroke(ctx, sp.apron, 1.1); }
-    if (sp.fur) [[-7, -114], [0, -116.5], [7, -114]].forEach(q => P.ellipse(ctx, q[0], q[1], 5.2, 4.4, '#f8f4ec', 'rgba(120,104,90,0.6)', 0.8));
+    if (sp.fur) [[-7, -114], [0, -116.5], [7, -114]].forEach(q => P.ellipse(ctx, q[0], q[1], 5.2, 4.4, sp.furCol || '#f8f4ec', sp.furEdge || 'rgba(120,104,90,0.6)', 0.8));
     if (sp.kind !== 'dress') { ctx.fillStyle = sp.sash || '#2a2320'; ctx.fillRect(-13.2 * f, -80, 24.6 * f, 7); ctx.strokeStyle = INK; ctx.lineWidth = 0.9; ctx.strokeRect(-13.2 * f, -80, 24.6 * f, 7); }
     else { ctx.fillStyle = sp.sash || C.tenghuang; ctx.fillRect(-12 * f, -92, 23 * f, 4); }
     if (sp.knife) { seg(ctx, -12, -79, -23, -87, 6.4, '#1c1512'); seg(ctx, -12, -79, -23, -87, 4.4, '#4b3525'); seg(ctx, -15, -83.4, -17.4, -80, 1, '#c8b48a'); seg(ctx, -19, -86.2, -21.4, -83, 1, '#c8b48a'); }
@@ -412,7 +427,7 @@
       ctx.beginPath(); ctx.moveTo(-4, -110); ctx.lineTo(6, -112); ctx.lineTo(24, -86); ctx.lineTo(17, -80); ctx.closePath(); fillStroke(ctx, P.dark(col, 0.06), 1.2);
       ctx.save(); ctx.translate(26, 0); carried(ctx, o.carry); ctx.restore(); P.ellipse(ctx, 21, -83, 4.3, 4.4, sp.skin || C.skin, INK, 1);
     } else if (!sit) arm(sw * 0.55 * mv, 0.04);
-    headSide(ctx, sp, o); if (sp.mask) { ctx.fillStyle = sp.mask; ctx.beginPath(); ctx.moveTo(-4, -130); ctx.lineTo(15.4, -130); ctx.lineTo(14, -117); ctx.quadraticCurveTo(6, -111, -4, -116); ctx.closePath(); ctx.fill(); }
+    headSide(ctx, sp, o); douli(ctx, sp, 1); if (sp.mask) { ctx.fillStyle = sp.mask; ctx.beginPath(); ctx.moveTo(-4, -130); ctx.lineTo(15.4, -130); ctx.lineTo(14, -117); ctx.quadraticCurveTo(6, -111, -4, -116); ctx.closePath(); ctx.fill(); }
   }
 
   /* 画一个人。ctx 的原点应已移到脚底。 */
@@ -465,7 +480,7 @@
 
   /* ---------- 序章登场的人 ---------- */
   Fig.cast = {
-    jingzhe: { name: '陆惊蛰', h: 150, kind: 'short', robe: '#4f6679', trim: '#2c3a47', inner: '#ebe3cf', pants: '#3c444c', sash: '#27211e', band: '#6c8798', towel: true, knife: true, brow: 0.8 },
+    jingzhe: { name: '陆惊蛰', h: 150, kind: 'short', robe: '#4a6e96', trim: '#2b4263', inner: '#d9d3c4', pants: '#34343a', sash: '#1e1b1c', band: '#3f8cc0', ribbon: '#3f8cc0', wraps: '#74849c', hairCol: '#2a211d', towel: true, knife: true, brow: 0.8 },      // 照画像：靛蓝短褐、蓝发带、黑腰带、深灰裤、灰蓝绑腿
     agui: { name: '阿桂', h: 116, kind: 'short', robe: '#8a775d', trim: '#5d4e3a', pants: '#5c5348', hair: 'boy', blush: true },
     laochu: { name: '老褚', h: 152, fat: 1.2, kind: 'short', robe: '#84735f', trim: '#4f4233', pants: '#514a42', apron: '#ddd5c1', hair: 'cook', beard: 'stubble', brow: -0.6 },
     siniang: { name: '阮四娘', h: 142, kind: 'dress', female: true, hair: 'female', robe: '#8b3a3a', trim: '#d7a544', skirt: '#3f504c', inner: '#ead9c0', sash: '#d7a544', brow: 1 },
@@ -474,14 +489,14 @@
     qier: { name: '小乞儿', h: 96, kind: 'short', robe: '#6d5d4a', trim: '#4a3f33', pants: '#57503f', hair: 'beggar', bare: true, blush: true },
     xiaolai: { name: '小癞', h: 122, kind: 'short', robe: '#665a4c', trim: '#40382f', pants: '#4c463c', hair: 'patchy', bare: true },
     child: { name: '孩子', h: 100, kind: 'robe', robe: '#b9b29c', trim: '#7d7868', hair: 'boy', blush: true, shoe: '#3a2f28' },
-    xiali: { name: '夏离', h: 156, kind: 'robe', robe: '#8a2f3a', trim: '#d7a544', inner: '#f0e7d2', sash: '#1d1a18', jade: true, hair: 'cap', skin: '#e2bf96', shoe: '#191513', pattern: '#e3b95a', hemTrim: '#d7a544', cuff: '#d7a544', wide: 1.2, brow: 1.2 },
+    xiali: { name: '夏离', h: 156, kind: 'robe', robe: '#a12a2c', trim: '#d7a544', inner: '#f0e7d2', sash: '#1d1a18', jade: true, hair: 'cap', skin: '#e2bf96', shoe: '#191513', pattern: '#e3b95a', hemTrim: '#d7a544', cuff: '#d7a544', wide: 1.2, brow: 1.2 },
     huoji: { name: '伙计', h: 160, fat: 1.08, kind: 'short', robe: '#3a3a3c', trim: '#1f1f21', pants: '#2c2c2e', skin: '#d9b28a', beard: 'stubble' },
     shikeA: { name: '食客甲', h: 150, kind: 'robe', robe: '#5d7a6b', trim: '#2f4238', wide: 1.3 },
     shikeB: { name: '食客乙', h: 150, fat: 1.12, kind: 'robe', robe: '#8a6a3c', trim: '#4f3b1f', beard: 'black', wide: 1.3 },
     hangcai: { name: '行菜', h: 148, kind: 'short', robe: '#5b6f62', trim: '#33413a', pants: '#3f4640', towel: true },
     qiushui: { name: '阑珊', h: 146, kind: 'dress', female: true, hair: 'gaoji', robe: '#e1e8e8', trim: '#9fb4c4', skirt: '#a9b9c8', inner: '#e6cfc8', sash: '#b8433a', skin: '#f7dfcb', shawl: true, pipaBack: true, brow: 0.5 },
-    tingxue: { name: '耶律听雪', h: 136, kind: 'robe', female: true, hair: 'twinbun', robe: '#f3eee4', trim: '#c8362e', lower: '#c8362e', hemY: -44, hemW: 25, pants: '#3a4654', boots: '#6a4a32', fur: true, skin: '#f9e0d0', blush: true, sash: '#c8362e' },
-    naren: { name: '娜仁托娅', h: 156, kind: 'robe', female: true, hair: 'braids', robe: '#a8352c', trim: '#2e5a66', hemTrim: '#2e5a66', inner: '#f0e7d2', sash: '#3a2a1e', fur: true, skin: '#e2bf96', pattern: '#e3b95a', shoe: '#5a3a22', brow: 1.2 },
+    tingxue: { name: '耶律听雪', h: 136, kind: 'robe', female: true, hair: 'girl', hairCol: '#2a201b', robe: '#40372f', trim: '#8a7f72', inner: '#cfc3ae', front: '#b23a30', hemTrim: '#b9ad9c', cuff: '#b9ad9c', hemY: -40, hemW: 29, wide: 1.6, pants: '#3a3836', boots: '#4a3b2e', fur: true, furCol: '#5c5048', furEdge: 'rgba(220,210,196,0.75)', skin: '#f9e0d0', blush: true, sash: '#5a3a26', beads: '#8a5a34' },      // 照画像：辫发红绳、黑褐貂裘、红袄、一挂木珠、毛口皮靴
+    naren: { name: '娜仁托娅', h: 156, kind: 'robe', female: true, hair: 'braids', hairCol: '#3a2a20', robe: '#a8352c', trim: '#c9a24a', hemTrim: '#f1ebe0', inner: '#f0e7d2', sash: '#3a2a1e', fur: true, skin: '#e2bf96', pattern: '#e3b95a', shoe: '#5a3a22', brow: 1.2 },
     he: { name: '贺元度', h: 154, kind: 'robe', robe: '#473c5a', trim: '#221c2e', inner: '#f2ecde', hair: 'gaojin', beard: 'black', wide: 1.7, sash: '#1a1522', jade: true, skin: '#f0dac2', shoe: '#191513' },
     xieke: { name: '蟹壳青', h: 174, fat: 1.3, kind: 'short', robe: '#3f5658', trim: '#1c2628', pants: '#2c3638', hair: 'bald', hairCol: '#c0906a', band: '#4f6b6c', skin: '#c99a72', beard: 'stubble', brow: 1.4, sash: '#2a211c' },
     zhong: { name: '钟推官', h: 152, kind: 'robe', robe: '#4d6b4a', trim: '#2c3f2b', hair: 'zhanjiao', beard: 'black', wide: 1.6, sash: '#17130f', shoe: '#17130f' },
@@ -502,6 +517,9 @@
     meihuachi: { name: '梅花翅', h: 140, kind: 'dress', female: true, hair: 'female', robe: '#9fb08c', trim: '#e6d7b4', skirt: '#5d6a52', inner: '#efe6d2', sash: '#b8433a', blush: true },
     xiaohuan: { name: '小丫头', h: 120, kind: 'dress', female: true, hair: 'twinbun', robe: '#b9a2aa', trim: '#e6d7b4', skirt: '#6a5a66', inner: '#efe6d2', blush: true },
     shuli: { name: '书吏', h: 148, kind: 'robe', robe: '#6a6f66', trim: '#33382f', hair: 'futou', beard: 'grey', wide: 1.3, sash: '#2a2320' },
+    shaogong: { name: '艄公', h: 150, kind: 'short', robe: '#746e5a', trim: '#423e31', pants: '#4c483d', hair: 'old', hairCol: '#b9b4a8', beard: 'grey', hat: 'douli', skin: '#c99a72', bare: true, sash: '#3a3228' },
+    shuifei: { name: '水匪', h: 158, kind: 'short', robe: '#2f3f42', trim: '#161f21', pants: '#232d2f', hairCol: '#15181a', band: '#1c2527', mask: '#2a3537', sash: '#4a3a2a', skin: '#c99a72', bare: true },
+    jiaofu: { name: '脚夫', h: 160, fat: 1.1, kind: 'short', robe: '#7d6c55', trim: '#4a3e30', pants: '#4f473c', beard: 'stubble', skin: '#c99a72', bare: true, band: '#5a5044' },
     baoqi: { name: '鲍七', h: 146, kind: 'short', robe: '#6a5a6a', trim: '#3d333d', pants: '#474049', beard: 'black' },
   };
   /* 路人和食客：按种子配一身衣裳 */
