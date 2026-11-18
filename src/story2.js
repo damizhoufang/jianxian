@@ -9,7 +9,7 @@
   const fl = () => JX.state.flags;
   ST.alias('俘虏', 'shuifei');
   /* 第二章每一场开头：先照第一章的办法摆回平常的样子，再把这一章自己的几样状态清掉 */
-  function ch2(stage) { const p = ch1(stage, false); W.flash = 0; W.raining = false; W.cooking = 0; return p; }
+  function ch2(stage) { const p = ch1(stage, false); W.flash = 0; W.raining = false; W.cooking = 0; W.blaze = 0; JX.state.flags.train = null; if (p) p.pose = null; return p; }
   const sit = { pose: 'sit', seat: 6 };                             // 席地坐在船板上
 
   /* ---------- 各场景此刻有谁在 ---------- */
@@ -113,6 +113,7 @@
     box.style.opacity = 0; await JX.sleep(JX.auto ? 0.05 : 0.7); box.remove();
   }
 
+  ST._h.cutSteps = cutSteps; ST._h.ch2 = ch2;
   /* ---------- 小动作 ---------- */
   /* 一个人划一道弧落到某处（跳出瓮、被丢下水都用它） */
   const arc = (e, tx, ty, h, sec) => { const x0 = e.x, y0 = e.y, z0 = e.z || 0; return JX.tween(JX.auto ? 0.03 : sec, q => { e.x = x0 + (tx - x0) * q; e.y = y0 + (ty - y0) * q; e.z = z0 * (1 - q) + Math.sin(q * Math.PI) * h; }).then(() => { e.z = 0; }); };
@@ -276,7 +277,7 @@
       ST.save();
       UI.modal++; UI.purse(null); UI.objective(null); W.objective = null;
       const box = UI.root().appendChild(JX.el('div', 'panel')); box.id = 'end';
-      box.innerHTML = '<h2>试玩到此</h2><p>序章《青玉案》、第一章《钗头凤》都做完了；第二章《扬州慢》做到第四场：听雪从酒坛里钻出来入了队，船过平江那天打了头一声春雷，镇江江面上有人出钱，只要那一根雁翎。</p><p>下一场是《边城》：过了瓜洲，是扬州。还没有做。</p><div class="btn jx-clickable" data-a="stay">留在船上看看</div><div class="btn jx-clickable" data-a="title">回到标题画面</div>';
+      box.innerHTML = ST._endHtml || '<h2>试玩到此</h2><p>序章《青玉案》、第一章《钗头凤》都做完了；第二章《扬州慢》做到第四场：听雪从酒坛里钻出来入了队，船过平江那天打了头一声春雷，镇江江面上有人出钱，只要那一根雁翎。</p><p>下一场是《边城》：过了瓜洲，是扬州。还没有做。</p><div class="btn jx-clickable" data-a="stay">留在船上看看</div><div class="btn jx-clickable" data-a="title">回到标题画面</div>';
       const a = await new Promise(res => { box.onclick = e => { const b = e.target.closest('[data-a]'); if (b) res(b.dataset.a); }; if (JX.auto) res('stay'); const hs = JX._upd = JX._upd || [], born = JX.time; const tick = () => { if (UI.menuOpen()) return; if (JX.time - born < 0.8) { JX.input.eat('confirm'); return; } if (JX.input.hit('confirm')) { hs.splice(hs.indexOf(tick), 1); res('stay'); } }; hs.push(tick); });
       box.remove(); UI.modal--;
       if (a === 'title') { location.reload(); return; }

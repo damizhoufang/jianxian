@@ -215,6 +215,10 @@
     const col = sp.robe, wide = sp.wide || 1;
     [-1, 1].forEach(sg => {
       const dy = sg * sw * mv * 5, sx = sg * d.sh;
+      if (sp.noArm === sg && !carry) {                          // 少了一条胳膊：空袖管在肩下打个结
+        ctx.beginPath(); ctx.moveTo(sx - sg * 4, -111); ctx.quadraticCurveTo(sx + sg * 7, -108, sx + sg * 5, -90); ctx.lineTo(sx - sg * 4, -88); ctx.closePath(); fillStroke(ctx, P.dark(col, 0.06), 1.2);
+        P.ellipse(ctx, sx + sg * 1, -86, 5.4, 4.4, P.dark(col, 0.22), INK, 1); seg(ctx, sx + sg * 1, -82, sx + sg * 3, -72, 3.2, P.dark(col, 0.12)); return;
+      }
       if (carry) {                                              // 两手端在身前
         ctx.beginPath(); ctx.moveTo(sx - sg * 3, -111); ctx.lineTo(sx + sg * 6, -104); ctx.lineTo(sg * 12, -80); ctx.lineTo(sg * 5, -88); ctx.closePath();
         fillStroke(ctx, P.dark(col, 0.1), 1.2); if (!back) P.ellipse(ctx, sg * 9, -84, 4.4, 4.4, sp.skin || C.skin, INK, 1);
@@ -277,6 +281,9 @@
       return;
     }
     if (what === 'pole') { seg(ctx, -24, 4, 30, -204, 5, INK); seg(ctx, -24, 4, 30, -204, 3, '#8a9a5a'); return; }
+    if (what === 'spear') { seg(ctx, -22, 2, 26, -196, 5, INK); seg(ctx, -22, 2, 26, -196, 3, '#8a6e4a'); ctx.beginPath(); ctx.moveTo(26, -196); ctx.lineTo(20, -208); ctx.lineTo(31, -226); ctx.lineTo(34, -206); ctx.closePath(); fillStroke(ctx, '#cfd6da', 1); P.ellipse(ctx, 25, -190, 4.5, 6, '#8e2a20'); return; }
+    if (what === 'ruan') { seg(ctx, 6, -78, 30, -122, 5, INK); seg(ctx, 6, -78, 30, -122, 3, '#6a4a30'); ctx.beginPath(); ctx.arc(-3, -66, 16, 0, Math.PI * 2); fillStroke(ctx, '#b08a52', 1.2); P.ellipse(ctx, -3, -66, 4, 4, '#3a2a1e'); seg(ctx, -5, -80, 24, -112, 0.8, '#f0e6c8'); seg(ctx, -1, -80, 27, -116, 0.8, '#f0e6c8'); return; }
+    if (what === 'brush') { seg(ctx, 4, -84, 12, -106, 2.6, INK); seg(ctx, 4, -84, 12, -106, 1.4, '#8a6a3a'); seg(ctx, 3, -82, 2, -77, 2.4, '#2a2420'); return; }
     if (what === 'staff') { seg(ctx, -26, -36, 28, -152, 5, INK); seg(ctx, -26, -36, 28, -152, 3.2, '#b08a52'); return; }
     if (what === 'blade') { seg(ctx, 6, -86, 30, -146, 4.6, INK); seg(ctx, 6, -86, 30, -146, 2.8, '#cfd6da'); seg(ctx, 2, -80, 8, -89, 5, '#2a2420'); return; }
     if (what === 'bow') {
@@ -521,6 +528,15 @@
     shaogong: { name: '艄公', h: 150, kind: 'short', robe: '#746e5a', trim: '#423e31', pants: '#4c483d', hair: 'old', hairCol: '#b9b4a8', beard: 'grey', hat: 'douli', skin: '#c99a72', bare: true, sash: '#3a3228' },
     shuifei: { name: '水匪', h: 158, kind: 'short', robe: '#2f3f42', trim: '#161f21', pants: '#232d2f', hairCol: '#15181a', band: '#1c2527', mask: '#2a3537', sash: '#4a3a2a', skin: '#c99a72', bare: true },
     jiaofu: { name: '脚夫', h: 160, fat: 1.1, kind: 'short', robe: '#7d6c55', trim: '#4a3e30', pants: '#4f473c', beard: 'stubble', skin: '#c99a72', bare: true, band: '#5a5044' },
+    bing: { name: '军士', h: 158, kind: 'short', robe: '#8a4a3c', trim: '#4a2a22', pants: '#3a3634', hat: 'douli', hatCol: '#6e5a44', sash: '#2a2420', beard: 'stubble', skin: '#d6b08a' },      // 褐红军袄、毡笠
+    laobing: { name: '老兵', noArm: -1, h: 150, kind: 'short', robe: '#9a6e60', trim: '#5a3a30', pants: '#4a4540', hair: 'old', hairCol: '#b9b4a8', beard: 'grey', skin: '#c99a72', brow: 1 },
+    maichang: { name: '卖唱人', h: 152, kind: 'robe', robe: '#5a6a7a', trim: '#2f3a44', hair: 'futou', beard: 'black', wide: 1.2, sash: '#2a2420' },
+    chapo: { name: '卖茶婆', h: 140, fat: 1.08, kind: 'dress', female: true, hair: 'female', robe: '#7a6a5a', trim: '#3d332a', skirt: '#4a4a44', inner: '#e6dcc8', sash: '#5a6a5a', skin: '#e2c19a' },
+    liumin: { name: '流民', h: 146, kind: 'short', robe: '#7a705e', trim: '#4a4438', pants: '#57503f', hair: 'beggar', bare: true, skin: '#c99a72' },
+    liting: { name: '李庭芝', h: 156, kind: 'robe', robe: '#70757c', trim: '#8e2a20', inner: '#b8433a', hair: 'futou', beard: 'black', wide: 1.3, sash: '#2a2420', pattern: '#a8aeb4', skin: '#c99a72', shoe: '#191513', brow: 1.1 },   // 旧铁甲、绛红披风（披风在演出里另画）
+    laojun: { name: '老军', h: 148, fat: 1.12, kind: 'short', robe: '#7a5a4a', trim: '#3f2e26', pants: '#4a4540', hat: 'douli', hatCol: '#5a4c3c', beard: 'grey', skin: '#c99a72', sash: '#2a2420' },
+    shitou: { name: '石头', h: 104, kind: 'short', robe: '#8a8068', trim: '#5a5444', pants: '#5c5348', hair: 'boy', blush: true, bare: true },
+    haojing: { name: '郝经', h: 156, kind: 'robe', robe: '#4f5f6e', trim: '#2a343e', inner: '#e9e2d0', hair: 'gaojin', hairCol: '#8a8680', beard: 'grey', beardLong: true, wide: 1.6, sash: '#2a2420', skin: '#e6caa6' },      // 洗得发白的深青直裰
     baoqi: { name: '鲍七', h: 146, kind: 'short', robe: '#6a5a6a', trim: '#3d333d', pants: '#474049', beard: 'black' },
   };
   /* 路人和食客：按种子配一身衣裳 */

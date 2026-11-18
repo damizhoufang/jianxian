@@ -880,6 +880,65 @@ def yebo():
     return mx.render(t60=3.2, wet=1.1, level=0.14)
 
 
+BC_A = bars("6,:2 1:1 2:1 | 3:3~ 2:1 | 1:1.5 2:0.5 3:1 5:1 | 6:4~ | 5:2 3:1 2:1 | 1:2~ 6,:2 | 2:1 3:1 1:1.5 6,:0.5 | 6,:4~")
+BC_B = bars("6:2 5:1 6:1 | 1':3~ 6:1 | 5:1.5 6:0.5 5:1 3:1 | 2:4~ | 3:2 5:1 6:1 | 5:1 3:1 2:2~ | 1:1 2:1 3:1.5 1:0.5 | 6,:4~")
+
+
+def biancheng():
+    """《边城》：扬州。羽调，慢，像在城墙底下走。前半阮在低处一个音一个音地拨，远处的鼓一小节一下；后半箫接过去。没有热闹的东西。"""
+    bpm = 72
+    G3 = 55                                                       # 宫在 G3：羽 = E，阮在 E3–E4，箫高八度
+    a, na = parse(BC_A, G3)
+    b, nb = parse(BC_B, G3, 1)
+    mx = Mix(na + nb, bpm, tail=6.0)
+    for bt, d, m, fl in a:
+        sec = d * 60 / bpm
+        mx.add(pluck(m2f(m), sec + 1.6, 1.5, bright=0.5, t60=3.0, pos=0.2, vib=16 if '~' in fl else 5, seed=int(bt * 191)), bt, pan=-0.12, rev=0.45)
+        if d >= 3:
+            mx.add(pluck(m2f(m + 12), 2.2, 0.5, bright=0.6, t60=2.4, seed=int(bt * 193)), bt + 2, pan=0.3, rev=0.6)
+    for bt, d, m, fl in b:
+        sec = d * 60 / bpm
+        mx.add(flute(m2f(m), sec * 0.96, 0.42, 'xiao', grace=(2 if d >= 3 else 0), vib=18 if '~' in fl else 8, seed=int(bt * 197)), na + bt, pan=0.12, rev=0.65)
+        if d >= 2:
+            mx.add(pluck(m2f(m - 24), sec + 1.4, 0.6, bright=0.5, t60=3.0, vib=10, seed=int(bt * 199)), na + bt + 1, pan=-0.25, rev=0.5)
+    roots = [6, 6, 1, 6, 5, 1, 2, 6, 6, 1, 5, 2, 3, 5, 1, 6]
+    for bar, r in enumerate(roots):
+        lo = CH[r][0]
+        b0 = bar * 4
+        mx.add(pluck(m2f(G3 + lo - 12), 5.0, 0.6, bright=0.4, t60=4.5, pos=0.25, vib=6, seed=800 + bar), b0, pan=-0.3, rev=0.5)
+        mx.add(dagu(70, 1.1, 0.5 if bar % 2 == 0 else 0.28, seed=bar + 1), b0, pan=0.0, rev=0.7)           # 远处的鼓
+        if bar % 2 == 1:
+            mx.add(dagu(70, 0.8, 0.18, seed=bar + 40), b0 + 2.5, pan=0.1, rev=0.8)
+        if bar % 4 == 3:
+            mx.add(bell(880, 2.4, 0.035), b0 + 2, pan=0.4, rev=0.9)
+    return mx.render(t60=3.0, wet=1.0, level=0.15)
+
+
+YY = bars("6:4~ | 0:2 3:2 | 5:3~ 3:1 | 2:4~ | 3:4~ | 0:2 6,:2 | 1:3~ 2:1 | 3:4~ | 6:3~ 5:1 | 3:2 2:2 | 1:2~ 6,:2 | 6,:4~")
+
+
+def yingye():
+    """《营夜》：军营的黄昏和夜里。几乎是空的：箫吹长音，低处的弦两拍一下，每隔四小节远远三声梆子（巡更的）。潜行的时候也用它。"""
+    bpm = 60
+    F3 = 53                                                       # 宫在 F3：羽 = D，箫在 D4–D5
+    mel, beats = parse(YY, F3, 1)
+    mx = Mix(beats, bpm, tail=6.0)
+    for bt, d, m, fl in mel:
+        sec = d * 60 / bpm
+        mx.add(flute(m2f(m), sec * 0.97, 0.34, 'xiao', grace=(2 if d >= 3 else 0), vib=17 if '~' in fl else 7, seed=int(bt * 211)), bt, pan=0.1, rev=0.75)
+    for bar in range(int(beats // 4)):
+        b0 = bar * 4
+        mx.add(pluck(m2f(F3 + 9 - 12), 4.0, 0.5, bright=0.35, t60=4.0, pos=0.26, vib=5, seed=900 + bar), b0, pan=-0.3, rev=0.5)
+        mx.add(pluck(m2f(F3 + 4 - 12), 3.0, 0.34, bright=0.35, t60=3.6, pos=0.26, vib=5, seed=930 + bar), b0 + 2, pan=-0.2, rev=0.5)
+        if bar % 4 == 1:
+            for k, (off, amp) in enumerate([(1.0, 0.10), (1.6, 0.08), (2.2, 0.06)]):
+                mx.add(wood(620, 0.13, amp), b0 + off, pan=-0.6, rev=0.9)
+        if bar % 4 == 3:
+            mx.add(harmonic(m2f(F3 + 9 + 12), 2.8, 0.06), b0 + 1, pan=0.45, rev=0.9)
+    y = mx.render(t60=3.4, wet=1.15, level=0.13)
+    return y * (0.135 / np.sqrt((y ** 2).mean()))               # 箫是长音，照峰值对齐会比别的曲子响一截，按均方根往下收
+
+
 # ---------------------------------------------------------------- 音效
 def sfx():
     rng = np.random.default_rng(3)
@@ -919,13 +978,17 @@ def sfx():
     yu *= 1 + 0.18 * np.sin(2 * np.pi * 0.37 * np.arange(n) / SR) + 0.1 * np.sin(2 * np.pi * 1.3 * np.arange(n) / SR)
     k = int(0.4 * SR); ramp = np.linspace(0, 1, k); yu[:k] = yu[:k] * ramp + yu[-k:] * (1 - ramp); yu = yu[:-k]      # 尾巴叠回开头：循环起来没有缝
     out['yu'] = enc(yu * 0.5)
+    tt = np.arange(int(0.22 * SR)) / SR; ff = 560 - 160 * tt / 0.22; ph = 2 * np.pi * np.cumsum(ff) / SR      # 雁叫：两声，鼻音
+    bb, aa = sg.butter(2, [500 / (SR / 2), 2400 / (SR / 2)], 'band')
+    honk = sg.lfilter(bb, aa, np.sign(np.sin(ph)) * 0.3 + np.sin(ph)) * np.minimum(1, tt / 0.02) * np.exp(-tt / 0.12)
+    out['yan'] = enc(np.concatenate([honk, np.zeros(int(0.12 * SR)), honk * 0.7]))
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, 'sfx.js'), 'w') as f:
         f.write('window.JX_SFX=' + json.dumps(out) + ';\n')
     print('音效：', ', '.join(out.keys()), '，共 %.0f KB' % (os.path.getsize(os.path.join(OUT, 'sfx.js')) / 1024))
 
 
-TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo}
+TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo, 'biancheng': biancheng, 'yingye': yingye}
 if __name__ == '__main__':
     want = sys.argv[1:] or list(TRACKS) + ['sfx']
     for name in want:

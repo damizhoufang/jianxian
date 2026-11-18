@@ -50,6 +50,8 @@
     ['meichuang', '梅窗', '白天安静的屋子里：软红院、仁寿堂、公堂散后', '古琴先弹，泛音点着；后半箫进来，句尾筝轻轻一拂。宫调慢板。'],
     ['xingchuan', '行船', '第二章：白天，运酒船在运河上', '笛子吹旋律，筝在句尾刮一道，像水；阮一长一短地垫着，是摇船的那个晃。宫调行板，没有鼓。'],
     ['yebo', '夜泊', '第二章：夜里泊船；雨天窝在舱口', '筝一个音一个音地弹，泛音像水面的月光；后半箫接过去，远远一声磬。商调，很慢。'],
+    ['biancheng', '边城', '第二章：扬州', '阮在低处一个音一个音地拨，远处的鼓一小节一下；后半箫接过去。羽调，慢，像在城墙底下走。'],
+    ['yingye', '营夜', '第二章：真州营外的黄昏、三更的军营', '几乎是空的：箫吹长音，低处的弦两拍一下，每隔一阵远远三声梆子。'],
   ];
   JX.TRACKS = TRACKS;
   const PICS = [['face', '头像'], ['half', '半身'], ['full', '全身'], ['sheet', '三视图']];
@@ -92,7 +94,7 @@
       if (pt && zoom != null) h += '<div class="lb jx-clickable" data-zoom="x"><img src="' + Art.pic(ch.id, PICS[zoom][0]) + '" alt=""><div class="cap">' + a.name + '　·　' + PICS[zoom][1] + '　　← → 换一张　　点一下或按 Esc 收起</div></div>';
     } else {
       h += '<div class="mus">' + TRACKS.map(t => '<div class="trk' + (playing === t[0] ? ' on' : '') + '"><b>《' + t[1] + '》</b><div class="w">' + t[2] + '</div><div class="h">' + t[3] + '</div><div class="btn small jx-clickable" data-play="' + t[0] + '">' + (playing === t[0] ? '■ 停' : '▶ 试听') + '</div></div>').join('') + '</div>' +
-        '<div class="note">十四首都是原创旋律，整首离线合成后装进游戏，游戏里只播放。一首一兆上下，点了才装载，头一回要等一两秒。</div>';
+        '<div class="note">十六首都是原创旋律，整首离线合成后装进游戏，游戏里只播放。一首一兆上下，点了才装载，头一回要等一两秒。</div>';
     }
     box.innerHTML = h;
     if (page < CHARS.length && painted(CHARS[page])) { spr = box.querySelector('.spr canvas'); drawSprites(CHARS[page]); }
