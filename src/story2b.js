@@ -64,7 +64,7 @@
     Fig.draw(g, e.sp, e.dir, e.ph, { moving: e.moving, pose: e.pose, carry: e.carry, shadow: false });
     if (e.dir === 2) cape();
   }
-  ST._drawLi = drawLi; ST._drawGoose = drawGoose;
+  ST._drawLi = drawLi; ST._drawGoose = drawGoose; ST._drawMule = drawMule;
 
   /* ---------- 各场景此刻有谁在 ---------- */
   const pop1 = JX.populate;
@@ -178,7 +178,7 @@
     async 老军回门() { const l = W.byId.laojun; if (l) { l.dir = 2; await nap(0.5); l.alpha = 0; l.vis = false; JX.audio.sfx('door', 0.6); } const t = W.byId.tingxue, x = W.byId.xiali, p = W.player; if (t) { t.pose = null; t.carry = null; t.x = p.x - 150; t.y = p.y + 30; t.dir = 3; } if (x) { x.x = p.x - 80; x.y = p.y - 6; x.dir = 3; } await nap(0.3); },
 
     /* —— 七　柝声 —— */
-    async 入二七() { ch2(29); const f = fl(); f.wengOpen = true; f.tx = 1; f.dusk = true; f.train = ['xiali']; W.exitsOff['ying:guan'] = '先躲过巡更的。'; },
+    async 入二七() { ch2(29); const f = fl(); f.wengOpen = true; f.tx = 1; f.dusk = true; f.train = ['xiali']; W.exitsOff['ying:guan'] = '先躲过巡更的。'; W.exitsOff['ying:out'] = '人还没见着，不能走。'; },
     async 可进门() { delete W.exitsOff['ying:guan']; },
     async 柝一来() { await duck(600, 850, 668); W.focus = { x: 640, y: 760 }; patrol([[1240, 706], [330, 706], [300, 664]], 5); await nap(1.2); },
     async 柝一去() { await patrolP; W.focus = null; await rise(); },

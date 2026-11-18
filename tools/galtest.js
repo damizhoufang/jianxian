@@ -1,4 +1,4 @@
-// 图鉴与配乐的检查：从标题进图鉴、翻页、十六首曲子逐首试听（能装载、能解码）、从菜单进图鉴、关掉后还能走。用法：node tools/galtest.js
+// 图鉴与配乐的检查：从标题进图鉴、翻页、十七首曲子逐首试听（能装载、能解码）、从菜单进图鉴、关掉后还能走。用法：node tools/galtest.js
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const go = require('./_go');
 const path = require('path');

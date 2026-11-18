@@ -9,7 +9,7 @@
   const fl = () => JX.state.flags;
   ST.alias('俘虏', 'shuifei');
   /* 第二章每一场开头：先照第一章的办法摆回平常的样子，再把这一章自己的几样状态清掉 */
-  function ch2(stage) { const p = ch1(stage, false); W.flash = 0; W.raining = false; W.cooking = 0; W.blaze = 0; JX.state.flags.train = null; if (p) p.pose = null; return p; }
+  function ch2(stage) { const p = ch1(stage, false); W.flash = 0; W.raining = false; W.cooking = 0; W.blaze = 0; W.fireLv = 0; W.charred = 0; W.matFire = false; W.embers = false; W.dawn = 0; W.geese = 0; JX.state.flags.train = null; if (p) p.pose = null; return p; }
   const sit = { pose: 'sit', seat: 6 };                             // 席地坐在船板上
 
   /* ---------- 各场景此刻有谁在 ---------- */

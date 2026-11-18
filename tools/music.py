@@ -940,6 +940,46 @@ def yingye():
 
 
 # ---------------------------------------------------------------- 音效
+
+G4 = 67
+JX_A = bars("5,:2 2:2 | 5:3~ 6:1 | 5:1 3:1 2:2 | 5,:4~", 4.0)
+JX_B = bars("5:1.5 6:0.5 1':2~ | 2':1 1':1 6:2 | 5:1 6:1 1':1 2':1^ | 2':4~ | 3':1.5 2':0.5 1':2~ | 6:1 1':1 2':2 | 1':1 6:1 5:1 3:1 | 5:4~", 4.0)
+JX_C = bars("2':2 1':1 6:1 | 5:2~ 3:2 | 2:1 3:1 5:1 6:1 | 5:4~", 4.0)
+
+
+def jiangxiao():
+    """《江晓》：江边，天刚亮。徵调（宫在 G），慢。头四小节只有筝，一个音一个音地弹、带泛音，像水面上刚有一点光；
+    然后笛子进来，筝退到底下分解和音；末四小节笛和筝合在一起。没有鼓，没有阮。"""
+    bpm = 66
+    mel, beats = parse(JX_A + ' | ' + JX_B + ' | ' + JX_C, G4)
+    mx = Mix(beats, bpm, tail=5.0)
+    spb = 60 / bpm
+    for b, d, m, fl in mel:
+        sec = d * spb
+        if b < 16:                                              # 引子：筝独奏，长音上叠一个泛音
+            mx.add(pluck(m2f(m), sec + 1.8, 1.5, bright=0.7, t60=3.0, glide=0.5 if d >= 3 else 0, vib=14 if '~' in fl else 3, seed=int(b * 211)), b, pan=-0.15, rev=0.5)
+            if d >= 2:
+                mx.add(harmonic(m2f(m + 12), sec + 1.0, 0.26), b + 0.02, pan=0.3, rev=0.7)
+        else:
+            mx.add(flute(m2f(m), sec * 0.96, 0.4, 'dizi', grace=(2 if '^' in fl else 0), vib=16 if '~' in fl else 6, seed=int(b * 223)), b, pan=0.12, rev=0.55)
+            if b >= 48:                                         # 末四小节：筝低八度跟着
+                mx.add(pluck(m2f(m - 12), sec + 1.4, 1.0, bright=0.68, t60=2.6, seed=int(b * 227)), b, pan=-0.25, rev=0.45)
+    roots = [5, 5, 1, 5, 5, 6, 1, 2, 3, 6, 1, 5, 2, 5, 1, 5]
+    for bar, r in enumerate(roots):
+        a, c, e = CH[r]
+        b0 = bar * 4
+        mx.add(pluck(m2f(G4 + a - 24), 3.6, 0.8 if bar >= 4 else 0.5, bright=0.5, t60=3.2, pos=0.2, seed=bar * 29, body=0.35), b0, pan=0.25, rev=0.35)      # 低音：一小节一下
+        if bar >= 4:                                            # 笛子进来以后，筝在底下分解和音，很轻
+            for i, off in enumerate([a - 12, e - 12, c, e - 12, a, c, e, c]):
+                mx.add(pluck(m2f(G4 + off), 1.5, 0.17 if i % 2 else 0.25, bright=0.66, t60=2.2, seed=bar * 31 + i), b0 + i * 0.5, pan=-0.4 + (i % 4) * 0.1, rev=0.45)
+        if bar % 4 == 3:                                        # 句尾：筝从低往高刮一道
+            for j, off in enumerate([-12, -10, -8, -5, -3, 0, 2, 4, 7, 9, 12]):
+                mx.add(pluck(m2f(G4 + off), 1.6, 0.13 + j * 0.011, bright=0.74, t60=2.0, seed=9900 + j + bar), b0 + 3.1 + j * 0.06, pan=-0.6 + j * 0.1, rev=0.5)
+        if bar in (0, 8):
+            mx.add(bell(1568, 2.0, 0.04), b0, pan=0.5, rev=0.7)
+    return mx.render(t60=2.2, wet=1.0, level=0.17)
+
+
 def sfx():
     rng = np.random.default_rng(3)
 
@@ -982,13 +1022,22 @@ def sfx():
     bb, aa = sg.butter(2, [500 / (SR / 2), 2400 / (SR / 2)], 'band')
     honk = sg.lfilter(bb, aa, np.sign(np.sin(ph)) * 0.3 + np.sin(ph)) * np.minimum(1, tt / 0.02) * np.exp(-tt / 0.12)
     out['yan'] = enc(np.concatenate([honk, np.zeros(int(0.12 * SR)), honk * 0.7]))
+    # 0.11.0 添的一样：一段可以循环的火声（低处呼呼地响，上头噼噼啪啪）。也排在最后
+    n = int(5.4 * SR); b3, a3 = sg.butter(2, [70 / (SR / 2), 520 / (SR / 2)], 'band'); huo = sg.lfilter(b3, a3, rng.normal(0, 1, n)) * 1.6
+    huo *= 1 + 0.3 * np.sin(2 * np.pi * 0.6 * np.arange(n) / SR) + 0.2 * np.sin(2 * np.pi * 2.3 * np.arange(n) / SR)
+    b4, a4 = sg.butter(2, [1800 / (SR / 2), 9000 / (SR / 2)], 'band')
+    for at in np.sort(rng.uniform(0.1, 5.2, 46)):                # 柴爆开的声音：一下一下，有大有小
+        ln = int(rng.uniform(0.006, 0.03) * SR); i0 = int(at * SR); ck = sg.lfilter(b4, a4, rng.normal(0, 1, ln)) * np.exp(-np.arange(ln) / (ln * 0.3)) * rng.uniform(0.5, 2.2)
+        huo[i0:i0 + ln] += ck[:max(0, min(ln, n - i0))]
+    k = int(0.4 * SR); ramp = np.linspace(0, 1, k); huo[:k] = huo[:k] * ramp + huo[-k:] * (1 - ramp); huo = huo[:-k]
+    out['huo'] = enc(huo * 0.42)
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, 'sfx.js'), 'w') as f:
         f.write('window.JX_SFX=' + json.dumps(out) + ';\n')
     print('音效：', ', '.join(out.keys()), '，共 %.0f KB' % (os.path.getsize(os.path.join(OUT, 'sfx.js')) / 1024))
 
 
-TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo, 'biancheng': biancheng, 'yingye': yingye}
+TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo, 'biancheng': biancheng, 'yingye': yingye, 'jiangxiao': jiangxiao}
 if __name__ == '__main__':
     want = sys.argv[1:] or list(TRACKS) + ['sfx']
     for name in want:

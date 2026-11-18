@@ -537,6 +537,8 @@
     laojun: { name: '老军', h: 148, fat: 1.12, kind: 'short', robe: '#7a5a4a', trim: '#3f2e26', pants: '#4a4540', hat: 'douli', hatCol: '#5a4c3c', beard: 'grey', skin: '#c99a72', sash: '#2a2420' },
     shitou: { name: '石头', h: 104, kind: 'short', robe: '#8a8068', trim: '#5a5444', pants: '#5c5348', hair: 'boy', blush: true, bare: true },
     haojing: { name: '郝经', h: 156, kind: 'robe', robe: '#4f5f6e', trim: '#2a343e', inner: '#e9e2d0', hair: 'gaojin', hairCol: '#8a8680', beard: 'grey', beardLong: true, wide: 1.6, sash: '#2a2420', skin: '#e6caa6' },      // 洗得发白的深青直裰
+    youhulu: { name: '油葫芦', h: 150, fat: 1.42, kind: 'short', robe: '#2a2420', trim: '#5a4a34', inner: '#3a322a', pants: '#1e1a18', hair: 'bun', hairCol: '#15110f', band: '#5a4a34', sash: '#7a5a2a', beard: 'stubble', brow: 0.8, skin: '#dcb890' },      // 促织客：圆头圆肚，发亮的黑油绸短打
+    zonghuo: { name: '纵火的', h: 156, kind: 'short', robe: '#3a342e', trim: '#1e1a18', pants: '#2a2622', hairCol: '#15110f', band: '#2a2622', sash: '#4a3a2a', skin: '#c99a72', beard: 'stubble' },
     baoqi: { name: '鲍七', h: 146, kind: 'short', robe: '#6a5a6a', trim: '#3d333d', pants: '#474049', beard: 'black' },
   };
   /* 路人和食客：按种子配一身衣裳 */
