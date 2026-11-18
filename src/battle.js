@@ -1,7 +1,7 @@
 /* 战斗。行动条排先后，时令轮转四季；敌人下一手会先露出架势，挡还是闪由你定。
    人物就站在当前场景里打，不另切画面。每一场战斗是一份定义（def），交给 JX.battle.run：
      allies / foes   各方的人：ent（场景里的人）、name、hp、spd、atk、def、season（0 春 1 夏 2 秋 3 冬）、cmds 或 ai
-     allow(b,u)      这一手的提示，返回 { ids, hint, pick }：ids 只许用哪几个指令（教学时用），hint 一句话，pick 建议用哪个（指引开着时光标先落在它上面）
+     allow(b,u)      这一手的提示，返回 { ids, hint, pick, target }（target 是建议打谁，写那个人的 key）：ids 只许用哪几个指令（教学时用），hint 一句话，pick 建议用哪个（指引开着时光标先落在它上面）
      resolve(...)    一下打出去之后改写结果（各场战斗自己的规矩）
      after(b,u)      每一手之后：插对白、数回合
      end(b)          返回 'win' / 'lose' 就结束；不写则打到一方全倒
@@ -80,7 +80,10 @@
     const auto = b.def.autoPick ? cmds.indexOf(b.def.autoPick(b, u, cmds)) : null;
     const c = await menu(b, u.name + '　这一手', cmds, allow, auto >= 0 ? auto : null);
     let t = null;
-    if (c.kind === 'attack' && !c.all) { const fs = alive(b, 'foe'); t = fs.length === 1 ? fs[0] : (await menu(b, c.name + '　打谁', fs.map(f => ({ id: f.key, name: f.name, desc: f.intent ? '架势：' + f.intent.tell : '', u: f })), null, null, 0.12)).u; }
+    if (c.kind === 'attack' && !c.all) {
+      const fs = alive(b, 'foe'), want = allow && allow.target ? fs.findIndex(f => f.key === allow.target) : -1;      // 提示里点了名的那个人：光标先落在他身上
+      t = fs.length === 1 ? fs[0] : (await menu(b, c.name + '　打谁', fs.map(f => ({ id: f.key, name: f.name, desc: (f.stun ? '站不稳。' : '') + (f.intent && !f.stun ? '架势：' + f.intent.tell : ''), u: f })), want >= 0 ? { pick: allow.target } : null, want >= 0 ? want : null, 0.12)).u;
+    }
     return { c, t };
   }
 

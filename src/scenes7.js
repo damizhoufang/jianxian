@@ -27,7 +27,7 @@
   }
 
   /* ================= 运酒船 =================
-     甲板是一块长条：船尾在左（橹、行灶），中段靠里是竹篷的舱（十九坛酒码在里头），桅在舱前，船头在右。 */
+     甲板是一块长条：船尾在左（桨、行灶），中段靠里是竹篷的舱（十九坛酒码在里头），桅在舱前，船头在右。 */
   const DECK = [[226, 634], [300, 600], [1980, 600], [2272, 730], [1980, 900], [300, 900], [226, 866]];
   const CX0 = 640, CX1 = 1320, EAVE = 556, RIDGE = 396, FL = 692, MX = 1420;
   function drawBoat(g) {
@@ -57,7 +57,7 @@
     g.strokeStyle = INK(0.8); g.lineWidth = 1.4; g.beginPath(); g.moveTo(224, 873); g.lineTo(300, 907); g.lineTo(1981, 907); g.lineTo(2275, 736); g.stroke();
     /* 船头柱，缠着缆 */
     P.post(g, 2256, 660, 16, 74, '#5a3c28'); for (let i = 0; i < 4; i++) P.line(g, 2254, 690 + i * 7, 2274, 688 + i * 7, 3, '#c9b48a');
-    /* 船尾：橹桩、水缸、一筐菜、柴 */
+    /* 船尾：桨桩、水缸、一筐菜、柴 */
     P.post(g, 254, 668, 14, 46, '#4a3424'); P.ellipse(g, 261, 668, 9, 4, '#6a4a32', INK(0.8), 1);
     P.jar(g, 398, 626, 0.96, { seed: 61, sealed: false, label: false, glaze: '#5a5248' }); P.ellipse(g, 398, 547, 15, 4.4, '#3a5a66');
     g.fillStyle = '#9a7a44'; g.beginPath(); g.moveTo(436, 592); g.lineTo(484, 592); g.lineTo(478, 624); g.lineTo(442, 624); g.closePath(); g.fill(); g.strokeStyle = INK(0.8); g.lineWidth = 1.2; g.stroke();
@@ -177,12 +177,16 @@
       c.strokeStyle = P.rgba(col, a * (0.4 + 0.6 * tw)); c.lineWidth = 1.4 + k; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 40 + (i % 5) * 16, y); c.stroke();
     }
   }
-  function oar(c, t, swing) {                                         // 船尾那支橹：摇起来一来一回
+  function oar(c, t, swing) {                                         // 船尾那支桨：摇起来一来一回
     const s = swing ? Math.sin(t * 1.9) : 0.2, hx = 356 + s * 16, hy = 628 - s * 4, bx = 66 - s * 26, by = 806 + Math.cos(t * 1.9) * (swing ? 8 : 0);
     c.strokeStyle = INK(0.9); c.lineWidth = 8; c.lineCap = 'round'; c.beginPath(); c.moveTo(hx, hy); c.lineTo(261, 668); c.lineTo(bx, by); c.stroke();
     c.strokeStyle = '#8a6a44'; c.lineWidth = 5; c.stroke();
     c.strokeStyle = '#7a5c3a'; c.lineWidth = 13; c.beginPath(); c.moveTo(bx + 64, by - 46); c.lineTo(bx, by); c.stroke(); c.lineCap = 'butt';
     if (swing) { c.strokeStyle = 'rgba(236,244,244,' + (0.3 + 0.2 * Math.abs(s)) + ')'; c.lineWidth = 1.6; for (let i = 0; i < 3; i++) { c.beginPath(); c.ellipse(bx - 10 - i * 26, by + 8 + i * 4, 16 + i * 10, 4 + i * 2, 0, 0, 6.3); c.stroke(); } }
+  }
+  function steam(c, t, W) {                                          // 灶上做着饭：锅里冒热气（W.cooking 立着的时候）
+    if (!W.cooking) return;
+    for (let i = 0; i < 6; i++) { const u = (t * 0.5 + i / 6) % 1; c.fillStyle = 'rgba(250,250,246,' + (0.34 * (1 - u)) + ')'; c.beginPath(); c.ellipse(520 + Math.sin(t * 1.3 + i * 2.1) * 14 * u, 600 - u * 120, 12 + u * 22, 9 + u * 14, 0, 0, 6.3); c.fill(); }
   }
   function bowWake(c, t, a) {                                         // 船头劈开的水
     for (let i = 0; i < 4; i++) { const u = (t * 0.6 + i / 4) % 1; c.strokeStyle = 'rgba(236,244,244,' + (a * (1 - u)) + ')'; c.lineWidth = 2; c.beginPath(); c.moveTo(2262, 800); c.quadraticCurveTo(2180 - u * 120, 930 + u * 30, 1980 - u * 320, 1004 + u * 40); c.stroke(); }
@@ -191,7 +195,7 @@
     { x: 520, y: 668, bw: 220, bh: 86, block: [-50, -22, 150, 26], draw: drawStove },
     { x: 930, y: 746, bw: 150, bh: 60, block: [-66, -22, 132, 22], draw: drawLowTable }];
   const base = o => Object.assign({
-    w: BW, h: BH, walk: [[250, 640, 1960, 884], [1960, 684, 2110, 826]], blocks: [[CX0, 600, CX1 - CX0, 96], [MX - 22, 622, 44, 20]],
+    w: BW, h: BH, walk: [[250, 640, 1960, 884], [1900, 684, 2110, 826]], blocks: [[CX0, 600, CX1 - CX0, 96], [MX - 22, 622, 44, 20]],
     spawns: { start: { x: 760, y: 800, dir: 3 }, bow: { x: 1700, y: 770, dir: 3 }, stern: { x: 450, y: 780, dir: 3 } },
     exits: [], props: PROPS,
     hots: [{ id: 'zao', x: 520, y: 700, r: 96, up: 120, verb: '下厨' }],
@@ -216,12 +220,12 @@
       flow(c, t, 60, '#f4faf6', 0.3); bowWake(c, t, 0.4);
       c.restore();
     },
-    anim(c, t) { oar(c, t, true); },
+    anim(c, t, W) { oar(c, t, true); steam(c, t, W); },
   });
 
   /* —— 夜泊 —— 船不走了；月亮，对岸几点渔火 */
   S.chuanye = base({
-    name: '运酒船', sub: '夜泊', ambient: '#8a92b6', music: 'tingyu', outside: '#070a16',
+    name: '运酒船', sub: '夜泊', ambient: '#8a92b6', music: 'yebo', outside: '#070a16',
     lights: [{ x: 1468, y: 640, r: 620, c: '#ffcf96', a: 0.6, ey: 0.75, glow: 44, gx: 1468, gy: 374, gc: '#ffb070', ga: 0.6 }, { x: 1700, y: 560, r: 1500, c: '#c6d2f6', a: 0.42, ey: 0.6 }, { x: 980, y: 650, r: 380, c: '#ffc890', a: 0.3, ey: 0.6 }],
     paint(c) {
       const r = JX.rng(52);
@@ -246,7 +250,7 @@
 
   /* —— 雷雨 —— 天压下来，岸是灰的；雨是粒子，雷是一下白（W.flash 记着那一下的时刻） */
   S.chuanyu = base({
-    name: '运酒船', sub: '平江府外 · 雨', ambient: '#aeb2b4', music: 'tingyu', outside: '#4c5a5c', particles: 'rain',
+    name: '运酒船', sub: '平江府外 · 雨', ambient: '#aeb2b4', music: 'yebo', outside: '#4c5a5c',
     lights: [{ x: 1200, y: 640, r: 2000, c: '#e6eef0', a: 0.4, ey: 0.6 }, { x: 980, y: 650, r: 460, c: '#ffd9a0', a: 0.42, ey: 0.6 }, { x: 520, y: 650, r: 260, c: '#ffb878', a: 0.4 }],
     paint(c) {
       c.fillStyle = P.vgrad(c, 0, 0, HORIZON, [[0, '#59646c'], [0.6, '#8a969a'], [1, '#aab4b4']]); c.fillRect(0, 0, BW, HORIZON);
@@ -254,16 +258,16 @@
       waterBase(c, '#7f8f8e', '#56696a', '#e4eeee');
       P.paper(c, BW, BH, 73, 0.25);
     },
-    under(c, t) {
+    under(c, t, W) {
       const st = bankStrip('rain'), off = (t * 20) % BW;
       c.save(); clipScene(c);
       c.drawImage(st, -off, 228, BW, 250); c.drawImage(st, BW - off, 228, BW, 250);
       c.fillStyle = P.vgrad(c, 0, 250, 200, [[0, 'rgba(170,180,180,0.55)'], [1, 'rgba(170,180,180,0.15)']]); c.fillRect(0, 250, BW, 200);      // 雨雾
       flow(c, t, 46, '#eef6f6', 0.22); bowWake(c, t, 0.3);
-      for (let i = 0; i < 60; i++) { const u = (t * 1.3 + i * 0.137) % 1, x = (i * 397.1 + Math.floor(t * 1.3 + i * 0.137) * 211.3) % BW, y = HORIZON + 20 + ((i * 173.9 + Math.floor(t * 1.3 + i * 0.137) * 97.7) % (BH - HORIZON - 30)); c.strokeStyle = 'rgba(236,244,244,' + (0.3 * (1 - u)) + ')'; c.lineWidth = 1.2; c.beginPath(); c.ellipse(x, y, 4 + u * 16, 1.4 + u * 5, 0, 0, 6.3); c.stroke(); }      // 雨点落在水面上的圈
+      if (W.raining) for (let i = 0; i < 60; i++) { const u = (t * 1.3 + i * 0.137) % 1, x = (i * 397.1 + Math.floor(t * 1.3 + i * 0.137) * 211.3) % BW, y = HORIZON + 20 + ((i * 173.9 + Math.floor(t * 1.3 + i * 0.137) * 97.7) % (BH - HORIZON - 30)); c.strokeStyle = 'rgba(236,244,244,' + (0.3 * (1 - u)) + ')'; c.lineWidth = 1.2; c.beginPath(); c.ellipse(x, y, 4 + u * 16, 1.4 + u * 5, 0, 0, 6.3); c.stroke(); }      // 雨点落在水面上的圈
       c.restore();
     },
-    anim(c, t) { oar(c, t, true); },
+    anim(c, t, W) { oar(c, t, true); steam(c, t, W); },
     top(c, t, W) { const d = W.flash ? t - W.flash : 9; if (d >= 0 && d < 0.7) { const a = d < 0.08 ? 0.85 : d < 0.16 ? 0.25 : d < 0.24 ? 0.7 : 0.7 * (1 - (d - 0.24) / 0.46); c.fillStyle = 'rgba(240,246,255,' + Math.max(0, a * 0.6) + ')'; c.fillRect(0, 0, BW, BH); } },
   });
 
@@ -295,7 +299,7 @@
      运河从城里出来的头一座码头。远处是城墙和北关门的城楼；河对岸泊着一排船；近处是石板码头，那条运酒船就靠在岸边，搭着跳板。 */
   S.matou = {
     name: '北关码头', sub: '正月二十一 · 清晨', w: 2400, h: 1080, ambient: '#bdbcc6', music: 'shisheng', outside: '#5c6c70',
-    walk: [[110, 640, 2300, 900], [1392, 606, 1468, 640]],
+    walk: [[110, 640, 2300, 900], [1392, 606, 1468, 664]],      // 跳板这一条要往码头里伸一截（叠着）：只是边挨边的话，上下各缩 4，中间留一道 8 个单位的缝，一帧迈不过去，人就上不了船
     spawns: { start: { x: 420, y: 800, dir: 3 } },
     exits: [{ id: 'board', x: 1392, y: 606, w: 76, h: 22, label: '上船', lx: 1430, ly: 560, back: [0, 30] }],
     marks: [{ t: '北关门', x: 420, y: 60 }, { t: '运酒的船', x: 1800, y: 380 }, { t: '跳板', x: 1430, y: 520 }],

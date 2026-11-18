@@ -408,7 +408,7 @@
       c.globalAlpha = 1;
     });
     if (W.talker && W.talker.vis !== false) {
-      const e = W.talker, y = e.y - (e.sp.h || 150) * (e.pose ? 0.82 : 1) - 30 + Math.sin(t * 5) * 4;
+      const e = W.talker, y = e.y - (e.z || 0) - (e.sp.h || 150) * (e.pose ? 0.82 : 1) - 30 + Math.sin(t * 5) * 4;      // 人被抬高了（站在瓮里、跳起来）时，说话的小泡泡也跟着抬高，不压在脸上
       c.fillStyle = '#f6e9c8'; c.strokeStyle = 'rgba(60,40,26,0.9)'; c.lineWidth = 1.6; c.beginPath(); c.roundRect(e.x - 21, y - 15, 42, 24, 11); c.fill(); c.stroke();
       c.fillStyle = '#8e2a20'; for (let i = -1; i <= 1; i++) { c.beginPath(); c.arc(e.x + i * 10, y - 3, 2.6 + (Math.floor(t * 4) % 3 === i + 1 ? 1 : 0), 0, 6.3); c.fill(); }
     }

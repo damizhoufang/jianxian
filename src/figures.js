@@ -246,6 +246,7 @@
       P.ellipse(ctx, 21, -160, 8 * fl, 13 * fl, '#ffb24a'); P.ellipse(ctx, 21, -163, 4.6, 8 * fl, '#fff0c0');
       return;
     }
+    if (what === 'sack') { ctx.save(); ctx.translate(1, -92); ctx.rotate(-0.1); ctx.beginPath(); ctx.roundRect(-18, -15, 36, 28, 10); fillStroke(ctx, P.hgrad(ctx, -18, 0, 36, [[0, '#8a7a5c'], [0.4, '#c2b08a'], [1, '#7a6a4c']]), 1.2); seg(ctx, -7, -14, -5, 12, 0.8, 'rgba(60,40,20,0.4)'); seg(ctx, 6, -14, 8, 12, 0.8, 'rgba(60,40,20,0.4)'); ctx.restore(); return; }      // 一只麻包，抱在胸前
     if (what === 'coins') {                                       // 一大串铜钱，拎在手里
       seg(ctx, 13, -90, 14, -74, 1.4, '#7a4a28'); for (let i = 0; i < 7; i++) P.ellipse(ctx, 14 + (i % 2 ? 2.4 : -2.4), -72 + i * 5, 5.4, 3.2, i % 3 ? '#c9a24a' : '#b08a3a', INK, 0.8);
       return;

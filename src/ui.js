@@ -193,7 +193,7 @@
         '<p style="font-size:24px;color:#7a5d3a">方向键任何时候都是四个固定方向。俯瞰（V）时点地面，人会自己走过去。</p>';
     } else if (tab === 3) {
       const all = JX.story.scenes(), cur = JX.game.playing ? all.indexOf(st.label) : -1, nx = all[cur + 1];
-      const chap = l => (l.indexOf('第一章·') === 0 ? '第一章　钗头凤' : '序章　青玉案'), short = l => l.replace(/^第一章·/, '');
+      const chap = l => (l.indexOf('第二章·') === 0 ? '第二章　扬州慢' : l.indexOf('第一章·') === 0 ? '第一章　钗头凤' : '序章　青玉案'), short = l => l.replace(/^第[一二]章·/, '');
       const groups = []; all.forEach((l, i) => { const g = chap(l); if (!groups.length || groups[groups.length - 1].name !== g) groups.push({ name: g, items: [] }); groups[groups.length - 1].items.push([l, i]); });
       h += '<p style="font-size:23px;line-height:1.4;margin:0 0 4px">测试用：点哪一场，就跳到那一场的开头。游戏里随时可按 <kbd>]</kbd> 下一场、<kbd>[</kbd> 上一场。</p>' +
         (all.length ? '' : '<p style="color:#8e2a20">场次表没有载入到。<span class="btn small jx-clickable" data-act="title">重新载入页面</span></p>') +
@@ -239,7 +239,7 @@
       const s = JX.store.get('save');
       t.innerHTML = '<div class="name">剑仙情缘恩仇录</div><div class="sub">卷一　惊蛰　·　序章　·　第一章</div><div class="seal">咸淳三年元夕</div>' +
         '<div class="menu"><div class="btn jx-clickable" data-a="new">新的故事</div>' + (s ? '<div class="btn jx-clickable" data-a="load">接着上回　<span style="font-size:22px;color:#7a5d3a">' + JX.esc(s.label) + '</span></div>' : '') + '<div class="btn jx-clickable" data-a="gallery">人物图鉴 · 配乐</div><div class="btn jx-clickable" data-a="scenes">选一场开始　<span style="font-size:22px;color:#7a5d3a">测试用</span></div><div class="btn small jx-clickable" data-a="full" style="margin-top:18px">全屏显示（F）</div></div>' +
-        '<div class="ver">试玩 ' + JX.VERSION + '　·　序章十场，第一章十二场　·　建议用 Chrome</div>';
+        '<div class="ver">试玩 ' + JX.VERSION + '　·　序章十场，第一章十二场，第二章四场　·　建议用 Chrome</div>';
       const btns = [...t.querySelectorAll('.btn:not(.small)')]; let sel = s ? 1 : 0;
       const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel)); paint();
       const finish = a => { hs.splice(hs.indexOf(tick), 1); t.remove(); JX.audio && JX.audio.sfx('gong'); res(a); };

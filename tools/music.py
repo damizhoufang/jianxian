@@ -806,6 +806,80 @@ def meichuang():
     return mx.render(t60=3.0, wet=1.05, level=0.15)
 
 
+F4 = 65
+XC_A = bars("5:1.5 6:0.5 1':1 2':1 | 3':2~ 2':1 1':1 | 6:1.5 1':0.5 6:1 5:1 | 3:3~ 0:1 | 5:1.5 6:0.5 1':1 6:1 | 5:1 3:1 2:2~ | 3:1 5:1 6:1.5 5:0.5 | 5:3~ 0:1")
+XC_B = bars("1':2~ 2':1 3':1 | 5':3~ 3':1 | 2':1.5 3':0.5 2':1 1':1 | 6:3~ 0:1 | 1':1 6:1 5:1.5 6:0.5 | 1':2~ 2':2 | 3':1 2':1 1':1 6:1 | 5:4~")
+XC_C = bars("5:1.5 6:0.5 1':1 2':1 | 3':2~ 2':1 1':1 | 6:1.5 1':0.5 6:1 5:1 | 3:3~ 0:1 | 5:1.5 6:0.5 1':1 6:1 | 5:1 3:1 2:2~ | 3:1 2:1 1:1.5 2:0.5 | 1:4~")
+
+
+def xingchuan():
+    """《行船》：白天，运酒船在运河上往北走。宫调，行板。笛子吹旋律，筝在句尾刮一下像水；阮一长一短地垫着，是摇船的那个晃；中段筝接过旋律，笛子在上头拖长音。没有鼓。"""
+    bpm = 76
+    mel, beats = parse(XC_A + ' | ' + XC_B + ' | ' + XC_C, F4)
+    mx = Mix(beats, bpm, tail=4.5)
+    spb = 60 / bpm
+    for b, d, m, fl in mel:
+        sec = d * spb
+        mid = 32 <= b < 64
+        if not mid:
+            mx.add(flute(m2f(m), sec * 0.96, 0.44, 'dizi', grace=(2 if '^' in fl else 0), vib=17 if '~' in fl else 7, seed=int(b * 151)), b, pan=0.1, rev=0.5)
+        else:                                                   # 中段：筝弹旋律，带一点滑；长音上笛子在高处轻轻跟着
+            mx.add(pluck(m2f(m - 12), sec + 1.3, 1.7, bright=0.68, t60=2.6, glide=0.7 if d >= 2 else 0, vib=16 if '~' in fl else 4, seed=int(b * 157)), b, pan=-0.2, rev=0.4)
+            mx.add(pluck(m2f(m - 24), sec + 1.2, 0.7, bright=0.56, t60=2.8, seed=int(b * 163)), b, pan=-0.3, rev=0.4)
+            if d >= 2:
+                mx.add(flute(m2f(m), sec * 0.9, 0.24, 'dizi', vib=13, seed=int(b * 167)), b, pan=0.35, rev=0.6)
+    roots = [1, 1, 6, 3, 1, 2, 6, 5, 1, 1, 2, 6, 6, 5, 1, 5, 1, 1, 6, 3, 1, 2, 5, 1]
+    for bar, r in enumerate(roots):
+        a, c, e = CH[r]
+        b0 = bar * 4
+        mid = 8 <= bar < 16
+        for beat, off, amp, ln in [(0, a - 24, 0.85, 1.8), (1.5, e - 24, 0.4, 0.8), (2, c - 12, 0.6, 1.6), (3.5, e - 12, 0.32, 0.8)]:      # 阮：一长一短，摇船的晃
+            mx.add(pluck(m2f(F4 + off), ln, amp, bright=0.52, t60=1.5, pos=0.21, seed=bar * 17 + int(beat * 2), body=0.38), b0 + beat, pan=0.3, rev=0.25)
+        if not mid:                                             # 筝的分解和音，很轻，像水一道一道过去
+            for i, off in enumerate([a - 12, e - 12, c, e - 12, a, e - 12, c, e - 12]):
+                mx.add(pluck(m2f(F4 + off), 1.4, 0.2 if i % 2 else 0.3, bright=0.66, t60=2.0, seed=bar * 19 + i), b0 + i * 0.5, pan=-0.35, rev=0.4)
+        if bar % 4 == 3:                                        # 句尾：筝从低往高刮一道
+            for j, off in enumerate([-12, -10, -8, -5, -3, 0, 2, 4, 7, 9, 12]):
+                mx.add(pluck(m2f(F4 + off), 1.6, 0.16 + j * 0.012, bright=0.74, t60=2.0, seed=9700 + j + bar), b0 + 3.0 + j * 0.055, pan=-0.6 + j * 0.1, rev=0.5)
+        if bar % 8 == 0:
+            mx.add(bell(1397, 1.8, 0.045), b0, pan=0.5, rev=0.7)
+    return mx.render(t60=2.0, wet=0.95, level=0.17)
+
+
+C4 = 60
+YB_A = bars("2:2 3:1 | 5:3~ | 6:2 5:1 | 2:3~ | 1':2 6:1 | 5:2 3:1 | 2:1 3:1 5:1 | 2:3~", 3.0)
+YB_B = bars("5:2 6:1 | 1':3~ | 2':2 1':1 | 6:3~ | 5:1 6:1 1':1 | 6:2 5:1 | 3:1 2:1 1:1 | 2:3~", 3.0)
+
+
+def yebo():
+    """《夜泊》：船停了，夜里，或是雨天窝在舱口。商调，很慢，三拍子但不摇。筝一个音一个音地弹，带吟；泛音像水面的月光；后半箫接过去，筝退成底下的几个音；远远一声磬。没有鼓，没有阮。"""
+    bpm = 56
+    mel, beats = parse(YB_A + ' | ' + YB_B, C4)
+    mx = Mix(beats, bpm, tail=6.5)
+    half = beats / 2
+    for b, d, m, fl in mel:
+        sec = d * 60 / bpm
+        if b < half:
+            mx.add(pluck(m2f(m), sec + 2.0, 1.6, bright=0.6, t60=3.6, glide=0.8 if d >= 2 else 0, vib=22 if '~' in fl else 7, seed=int(b * 173)), b, pan=-0.1, rev=0.5)
+            if d >= 3:
+                mx.add(harmonic(m2f(m + 12), 3.0, 0.11), b + 1.5, pan=0.45, rev=0.9)
+        else:
+            mx.add(flute(m2f(m), sec * 0.96, 0.38, 'xiao', grace=(2 if d >= 3 else 0), vib=19 if '~' in fl else 8, seed=int(b * 179)), b, pan=0.15, rev=0.65)
+            if d >= 2:
+                mx.add(pluck(m2f(m - 12), sec + 1.6, 0.7, bright=0.5, t60=3.4, vib=12, seed=int(b * 181)), b + 1, pan=-0.25, rev=0.55)
+    roots = [2, 5, 6, 2, 6, 5, 2, 2, 5, 1, 2, 6, 1, 5, 6, 2]
+    for bar, r in enumerate(roots):
+        a, c, e = CH[r]
+        b0 = bar * 3
+        mx.add(pluck(m2f(C4 + a - 24), 4.5, 0.55, bright=0.4, t60=4.6, pos=0.24, vib=8, seed=700 + bar), b0, pan=-0.3, rev=0.5)            # 低音：筝的低弦，一小节一个
+        mx.add(harmonic(m2f(C4 + e), 2.6, 0.07), b0 + 2, pan=0.5 if bar % 2 else -0.5, rev=0.9)                                        # 泛音，左一下右一下
+        if bar % 4 == 1:
+            mx.add(harmonic(m2f(C4 + c + 12), 2.8, 0.06), b0 + 1, pan=0.2, rev=0.9)
+        if bar % 8 == 3:
+            mx.add(bell(1175, 2.6, 0.04), b0 + 1, pan=-0.4, rev=0.9)                                                                  # 远远一声磬
+    return mx.render(t60=3.2, wet=1.1, level=0.14)
+
+
 # ---------------------------------------------------------------- 音效
 def sfx():
     rng = np.random.default_rng(3)
@@ -837,13 +911,21 @@ def sfx():
     out['xian'] = enc(pluck(988, 1.3, 1.0, bright=0.88, t60=1.0, glide=0.4, seed=7))
     bg = wood(620, 0.13, 0.7); out['bang'] = enc(np.concatenate([bg, np.zeros(int(0.24 * SR)), bg * 0.85]))
     sp = noise(0.55, 180, 2600, 0.15); sp[:400] *= np.linspace(0, 1, 400); out['splash'] = enc(sp * 0.6)
+    # 0.9.0 添的两样：一声雷（先一下裂，再滚远）、一段可以循环的雨。也排在最后
+    lei = noise(3.6, 28, 240, 1.2) * 1.0 + np.pad(noise(0.3, 180, 2600, 0.07) * 0.55, (0, int(3.3 * SR)))
+    lei += np.pad(noise(2.2, 24, 160, 0.9) * 0.6, (int(1.1 * SR), int(0.3 * SR)))[:len(lei)]
+    lei[:300] *= np.linspace(0, 1, 300); out['lei'] = enc(lei)
+    n = int(5.4 * SR); b2, a2 = sg.butter(2, [900 / (SR / 2), 7500 / (SR / 2)], 'band'); yu = sg.lfilter(b2, a2, rng.normal(0, 1, n))
+    yu *= 1 + 0.18 * np.sin(2 * np.pi * 0.37 * np.arange(n) / SR) + 0.1 * np.sin(2 * np.pi * 1.3 * np.arange(n) / SR)
+    k = int(0.4 * SR); ramp = np.linspace(0, 1, k); yu[:k] = yu[:k] * ramp + yu[-k:] * (1 - ramp); yu = yu[:-k]      # 尾巴叠回开头：循环起来没有缝
+    out['yu'] = enc(yu * 0.5)
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, 'sfx.js'), 'w') as f:
         f.write('window.JX_SFX=' + json.dumps(out) + ';\n')
     print('音效：', ', '.join(out.keys()), '，共 %.0f KB' % (os.path.getsize(os.path.join(OUT, 'sfx.js')) / 1024))
 
 
-TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang}
+TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo}
 if __name__ == '__main__':
     want = sys.argv[1:] or list(TRACKS) + ['sfx']
     for name in want:

@@ -610,6 +610,8 @@
   });
 
   /* ---------- 演出 ---------- */
+  ST._h = { cutIn, cutBg, cutVig, fighters, giveUp, until, ch1 };      // 后面各章的演出（story2.js 起）要用的几样工具
+  ST.alias = (name, id) => { NAMES[name] = id; };                     // 对白里的另一个叫法（“俘虏”用水匪的小像）
   const HOOKS = ST.hooks = {
     async 入场一() { const st = JX.state; st.stage = 1; st.flags = {}; st.money = 0; W.setPlayer('jingzhe'); UI.purse(null); UI.tone(null); },
     async 开坛特写() {

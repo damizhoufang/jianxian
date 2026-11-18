@@ -46,6 +46,17 @@
     const b = A.sbufs[id]; if (!b) return;
     const src = A.ctx.createBufferSource(), g = A.ctx.createGain(); src.buffer = b; g.gain.value = vol == null ? 1 : vol; src.connect(g); g.connect(sfxGain); src.start();
   };
+  /* 环境声：循环着放的一段（雨声）。换场景就停；id 给空也是停 */
+  A.amb = function (id, vol) {
+    A.ambWant = id ? { id, vol } : null;
+    if (A.ambCur && A.ambCur.id === id) return;
+    if (A.ambCur) { const o = A.ambCur; A.ambCur = null; o.g.gain.setTargetAtTime(0, A.ctx.currentTime, 0.4); setTimeout(() => { try { o.src.stop(); } catch (e) { /* 已停 */ } }, 1600); }
+    if (!id || !A.ctx || !JX.settings.sfx) return;
+    const b = A.sbufs[id]; if (!b) return;
+    const src = A.ctx.createBufferSource(), g = A.ctx.createGain(); src.buffer = b; src.loop = true; src.loopStart = 0.05; src.loopEnd = Math.max(0.1, b.duration - 0.05);
+    g.gain.value = 0; g.gain.setTargetAtTime(vol == null ? 0.5 : vol, A.ctx.currentTime, 0.8); src.connect(g); g.connect(sfxGain); src.start();
+    A.ambCur = { id, src, g };
+  };
   /* 浏览器要等用户按过键、点过鼠标才许出声 */
   JX.on('userGesture', async () => {
     if (A.started) { if (A.ctx && A.ctx.state === 'suspended') A.ctx.resume(); return; }
@@ -54,6 +65,7 @@
     if (!Object.keys(window.JX_SFX).length) await loadScript('music/sfx.js');
     for (const k of Object.keys(window.JX_SFX)) { try { A.sbufs[k] = await A.ctx.decodeAudioData(b64buf(window.JX_SFX[k])); } catch (e) { /* 跳过 */ } }
     if (A.want) { const w = A.want; A.want = null; A.music(w.id, w.muffle); }
+    if (A.ambWant) { const w = A.ambWant; A.amb(w.id, w.vol); }
   });
-  JX.on('sceneEnter', sc => { if (sc.music && !A.hold) A.music(sc.music, sc.muffle); });
+  JX.on('sceneEnter', sc => { if (sc.music && !A.hold) A.music(sc.music, sc.muffle); A.amb(null); });
 })();
