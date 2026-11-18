@@ -118,6 +118,30 @@
       W.add('xiali', 'xiali', 180, 880, { dir: 3, tag: '夏公子', solid: false });
       W.add('bingren', { h: 144, kind: 'dress', female: true, hair: 'female', robe: '#6a6f7a', trim: '#3c404a', skirt: '#4a4f58', inner: '#d9d2c0' }, 1420, 706, { dir: 0, pose: 'sit', seat: 30, solid: false, bark: ['（咳了两声）', '先生还没回来……'] });
     }
+    if (id === 'beiwa') {
+      W.add('laolai', 'laolai', 640, 654, { dir: 0, pose: 'sit', seat: 30, tag: '团头老癞', reach: 170, solid: false });
+      W.add('qg1', 'qier', 566, 702, { dir: 3, pose: 'squat', solid: false, bark: ['一五，一十，十五……'] });
+      W.add('qg2', Object.assign({}, Fig.cast.qier, { h: 106, robe: '#5d5648', hair: 'boy' }), 498, 726, { dir: 3, pose: 'squat', solid: false, bark: ['……少了两文。'] });
+      W.add('chabo', { h: 148, kind: 'short', robe: '#5d6f62', trim: '#33413a', pants: '#3f4640', towel: true }, 352, 600, { dir: 0, solid: false, bark: ['点茶——七宝擂茶——', '客官里边坐。'] });
+      W.add('shuohua', { h: 150, kind: 'robe', robe: '#5a6a80', trim: '#2c3644', hair: 'futou', beard: 'grey', wide: 1.5 }, 950, 538, { dir: 0, solid: false, tag: '说话人', reach: 190, bark: ['“……却说那刘玄德三顾茅庐——”', '“欲知后事如何——明日请早！”'] });
+      [[800, 654, 31], [866, 654, 32], [928, 654, 33], [950, 710, 34], [1034, 710, 35]].forEach(([x, y, sd], i) => W.add('ts' + i, Fig.extra(sd), x, y, { dir: 2, pose: 'sit', seat: 26, solid: false }));
+      W.add('kid1', Object.assign({}, Fig.cast.agui, { robe: '#7a8a6a' }), 1410, 612, { dir: 2, solid: false }); W.add('kid2', Object.assign({}, Fig.cast.child, { robe: '#a8866a' }), 1476, 618, { dir: 2, solid: false });
+      W.add('tangren', { h: 150, kind: 'short', robe: '#8a6a3c', trim: '#4f3b1f', pants: '#4a443c', hair: 'bun', beard: 'stubble' }, 1722, 664, { dir: 1, bark: ['糖狮儿——吹糖人儿——', '小哥，给家里的孩子带一个？'] });
+      for (let i = 0; i < 11; i++) W.add('gz' + i, Fig.extra(200 + i * 7), 1876 + i * 63 + (i % 2) * 8, 694 + (i % 3) * 10, { dir: 2, solid: false });      // 围着露台看的人
+      if (sg === 14) {
+        W.add('xiali', 'xiali', 150, 836, { dir: 3, tag: '夏公子', solid: false });
+        W.add('bushu', 'bushu', 2200, 452, { dir: 0, solid: false, tag: '部署' });
+        if (!f.sumoDone) W.add('tingxue', 'tingxue', 2100, 505, { dir: 0, solid: false, tag: '耶律听雪' });
+      }
+    }
+    if (id === 'ruanhong') {
+      const late = sg === 17;
+      W.add('cuimama', 'cuimama', 420, 702, { dir: late ? 0 : 1, pose: 'sit', seat: 24, tag: '崔妈妈', solid: false, bark: ['（嗑瓜子）', '一盏茶。说好的。'] });
+      W.add('qiushui', 'qiushui', late ? 1410 : 1470, late ? 676 : 664, { dir: late ? 1 : 2, pose: late ? null : 'sit', seat: 30, carry: late ? null : 'pipa', tag: '阑珊', solid: false, reach: 190 });
+      W.add('dun', { h: 44 }, 1470, 670, { solid: false, draw(g) { P.shadow(g, 0, 0, 28, 8, 0.4); g.fillStyle = P.hgrad(g, -24, 0, 48, [[0, '#7a5a66'], [0.5, '#c9a8b0'], [1, '#6a4a56']]); g.beginPath(); g.moveTo(-18, -44); g.lineTo(18, -44); g.quadraticCurveTo(30, -22, 18, 0); g.lineTo(-18, 0); g.quadraticCurveTo(-30, -22, -18, -44); g.closePath(); g.fill(); g.strokeStyle = 'rgba(43,34,28,0.85)'; g.lineWidth = 1.4; g.stroke(); P.ellipse(g, 0, -44, 18, 5.4, '#d9c0c6', 'rgba(43,34,28,0.85)', 1.2); } });
+      W.add('xiali', 'xiali', late ? 1215 : 150, late ? 806 : 842, { dir: 3, tag: '夏公子', solid: false });
+    }
+    if (id === 'shufang') W.add('fuqin', 'luwenyuan', 960, 644, { dir: 0, pose: 'sit', seat: 30, tag: '父亲', solid: false, reach: 210 });
     if (id === 'kitchen') {
       W.add('laochu', 'laochu', 770, 474, { dir: 0, tag: '老褚', bark: sg >= 11 ? ['……（看了你一眼，往灶里添了把柴）'] : ['别挡着灶口。', '蟹酿橙还差一笼。', '手脚麻利点，今晚要跑到三更。'] });
       W.add('cook2', { h: 150, kind: 'short', robe: '#7d6f5c', trim: '#4a3f33', pants: '#4f4840', apron: '#d8d0bc', hair: 'cook' }, 1140, 470, { dir: 2, bark: ['……（忙着颠勺，没空理你）'] });
@@ -196,26 +220,50 @@
 
   function addCups() { const f = JX.state.flags; ['cup1', 'cup2'].forEach(k => { if (f[k] && !W.byId[k]) { const o = k === 'cup1' ? [-70, -112] : [40, -76]; W.add(k, { h: 4 }, 960, k === 'cup1' ? 721 : 722, { solid: false, draw(g) { g.save(); g.translate(o[0], o[1]); P.ellipse(g, 0, 0, 9, 4, '#d8ece0', 'rgba(43,34,28,0.7)', 1); P.ellipse(g, 0, -1, 6, 2.4, '#c9862e'); P.line(g, 14, -4, 34, 2, 1.6, '#7a4a28'); P.line(g, 14, -1, 34, 5, 1.6, '#7a4a28'); g.restore(); } }); } }); }
   /* ---------- 朱印特写：案上那册旧书 ---------- */
-  function drawSeal(c, k) {                                        // k：0 远看，1 凑近到看得清印
+  function drawSeal(c, k, o) {                                     // k：0 远看，1 凑近到看得清印；o.txt 印文看得清（老学庵），o.fresh 新书，o.fade 印刚钤上去、慢慢显出来
+    o = o || {};
     const w = 1300, h = 640;
     const bg = c.createRadialGradient(650, 320, 60, 650, 320, 800); bg.addColorStop(0, '#5a4030'); bg.addColorStop(0.6, '#2a1c16'); bg.addColorStop(1, '#0e0a08'); c.fillStyle = bg; c.fillRect(0, 0, w, h);
     c.save(); c.translate(650, 330); const z = 1 + k * 0.9; c.scale(z, z); c.translate(-140 * k, -70 * k); c.rotate(-0.06);
     c.fillStyle = 'rgba(0,0,0,0.4)'; c.fillRect(-296, -176, 600, 372);
-    c.fillStyle = P.hgrad(c, -300, 0, 600, [[0, '#d8caa6'], [0.48, '#efe4c6'], [0.5, '#b8aa88'], [0.52, '#efe4c6'], [1, '#dccfac']]); c.fillRect(-300, -180, 600, 360);
+    c.fillStyle = P.hgrad(c, -300, 0, 600, o.fresh ? [[0, '#ece2c6'], [0.48, '#faf3df'], [0.5, '#cdc2a0'], [0.52, '#faf3df'], [1, '#efe5ca']] : [[0, '#d8caa6'], [0.48, '#efe4c6'], [0.5, '#b8aa88'], [0.52, '#efe4c6'], [1, '#dccfac']]); c.fillRect(-300, -180, 600, 360);
     c.strokeStyle = 'rgba(43,34,28,0.8)'; c.lineWidth = 2; c.strokeRect(-300, -180, 600, 360);
     c.strokeStyle = 'rgba(120,60,40,0.35)'; c.lineWidth = 1; for (let i = 0; i < 9; i++) { c.beginPath(); c.moveTo(-272 + i * 30, -160); c.lineTo(-272 + i * 30, 160); c.stroke(); c.beginPath(); c.moveTo(28 + i * 30, -160); c.lineTo(28 + i * 30, 160); c.stroke(); }
     const r = JX.rng(77); c.fillStyle = 'rgba(30,22,16,0.8)';
     c.strokeStyle = 'rgba(30,22,16,0.78)'; c.lineCap = 'round';                                   // 一行行的字：只画出字的样子，看不清写的什么
     for (let col = 0; col < 16; col++) { const x = (col < 8 ? -257 : 43) + (col % 8) * 30, n = 9 + Math.floor(r() * 5); for (let j = 0; j < n; j++) { const y = -148 + j * 22, m = 3 + Math.floor(r() * 4); for (let q = 0; q < m; q++) { const k = r(), sx = x - 7 + r() * 12, sy = y - 7 + r() * 12, len = 5 + r() * 8; c.lineWidth = 1.4 + r() * 1.2; c.beginPath(); c.moveTo(sx, sy); if (k < 0.4) c.lineTo(Math.min(x + 8, sx + len), sy + (r() - 0.5) * 2); else if (k < 0.75) c.lineTo(sx + (r() - 0.5) * 2, Math.min(y + 9, sy + len)); else c.lineTo(sx + (r() < 0.5 ? -1 : 1) * len * 0.6, sy + len * 0.7); c.stroke(); } } }
     /* 朱印：方的，四个字的位置，字是篆的，看不真——只看得出是一方藏书印 */
-    c.save(); c.translate(236, 112); c.rotate(0.03); c.globalAlpha = 0.86; c.fillStyle = '#b5302a'; c.fillRect(-34, -34, 68, 68); c.globalAlpha = 1;
+    const sa = o.fade != null ? Math.min(1, o.fade * 1.7) : 1;
+    c.save(); c.translate(236, 112); c.rotate(0.03); c.globalAlpha = 0.86 * sa; c.fillStyle = o.fresh ? '#c8362e' : '#b5302a'; c.fillRect(-34, -34, 68, 68); c.globalAlpha = sa;
     c.strokeStyle = '#efe4c6'; c.lineWidth = 3; c.strokeRect(-27, -27, 54, 54);
-    c.lineWidth = 2.6; [[-14, -14], [14, -14], [-14, 14], [14, 14]].forEach(([x, y], i) => { c.beginPath(); c.moveTo(x - 8, y - 8); c.lineTo(x + 8, y - 8); c.moveTo(x - 8, y); c.lineTo(x + 8, y); c.moveTo(x - 8, y + 8); c.lineTo(x + 8, y + 8); c.moveTo(x + (i % 2 ? -8 : 8), y - 8); c.lineTo(x + (i % 2 ? -8 : 8), y + 8); c.moveTo(x, y - 8 + (i > 1 ? 8 : 0)); c.lineTo(x, y + (i > 1 ? 8 : 0)); c.stroke(); });
+    if (o.txt) { c.fillStyle = '#f6ecd2'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '600 25px ' + P.KAI; c.fillText('老', 13, -12); c.fillText('学', 13, 13.5); c.save(); c.translate(-13, 1); c.scale(1, 1.9); c.fillText('庵', 0, 0); c.restore(); }
+    else { c.lineWidth = 2.6; [[-14, -14], [14, -14], [-14, 14], [14, 14]].forEach(([x, y], i) => { c.beginPath(); c.moveTo(x - 8, y - 8); c.lineTo(x + 8, y - 8); c.moveTo(x - 8, y); c.lineTo(x + 8, y); c.moveTo(x - 8, y + 8); c.lineTo(x + 8, y + 8); c.moveTo(x + (i % 2 ? -8 : 8), y - 8); c.lineTo(x + (i % 2 ? -8 : 8), y + 8); c.moveTo(x, y - 8 + (i > 1 ? 8 : 0)); c.lineTo(x, y + (i > 1 ? 8 : 0)); c.stroke(); }); }
     c.restore();
     c.restore();
     const v = c.createRadialGradient(650, 320, 240, 650, 320, 760); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.7)'); c.fillStyle = v; c.fillRect(0, 0, w, h);
   }
-  ST._drawSeal = (c, k) => drawSeal(c, k);
+  ST._drawSeal = (c, k, o) => drawSeal(c, k, o);
+  /* 抄家夜：火把底下，一只翻书的手（只见手和袖口，不见人） */
+  function drawHand(c, k) {
+    drawSeal(c, 0.78 + k * 0.22, { txt: true });
+    const fl = 0.85 + 0.15 * Math.sin(JX.time * 9);
+    c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(1180, 120, 0, 1180, 120, 900); g.addColorStop(0, 'rgba(255,150,70,' + 0.34 * fl + ')'); g.addColorStop(1, 'rgba(255,120,40,0)'); c.fillStyle = g; c.fillRect(0, 0, 1300, 640); c.restore();
+    c.save(); c.translate(360 + k * 40, 586 - k * 40); c.rotate(-0.5); c.scale(1.4, 1.4);
+    /* 袖子：深色的窄袖，露一道白的里衣袖口 */
+    c.fillStyle = P.vgrad(c, 0, -70, 170, [[0, '#4f5d57'], [1, '#2c3632']]); c.beginPath(); c.moveTo(-560, -30); c.lineTo(-8, -46); c.lineTo(-8, 50); c.lineTo(-560, 150); c.closePath(); c.fill(); c.strokeStyle = 'rgba(20,14,10,0.85)'; c.lineWidth = 2.4; c.stroke();
+    c.fillStyle = '#ece4d0'; c.fillRect(-20, -44, 20, 92); c.strokeRect(-20, -44, 20, 92);
+    /* 手背朝上，四指并着搭在书页上，食指微微抬起——正要翻过这一页 */
+    const skin = '#ecd2b4', ink = 'rgba(60,36,22,0.85)';
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    const finger = (x0, y0, x1, y1, w) => { c.strokeStyle = ink; c.lineWidth = w + 3.4; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.strokeStyle = skin; c.lineWidth = w; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); };
+    finger(30, 30, 74, 52, 17);                                                            // 拇指贴在掌侧
+    finger(66, 27, 122, 30, 15); finger(70, 10, 140, 11, 16); finger(70, -8, 146, -9, 17); finger(66, -26, 136 + k * 6, -34 - k * 10, 16);
+    c.fillStyle = skin; c.strokeStyle = ink; c.lineWidth = 2.4; c.beginPath(); c.moveTo(-2, -32); c.quadraticCurveTo(40, -44, 76, -34); c.lineTo(78, 36); c.quadraticCurveTo(40, 46, -2, 38); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = skin; c.fillRect(66, -30, 16, 64);                                       // 盖住指根的描边
+    c.strokeStyle = 'rgba(60,36,22,0.35)'; c.lineWidth = 1.6; [-18, 0, 18].forEach(y => { c.beginPath(); c.moveTo(70, y); c.lineTo(80, y + 1); c.stroke(); });
+    c.restore();
+    cutVig(c);
+  }
   /* 跟在阿蛰后头走的人（第七场的罗二） */
   let followT = 0;
   JX.on('update', dt => {
@@ -230,6 +278,22 @@
     if (W.byId.zhong) return;
     W.add('zhong', 'zhong', 330, 700, { dir: 3, tag: '钟推官' }); W.add('cy1', 'chaiyi', 250, 620, { dir: 3, solid: false }); W.add('cy2', 'chaiyi', 240, 790, { dir: 3, solid: false });
     W.add('t1', { h: 2 }, 250, 622, torch(26)); W.add('t2', { h: 2 }, 240, 792, torch(26));
+  }
+  /* 抄家夜：三个举火把的差役从左手的门进来，站到书案左边；父亲起身，绕过书案走到他们中间 */
+  const RAID = { a: [636, 778], b: [800, 792], d: [330, 822], fa: [716, 784] };
+  function raidIn() {
+    const fa = W.byId.fuqin; JX.audio.sfx('door');
+    const mk = id => W.add(id, 'chaiyi', 76, 770, { dir: 3, solid: false, carry: 'torch' });
+    const a = mk('cy1'), b = mk('cy2'), d = mk('cy3');
+    W.walk(a, RAID.a[0], RAID.a[1], { speed: 250, straight: true, dir: 3 }).then(() => { if (!fa || W.id !== 'shufang' || fa.out) return; fa.pose = null; return W.walk(fa, 700, 650, { speed: 110, straight: true }).then(() => { if (!fa.out) return W.walk(fa, RAID.fa[0], RAID.fa[1], { speed: 110, straight: true, dir: 0 }); }); });
+    JX.sleep(0.45).then(() => { if (W.byId.cy2 === b) W.walk(b, RAID.b[0], RAID.b[1], { speed: 250, straight: true, dir: 1 }); });
+    JX.sleep(0.9).then(() => { if (W.byId.cy3 === d) W.walk(d, RAID.d[0], RAID.d[1], { speed: 220, straight: true, dir: 3 }); });
+  }
+  /* 第一章每一场开头都要把人和界面摆回“平常”的样子（跳场是直接从这里起头的） */
+  function ch1(stage, follow) {
+    const st = JX.state, f = st.flags; st.stage = stage; f.follow = follow || false;
+    if (!W.player || W.player.sp !== Fig.cast.jingzhe) W.setPlayer('jingzhe');
+    const p = W.player; p.carry = null; p.vis = true; p.pose = null; p.speedK = 1; UI.purse(st.money); UI.tone(null); W.focus = null; W.raid = 0; return p;
   }
   /* 两场真打的战斗共用的人和招 */
   function fighters(p, x) {
@@ -726,16 +790,162 @@
       }
       W.locked = false; UI.roam(true);
     },
+    /* —— 第一章·四 团头 —— */
+    async 入一四() { ch1(14, 'xiali'); JX.state.flags.sumoDone = false; },
+    async 老癞认人() {
+      const p = W.player, l = W.byId.laolai, x = W.byId.xiali; JX.state.flags.follow = false;
+      await W.walk(p, 700, 766, { speed: 220 }); W.face(p, l);
+      if (x) { x.path = null; await W.walk(x, 806, 790, { speed: 240 }); W.face(x, l); }
+    },
+    async 唿哨() { const k = W.byId.qg1, l = W.byId.laolai; JX.audio.sfx('page'); await JX.sleep(JX.auto ? 0.02 : 0.5); if (k && l) { k.pose = null; await W.walk(k, l.x - 60, l.y + 10, { speed: 200, straight: true, dir: 3 }); } await JX.sleep(JX.auto ? 0.02 : 0.7); },
+    async 看露台() {
+      const p = W.player, x = W.byId.xiali, l = W.byId.laolai, t = W.byId.tingxue; JX.state.flags.follow = false; W.focus = { x: 1840, y: 560 };
+      if (l) { l.pose = null; l.tag = '老癞'; W.walk(l, 640, 772, { speed: 170, straight: true }).then(() => W.walk(l, 1930, 812, { speed: 170, straight: true, dir: 3 })); }      // 团头也踱过来看热闹
+      const a = W.walk(p, 2150, 790, { speed: 220, dir: 2 }); if (x) { x.path = null; await W.walk(x, 2264, 806, { speed: 240, dir: 2 }); } await a; if (t) t.dir = 0;
+    },
+    async 撞倒山上台() {
+      const z = W.add('zds', 'zhuangdaoshan', 2650, 640, { dir: 1, solid: false, tag: '撞倒山' }), t = W.byId.tingxue;
+      await W.walk(z, 2566, 590, { speed: 170, straight: true }); await W.walk(z, 2300, 505, { speed: 170, straight: true, dir: 1 }); JX.audio.sfx('door'); if (t) t.dir = 3; await JX.sleep(JX.auto ? 0.02 : 0.4);
+    },
+    /* 相扑：只有两手。他扑过来就闪（闪开了他会站不稳），站不稳就摔；摔两回下台。指引开着时光标先落在该用的那一手上。 */
+    async 战相扑() {
+      const B = JX.battle, f = JX.state.flags, t = W.byId.tingxue, z = W.byId.zds || W.add('zds', 'zhuangdaoshan', 2300, 505, { dir: 1, solid: false, tag: '撞倒山' });
+      const MV = { pu: { name: '猛扑', tell: '他压低身子，两臂张开——要整个人扑过来', type: 'heavy', pow: 1.2 }, bao: { name: '抱腰', tell: '他两手往下一探——要来抱你的腰', type: 'grab', pow: 1 } };
+      const foe = b => b.units.find(u => u.side === 'foe');
+      for (let lost = 0; ;) {
+        t.x = 2100; t.y = 505; t.dir = 3; t.pose = null; t.z = 0; z.x = 2300; z.y = 505; z.dir = 1; z.vis = true; z.alpha = 1; z.pose = null;
+        const r = await B.run({
+          goal: '替听雪打：把“撞倒山”摔下台', music: 'jiaofeng', wheel: false, zoom: 1.3, focus: { x: 2200, y: 480 },
+          allies: [{ ent: t, key: 'tingxue', name: '耶律听雪', hp: 100, spd: 10, atk: 30, def: 4, cmds: [
+            { id: 'shan', name: '闪', kind: 'dodge', desc: '脚下一滑，让到一边。他扑过来、抱过来都躲得开；他扑了空，就站不稳。' },
+            { id: 'shuai', name: '摔', kind: 'attack', type: 'grab', pow: 1.3, desc: '抢进去，借他的力一带。要等他站不稳的时候才摔得动。' }] }],
+          foes: [{ ent: z, key: 'zds', name: '撞倒山', hp: 100, spd: 10, atk: 26, def: 2, keep: true, n: 0, ai: (b, u) => (u.n++ % 2 ? MV.bao : MV.pu) }],
+          allow(b) { const o = foe(b); return o.stun ? { pick: 'shuai', hint: '他扑空了，脚下不稳——就是现在：摔！' } : { pick: 'shan', hint: (o.intent && o.intent.type === 'grab' ? '他要来抱腰。' : '他要扑过来。') + '先闪——等他扑空。' }; },
+          autoPick(b, u, cmds) { return cmds.find(c => c.id === (foe(b).stun ? 'shuai' : 'shan')); },
+          resolve(b, a, m, x, r) {
+            if (a.side === 'foe' && r.evade) { a.stun = 1; b.missed = (b.missed || 0) + 1; }
+            if (a.side === 'ally' && m.id === 'shuai') { if (!x.stun) { r.dmg = 0; r.iron = '纹丝不动'; } else b.thrown = (b.thrown || 0) + 1; }
+            return r;
+          },
+          async after(b, u) {
+            if (u.side === 'foe' && b.missed === 1 && !b.said1) { b.said1 = true; await B.talk(() => UI.narrate('撞倒山扑了个空，往前冲出去三步，险些自己掉下台。台下哄地笑了。')); }
+            else if (u.side === 'ally' && b.thrown === 1 && !b.said2 && foe(b).hp > 0) { b.said2 = true; await B.talk(async () => { await UI.narrate('她抢进去，肩膀一顶，手上一带——两百斤的汉子横着摔在毡子上。'); await UI.say('tingxue', '耶律听雪', '起来！还没完呢！', 'grin'); }); }
+            else if (u.side === 'ally' && b.last && b.last.r.iron && !b.said3) { b.said3 = true; await B.talk(() => UI.narrate('她一头撞上去，对面纹丝不动。——他还站得稳的时候，摔不动。')); }
+          },
+        });
+        if (r.result === 'win') break;
+        await UI.narrate('她被一把推下了台，在人堆里打了个滚，又跳了上去。——再来。');
+        if (await giveUp(++lost)) break;
+      }
+      /* 最后一下：整个人飞出台沿，落在看客堆里 */
+      f.sumoDone = true; W.focus = { x: 1840, y: 560 }; W.camSnap = true; t.dir = 3; z.vis = true; z.alpha = 1;
+      const x0 = z.x, y0 = z.y; JX.audio.sfx('wrong');
+      await JX.tween(JX.auto ? 0.03 : 0.7, k => { z.x = x0 + (2430 - x0) * k; z.y = y0 + (726 - y0) * k; z.z = Math.sin(k * Math.PI) * 150; }, JX.ease.out); z.z = 0; z.pose = 'squat'; z.dir = 0; JX.audio.sfx('door');
+      ['gz8', 'gz9'].forEach((id, i) => { const g = W.byId[id]; if (g) W.walk(g, g.x + (i ? 76 : -66), g.y + 22, { speed: 260, straight: true, dir: i ? 1 : 3 }); });
+      t.dir = 0; await JX.sleep(JX.auto ? 0.02 : 0.6);
+    },
+    async 听雪下台() {
+      const t = W.byId.tingxue, p = W.player, l = W.byId.laolai; if (!t) return; t.carry = 'coins';
+      const x0 = t.x, y0 = t.y, x1 = p.x - 100, y1 = p.y - 2; JX.audio.sfx('pop');
+      await JX.tween(JX.auto ? 0.03 : 0.6, k => { t.x = x0 + (x1 - x0) * k; t.y = y0 + (y1 - y0) * k; t.z = Math.sin(k * Math.PI) * 110; }); t.z = 0; t.dir = 3; p.dir = 1;
+      if (l && l.x < 1900) { l.path = null; l.pose = null; await W.walk(l, 1930, 812, { speed: 420, straight: true, dir: 3 }); }
+    },
+    async 听雪回楼() {
+      const t = W.byId.tingxue; JX.state.flags.follow = 'xiali'; W.focus = null; W.player.dir = 3;
+      if (t) W.walk(t, 1180, 800, { speed: 250, straight: true }).then(() => W.remove('tingxue'));
+      await JX.sleep(JX.auto ? 0.02 : 0.9);
+    },
+    /* —— 第一章·五 软红院 —— */
+    async 入一五() { ch1(15, false); JX.state.flags.qs = 0; },
+    async 夏离放银() { const x = W.byId.xiali; if (x) await W.walk(x, 262, 716, { speed: 200, dir: 1 }); JX.audio.sfx('coin'); await JX.sleep(JX.auto ? 0.02 : 0.5); if (x) x.dir = 3; },
+    async 崔妈妈让路() { const c = W.byId.cuimama; if (c) c.dir = 0; JX.state.flags.follow = 'xiali'; },
+    async 到里间() { const p = W.player, x = W.byId.xiali; JX.state.flags.follow = false; const a = W.walk(p, 1310, 752, { speed: 200, dir: 3 }); if (x) { x.path = null; W.walk(x, 1200, 808, { speed: 220, dir: 3 }); } await a; },
+    async 阑珊转身() { const q = W.byId.qiushui; if (q) { q.pose = null; q.x = 1410; q.y = 676; q.dir = 1; } JX.audio.sfx('tick'); await JX.sleep(JX.auto ? 0.02 : 0.6); },
+    /* 对下片：两回，各三句里挑一句。挑错了她只说一句，那一句拿掉，再挑；不罚。指引开着时光标先落在对的那一句上。 */
+    async 对句() {
+      const G = JX.settings.guide;
+      await UI.card('墙上的半首', ['不是爱风尘，', '似被前缘误。', '花落花开自有时，', '总赖东君主。'], '下片空着');
+      await UI.narrate('上片四句，韵脚落在“误”和“主”上。下片要接得上意思，也得落在这个韵上。');
+      const ask = async (q, opts, right, wrong) => {
+        let list = opts.slice();
+        for (;;) {
+          const at = list.indexOf(right), k = await UI.choice(q, list, { top: 520, sel: G ? at : 0, auto: at, sub: G ? '指引开着：光标已经停在对的那一句上，按回车就行' : '看韵脚：要和“误”“主”押得上' });
+          if (k === at) return;
+          await UI.say('qiushui', '阑珊', wrong[list[k]], 'normal'); list = list.filter((s, i) => i !== k);
+        }
+      };
+      await ask('下片头两句是——', ['山盟虽在，锦书难托。', '去也终须去，住也如何住。', '二十四桥仍在，波心荡、冷月无声。'], '去也终须去，住也如何住。',
+        { '山盟虽在，锦书难托。': '那是《钗头凤》。说的是别人家的事。', '二十四桥仍在，波心荡、冷月无声。': '那是扬州的月亮。奴问的是这面墙。' });
+      await ask('结句是——', ['蓦然回首，那人却在，灯火阑珊处。', '小楼一夜听春雨，深巷明朝卖杏花。', '若得山花插满头，莫问奴归处。'], '若得山花插满头，莫问奴归处。',
+        { '蓦然回首，那人却在，灯火阑珊处。': '那是奴昨夜唱的。小二哥记性好，只是记错了地方。', '小楼一夜听春雨，深巷明朝卖杏花。': '春雨杏花，是好句子。不是这一首的。' });
+      await UI.say('jingzhe', '陆惊蛰', '去也终须去，住也如何住。若得山花插满头，莫问奴归处。', 'normal');
+      await UI.card('卜算子', ['不是爱风尘，', '似被前缘误。', '花落花开自有时，', '总赖东君主。', '去也终须去，', '住也如何住。', '若得山花插满头，', '莫问奴归处。'], '严蕊');
+    },
+    /* 怎么求她：三样都说得通，回答不一样，记一笔好感（f.qs：2 最好，0 最差），不影响往下走 */
+    async 求她() {
+      const f = JX.state.flags;
+      const k = await UI.choice('怎么对她说？', ['照实说：三天拿不出真凶，死的是我', '不求她上堂，只求一句实话', '拿话激她：是没看见，还是不敢说'], { sub: '三样都说得通，她的回答不一样' });
+      if (k === 0) {
+        await UI.say('jingzhe', '陆惊蛰', '三天拿不出真凶，我死，保我的人同罪。整座楼里看见那一下的，只有姑娘。', 'normal');
+        await UI.say('qiushui', '阑珊', '小二哥倒是不绕弯子。', 'normal');
+        await UI.narrate('她垂下眼，手指在弦上按了一下，没有出声。'); f.qs = 1;
+      } else if (k === 1) {
+        await UI.say('jingzhe', '陆惊蛰', '我不求姑娘上堂。只求一句实话：昨晚拐角上，是个什么人。往后的事，我自己去办。', 'normal');
+        await UI.say('qiushui', '阑珊', '实话说出了口，就收不回去了。小二哥是明白人。', 'normal');
+        await UI.narrate('她说这话的时候，头一回正眼看了他。'); f.qs = 2;
+      } else {
+        await UI.say('jingzhe', '陆惊蛰', '姑娘是没看见，还是看见了不敢说？', 'smirk');
+        await UI.say('qiushui', '阑珊', '小二哥这话，问得很好。', 'cold');
+        await UI.narrate('她笑了一下，很淡。越是这样，越是动了气。'); f.qs = 0;
+      }
+    },
+    async 接书() { const q = W.byId.qiushui; if (q) { q.carry = 'book'; q.dir = 1; } JX.audio.sfx('page'); await JX.sleep(JX.auto ? 0.02 : 0.4); },
+    async 翻书() {
+      const p = W.player, q = W.byId.qiushui; if (q) q.carry = null; p.carry = 'book'; JX.audio.sfx('page');
+      await UI.narrate('蓝布函套，里头是一册旧刻的集子，纸已经黄了。他翻开卷首。');
+      await cutIn((c, k) => drawSeal(c, k, { txt: true }), ['卷首右下角，一方朱印。', '三个字：老学庵。']);
+    },
+    /* —— 第一章·六 忆二 抄家 —— */
+    async 入一六() { const st = JX.state; st.stage = 16; st.flags.follow = false; W.focus = null; W.raid = 0; UI.tone('sepia'); UI.purse(null); W.setPlayer('child', { speedK: 0.7 }); },
+    async 父亲考书() { const p = W.player; await W.walk(p, 960, 754, { speed: 150, dir: 2 }); },
+    async 钤印() { JX.audio.sfx('tick'); await cutIn((c, k) => drawSeal(c, 0.5 + k * 0.5, { txt: true, fresh: true, fade: k }), ['印揭起来。纸上三个朱红的字：老学庵。'], 1.8); },
+    async 靴声() {
+      const fa = W.byId.fuqin, p = W.player;
+      for (let i = 0; i < 4; i++) { JX.audio.sfx('door', 0.4 + i * 0.15); await JX.sleep(JX.auto ? 0.01 : 0.34); }
+      W.raid = JX.time; if (fa) fa.dir = 1; p.dir = 1; await JX.sleep(JX.auto ? 0.02 : 1);
+    },
+    async 母亲进来() {
+      const p = W.player, m = W.add('muqin', 'lumu', 1625, 580, { dir: 0, solid: false, tag: '母亲' }); JX.audio.sfx('page');
+      await W.walk(m, 1625, 700, { speed: 320, straight: true }); await W.walk(m, p.x + 74, p.y + 6, { speed: 320, straight: true, dir: 1 });
+      p.dir = 3; p.carry = 'bundle'; JX.audio.sfx('tick'); await JX.sleep(JX.auto ? 0.02 : 0.5);
+      const a = W.walk(p, 1340, 782, { speed: 190, straight: true, dir: 3 }); await W.walk(m, 1250, 778, { speed: 190, straight: true, dir: 3 }); await a;
+      W.blocks.push([0, 560, 1296, 400]);                           // 回不去了：母亲挡在身后
+      raidIn();
+    },
+    async 回头() {
+      const p = W.player, fa = W.byId.fuqin, a = W.byId.cy1, b = W.byId.cy2, d = W.byId.cy3, m = W.byId.muqin; p.dir = 1; p.path = null;
+      const put = (e, q, dir) => { if (e) { e.path = null; e.moving = false; e.x = q[0]; e.y = q[1]; e.dir = dir; } };
+      put(a, RAID.a, 1); put(b, RAID.b, 1); put(d, RAID.d, 3); put(m, [1650, 784], 1);
+      if (fa) { fa.out = true; fa.pose = null; put(fa, RAID.fa, 1); }
+      W.add('beiying', { h: 154, kind: 'robe', robe: '#4a5550', trim: '#252b28', inner: '#e9e2d0', hair: 'gaojin', wide: 1.7 }, 1150, 612, { dir: 2, solid: false });
+      W.add('cy4', 'chaiyi', 1262, 648, { dir: 1, solid: false, carry: 'torch' });
+      /* 父亲被夹着往外走，走得很慢 */
+      [[fa, 250, 790], [a, 170, 784], [b, 334, 798]].forEach(([e, x, y]) => { if (e) W.walk(e, x, y, { speed: 46, straight: true, dir: 1 }); });
+    },
+    async 翻书的手() { JX.audio.sfx('page'); await cutIn(drawHand, ['火把底下，只看得见一只翻书的手。翻得很慢，像是很爱惜。'], 2.6); },
+    /* —— 第一章·七 一方印 —— */
+    async 入一七() { const p = ch1(17, false); p.carry = 'book'; },
+    async 收书() { const p = W.player; p.carry = null; JX.audio.sfx('page'); JX.state.flags.follow = 'xiali'; await JX.sleep(JX.auto ? 0.02 : 0.4); },
     /* 做到哪里，就在哪里停：一张卡片，可以留下来走走，也可以回标题 */
     async 试玩结束() {
       ST.save();
       UI.modal++; UI.purse(null); UI.objective(null); W.objective = null;
       const box = UI.root().appendChild(JX.el('div', 'panel')); box.id = 'end';
-      box.innerHTML = '<h2>试玩到此</h2><p>序章《青玉案》十场已经做完；第一章《钗头凤》做到第三场：壶是在楼梯拐角换的，毒是岭南的钩吻。</p><p>下一场在北瓦——团头老癞，和溜出去打擂的听雪。还在做。</p><div class="btn jx-clickable" data-a="stay">留在药铺里看看</div><div class="btn jx-clickable" data-a="title">回到标题画面</div>';
+      box.innerHTML = '<h2>试玩到此</h2><p>序章《青玉案》十场已经做完；第一章《钗头凤》做到第七场：跟着真州来客进城的是一个卖花女，阑珊还没有答应上堂，那册书上钤着“老学庵”。</p><p>下一场在临安府的架阁库——钟推官，和十一年前的那一卷案子。还在做。</p><div class="btn jx-clickable" data-a="stay">留在软红院看看</div><div class="btn jx-clickable" data-a="title">回到标题画面</div>';
       const a = await new Promise(res => { box.onclick = e => { const b = e.target.closest('[data-a]'); if (b) res(b.dataset.a); }; if (JX.auto) res('stay'); const hs = JX._upd = JX._upd || [], born = JX.time; const tick = () => { if (UI.menuOpen()) return; if (JX.time - born < 0.8) { JX.input.eat('confirm'); return; } if (JX.input.hit('confirm')) { hs.splice(hs.indexOf(tick), 1); res('stay'); } }; hs.push(tick); });      // 刚出来的一瞬不收回车，免得连按对白时一下子跳过去
       box.remove(); UI.modal--;
       if (a === 'title') { location.reload(); return; }
-      const p = W.player; if (p) { p.x = 250; p.y = 820; p.dir = 3; p.path = null; }
+      const p = W.player, sp0 = (W.sc && W.sc.spawns && W.sc.spawns.start) || { x: 250, y: 820 }; if (p) { p.x = sp0.x + 60; p.y = sp0.y; p.dir = 3; p.path = null; }
       W.focus = null; W.locked = false; UI.purse(JX.state.money); UI.roam(true); JX.ended = true;
       await UI.fade(0, JX.auto ? 0.05 : 1.2);
     },

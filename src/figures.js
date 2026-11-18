@@ -228,6 +228,21 @@
   function carried(ctx, what) {
     if (what === 'pipa') { miniPipa(ctx, -4, -62, 0.42, 1.2); return; }
     if (what === 'saber') { ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(8, -86); ctx.quadraticCurveTo(34, -116, 24, -152); ctx.stroke(); ctx.strokeStyle = '#e4eaee'; ctx.lineWidth = 3; ctx.stroke(); seg(ctx, 2, -80, 9, -88, 5.4, '#5a3a22'); seg(ctx, 3, -90, 13, -84, 2.4, '#c9a24a'); ctx.lineCap = 'butt'; return; }
+    if (what === 'torch') {                                       // 火把：一根杆子、一团跳动的火，外加一圈光
+      const fl = 1 + 0.12 * Math.sin((JX.time || 0) * 11);
+      seg(ctx, 10, -84, 20, -150, 4.4, INK); seg(ctx, 10, -84, 20, -150, 2.6, '#5a3a22');
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createRadialGradient(21, -160, 0, 21, -160, 150); gr.addColorStop(0, 'rgba(255,180,100,' + (0.42 * fl) + ')'); gr.addColorStop(1, 'rgba(255,140,60,0)'); ctx.fillStyle = gr; ctx.fillRect(-130, -310, 300, 300); ctx.restore();
+      P.ellipse(ctx, 21, -160, 8 * fl, 13 * fl, '#ffb24a'); P.ellipse(ctx, 21, -163, 4.6, 8 * fl, '#fff0c0');
+      return;
+    }
+    if (what === 'coins') {                                       // 一大串铜钱，拎在手里
+      seg(ctx, 13, -90, 14, -74, 1.4, '#7a4a28'); for (let i = 0; i < 7; i++) P.ellipse(ctx, 14 + (i % 2 ? 2.4 : -2.4), -72 + i * 5, 5.4, 3.2, i % 3 ? '#c9a24a' : '#b08a3a', INK, 0.8);
+      return;
+    }
+    if (what === 'book') {                                        // 一册线装书，两手捧着
+      ctx.save(); ctx.translate(0, -88); ctx.rotate(-0.08); ctx.fillStyle = '#3f5a78'; ctx.fillRect(-13, -9, 26, 18); ctx.strokeStyle = INK; ctx.lineWidth = 1; ctx.strokeRect(-13, -9, 26, 18); ctx.fillStyle = '#efe6cc'; ctx.fillRect(-10, -7, 5, 14); ctx.restore();
+      return;
+    }
     if (what === 'staff') { seg(ctx, -26, -36, 28, -152, 5, INK); seg(ctx, -26, -36, 28, -152, 3.2, '#b08a52'); return; }
     if (what === 'blade') { seg(ctx, 6, -86, 30, -146, 4.6, INK); seg(ctx, 6, -86, 30, -146, 2.8, '#cfd6da'); seg(ctx, 2, -80, 8, -89, 5, '#2a2420'); return; }
     if (what === 'bow') {
@@ -297,6 +312,7 @@
       [[-10, -94], [9, -62], [-12, -44], [6, -30], [14, -90], [-3, -54]].forEach(p => { P.ellipse(ctx, p[0], p[1], 2.4, 2.4, P.rgba(sp.pattern, 0.5)); });
     }
     if (back) { seg(ctx, 0, -112, 0, -82, 1, P.rgba('#1a120c', 0.3)); ctx.strokeStyle = sp.inner || '#ece4d0'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -119, 8, 0.25, Math.PI - 0.25); ctx.stroke(); }
+    else if (sp.topless) { ctx.strokeStyle = 'rgba(90,50,30,0.55)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(-d.sh + 4, -100); ctx.quadraticCurveTo(-d.sh * 0.5, -94, -1, -100); ctx.quadraticCurveTo(d.sh * 0.5, -94, d.sh - 4, -100); ctx.moveTo(0, -112); ctx.lineTo(0, -100); ctx.stroke(); P.ellipse(ctx, -d.sh * 0.5, -101, 1.4, 1.4, 'rgba(120,60,40,0.8)'); P.ellipse(ctx, d.sh * 0.5, -101, 1.4, 1.4, 'rgba(120,60,40,0.8)'); P.ellipse(ctx, 0, -86, 1.6, 2, 'rgba(90,50,30,0.6)'); }
     else collarFront(ctx, sp, d);
     if (sp.fur) for (let i = -3; i <= 3; i++) P.ellipse(ctx, i * 6.6, -113.5 + Math.abs(i) * 1.5, 5.2, 4.4, '#f8f4ec', 'rgba(120,104,90,0.6)', 0.8);
     if (sp.apron && !back) { ctx.beginPath(); ctx.moveTo(-d.wa + 2, -84); ctx.lineTo(d.wa - 2, -84); ctx.lineTo(d.hem - 3, -36); ctx.lineTo(-d.hem + 3, -36); ctx.closePath(); fillStroke(ctx, sp.apron, 1.1); seg(ctx, -6, -84, -4, -112, 1.6, sp.apron); seg(ctx, 6, -84, 4, -112, 1.6, sp.apron); }
@@ -360,6 +376,7 @@
     if (sp.lower) { ctx.save(); ctx.clip(); ctx.fillStyle = cloth(ctx, sp.lower, -20, 18); ctx.fillRect(-60, -74, 120, 90); ctx.strokeStyle = P.rgba('#1a120c', 0.26); ctx.lineWidth = 1; for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.moveTo(i * 5, -74); ctx.lineTo(i * 8, d.hemY + 5); ctx.stroke(); } ctx.restore(); ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke(); }
     if (d.k !== 'short') { ctx.strokeStyle = P.rgba('#1a120c', 0.22); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-4, -70); ctx.quadraticCurveTo(-8 + sway, -40, -8 + sway, d.hemY + 2); ctx.moveTo(5, -70); ctx.quadraticCurveTo(7 + sway, -40, 6 + sway, d.hemY + 2); ctx.stroke(); }
     if (d.k === 'dress') { ctx.fillStyle = sp.skirt || '#5b6b68'; ctx.beginPath(); ctx.moveTo(8, -112); ctx.lineTo(11.5 * f, -76); ctx.lineTo(16 * f + sway * 0.6, d.hemY); ctx.lineTo(9 + sway * 0.6, d.hemY + 2); ctx.lineTo(6, -76); ctx.closePath(); ctx.fill(); }
+    else if (sp.topless) { ctx.strokeStyle = 'rgba(90,50,30,0.55)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(3 * f, -103); ctx.quadraticCurveTo(11 * f, -100, 10.5 * f, -94); ctx.moveTo(6 * f, -90); ctx.quadraticCurveTo(13.5 * f, -84, 9 * f, -82); ctx.stroke(); P.ellipse(ctx, 9 * f, -99, 1.3, 1.3, 'rgba(120,60,40,0.8)'); }
     else { ctx.strokeStyle = sp.trim || P.dark(col, 0.45); ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(6.5, -116); ctx.quadraticCurveTo(13, -104, 10, -82); ctx.stroke(); ctx.fillStyle = sp.inner || '#ece4d0'; ctx.fillRect(3, -118, 5, 3.2); }
     if (sp.apron) { ctx.beginPath(); ctx.moveTo(4, -84); ctx.lineTo(12 * f, -84); ctx.lineTo(15 * f, -36); ctx.lineTo(4, -36); ctx.closePath(); fillStroke(ctx, sp.apron, 1.1); }
     if (sp.fur) [[-7, -114], [0, -116.5], [7, -114]].forEach(q => P.ellipse(ctx, q[0], q[1], 5.2, 4.4, '#f8f4ec', 'rgba(120,104,90,0.6)', 0.8));
@@ -451,6 +468,13 @@
     huyuan: { name: '护院', h: 162, fat: 1.12, kind: 'short', robe: '#4a4038', trim: '#241e1a', pants: '#3a3430', beard: 'black', brow: 1.2, sash: '#8e2a20' },
     luoer: { name: '罗二', h: 152, kind: 'short', robe: '#6a6456', trim: '#3a362e', pants: '#4a463c', beard: 'stubble', band: '#5a5548', skin: '#d9b28a' },
     zhanggui: { name: '仁寿堂掌柜', h: 146, kind: 'robe', robe: '#5f6658', trim: '#33382f', hair: 'old', hairCol: '#cfcbc2', beard: 'grey', wide: 1.5, band: '#3d4238', brow: -0.3 },
+    /* —— 第一章 —— */
+    laolai: { name: '老癞', h: 150, kind: 'robe', robe: '#7a4f3a', trim: '#3d2418', inner: '#e9dcc0', hair: 'patchy', sash: '#c9a24a', wide: 1.3, beard: 'stubble', skin: '#d9b28a', shoe: '#2a211c', pattern: '#c9a25a', brow: 0.4 },
+    cuimama: { name: '崔妈妈', h: 140, fat: 1.16, kind: 'dress', female: true, hair: 'female', robe: '#6e4a36', trim: '#c9a24a', skirt: '#4a3a44', inner: '#e6d6c0', sash: '#c9a24a', brow: 0.6 },
+    luwenyuan: { name: '陆文渊', h: 154, kind: 'robe', robe: '#6f7f86', trim: '#39454a', inner: '#f0e9d8', hair: 'gaojin', beard: 'black', wide: 1.6, sash: '#2a2320' },
+    lumu: { name: '母亲', h: 142, kind: 'dress', female: true, hair: 'female', robe: '#8a94a0', trim: '#e2d9c2', skirt: '#59606c', inner: '#eee6d4', sash: '#b9b2a0' },
+    bushu: { name: '部署', h: 150, kind: 'robe', robe: '#4a5f58', trim: '#26332f', hair: 'futou', beard: 'grey', wide: 1.3, sash: '#8e2a20' },
+    zhuangdaoshan: { name: '撞倒山', h: 178, fat: 1.55, kind: 'short', robe: '#c99a72', trim: '#b08058', inner: '#c99a72', pants: '#3a3430', hair: 'bald', hairCol: '#c0906a', skin: '#c99a72', sash: '#8e2a20', band: '#8e2a20', beard: 'stubble', brow: 1.3, bare: true, topless: true },
     baoqi: { name: '鲍七', h: 146, kind: 'short', robe: '#6a5a6a', trim: '#3d333d', pants: '#474049', beard: 'black' },
   };
   /* 路人和食客：按种子配一身衣裳 */

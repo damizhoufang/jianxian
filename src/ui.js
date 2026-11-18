@@ -74,6 +74,7 @@
     const chars = []; let paren = false;
     for (const ch of text) { if (ch === '（') paren = true; chars.push([ch, paren]); if (ch === '）') paren = false; }
     const render = n => { let h = '', open = false; for (let i = 0; i < n; i++) { const [ch, p] = chars[i]; if (p && !open) { h += '<i>'; open = true; } if (!p && open) { h += '</i>'; open = false; } h += JX.esc(ch); } if (open) h += '</i>'; node.innerHTML = h; };
+    node.innerHTML = '';                                          // 先清掉上一句，免得新名字底下闪一下旧话
     return new Promise(res => {
       let shown = 0, t = 0, done = false;
       const tick = dt => {
@@ -125,19 +126,23 @@
     await JX.sleep(JX.auto ? 0.05 : 1.1); await Promise.race([waitConfirm(0.3), JX.sleep(7)]);
     card.style.opacity = 0; await JX.sleep(JX.auto ? 0.05 : 1); card.classList.add('hide'); UI.modal--;
   };
-  UI.choice = function (q, opts) {
-    UI.modal++;
+  /* 选一项。o 可以不给：sel 是光标先落在第几项，sub 是问题底下的一行小字，auto 是自动测试时选第几项，top 是整个框离画面顶多远（默认 300）。
+     刚弹出来的一瞬不收“确定”，免得连按对白时一下子选过去。 */
+  UI.choice = function (q, opts, o) {
+    o = o || {}; UI.modal++;
     return new Promise(res => {
-      choiceBox.innerHTML = (q ? '<div class="q">' + JX.esc(q) + '</div>' : '');
-      let sel = 0; const btns = opts.map((o, i) => { const b = el('div', 'btn jx-clickable', JX.esc(o)); b.onclick = () => finish(i); choiceBox.appendChild(b); return b; });
+      choiceBox.innerHTML = (q || o.sub ? '<div class="hd">' + (q ? '<div class="q">' + JX.esc(q) + '</div>' : '') + (o.sub ? '<div class="sub">' + JX.esc(o.sub) + '</div>' : '') + '</div>' : '');
+      choiceBox.style.top = (o.top || 300) + 'px';
+      let sel = o.sel || 0; const born = JX.time; const btns = opts.map((t, i) => { const b = el('div', 'btn jx-clickable', JX.esc(t)); b.onclick = () => finish(i); b.onmousemove = () => { if (sel !== i) { sel = i; paint(); } }; choiceBox.appendChild(b); return b; });
       const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel)); paint();
       choiceBox.classList.remove('hide');
       const tick = () => {
-        if (JX.auto) return finish(JX.autoChoice ? JX.autoChoice(q, opts) : 0);
+        if (JX.auto) return finish(JX.autoChoice ? JX.autoChoice(q, opts) : (o.auto || 0));
         if (menu) return;
-        if (JX.input.hit('up') || JX.input.hit('w')) { sel = (sel + opts.length - 1) % opts.length; paint(); }
-        if (JX.input.hit('down') || JX.input.hit('s')) { sel = (sel + 1) % opts.length; paint(); }
-        if (JX.input.hit('confirm')) { JX.input.eat('confirm'); finish(sel); }
+        if (JX.input.hit('up') || JX.input.hit('w')) { sel = (sel + opts.length - 1) % opts.length; paint(); JX.audio && JX.audio.sfx('page'); }
+        if (JX.input.hit('down') || JX.input.hit('s')) { sel = (sel + 1) % opts.length; paint(); JX.audio && JX.audio.sfx('page'); }
+        for (let i = 0; i < opts.length; i++) if (JX.input.hit('Digit' + (i + 1)) || JX.input.hit('Numpad' + (i + 1))) { sel = i; paint(); }
+        if (JX.input.hit('confirm')) { JX.input.eat('confirm'); if (JX.time - born > 0.4) finish(sel); }
       };
       const hs = JX._upd = JX._upd || []; hs.push(tick);
       function finish(i) { const k = hs.indexOf(tick); if (k >= 0) hs.splice(k, 1); choiceBox.classList.add('hide'); UI.modal--; JX.audio && JX.audio.sfx('tick'); res(i); }
@@ -234,7 +239,7 @@
       const s = JX.store.get('save');
       t.innerHTML = '<div class="name">剑仙情缘恩仇录</div><div class="sub">卷一　惊蛰　·　序章　·　第一章</div><div class="seal">咸淳三年元夕</div>' +
         '<div class="menu"><div class="btn jx-clickable" data-a="new">新的故事</div>' + (s ? '<div class="btn jx-clickable" data-a="load">接着上回　<span style="font-size:22px;color:#7a5d3a">' + JX.esc(s.label) + '</span></div>' : '') + '<div class="btn jx-clickable" data-a="gallery">人物图鉴 · 配乐</div><div class="btn jx-clickable" data-a="scenes">选一场开始　<span style="font-size:22px;color:#7a5d3a">测试用</span></div><div class="btn small jx-clickable" data-a="full" style="margin-top:18px">全屏显示（F）</div></div>' +
-        '<div class="ver">试玩 ' + JX.VERSION + '　·　序章十场，第一章做到第三场　·　建议用 Chrome</div>';
+        '<div class="ver">试玩 ' + JX.VERSION + '　·　序章十场，第一章做到第七场　·　建议用 Chrome</div>';
       const btns = [...t.querySelectorAll('.btn:not(.small)')]; let sel = s ? 1 : 0;
       const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel)); paint();
       const finish = a => { hs.splice(hs.indexOf(tick), 1); t.remove(); JX.audio && JX.audio.sfx('gong'); res(a); };

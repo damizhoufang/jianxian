@@ -175,12 +175,13 @@
     return null;
   }
   W.objTarget = () => { const o = W.objective; if (!o) return null; return targetPos(o.at && (o.at[W.id] || o.at['*'])); };
-  function nearby() {
+  function nearby() {                                             // 剧情正等着的那个人或东西优先：旁边有会搭话的路人，也不抢它的“回车”
     const p = W.player; if (!p) return null;
-    let best = null, bd = 1e9;
+    let best = null, bd = 1e9, bw = false;
     const f = DIRV[p.dir], px = p.x + f[0] * 26, py = p.y + f[1] * 18;
-    W.ents.forEach(e => { if (e === p || e.vis === false || !(e.act || W.waiters[e.id] || e.bark)) return; const d = JX.dist(px, py, e.x, e.y); if (d < (e.reach || 82) && d < bd) { bd = d; best = { e, x: e.x, y: e.y - (e.sp.h || 150) * (e.pose ? 0.8 : 1) - 18, label: e.verb || '说话' }; } });
-    W.hots.forEach(h => { if (h.off || !(h.act || W.waiters[h.id])) return; const d = JX.dist(px, py, h.x, h.y); if (d < (h.r || 80) && d < bd) { bd = d; best = { h, x: h.x, y: h.y - (h.up || 110), label: h.verb || '查看' }; } });
+    const take = (d, want, make) => { if ((want && !bw) || (want === bw && d < bd)) { bd = d; bw = want; best = make(); } };
+    W.ents.forEach(e => { if (e === p || e.vis === false || !(e.act || W.waiters[e.id] || e.bark)) return; const d = JX.dist(px, py, e.x, e.y); if (d < (e.reach || 82)) take(d, !!W.waiters[e.id], () => ({ e, x: e.x, y: e.y - (e.sp.h || 150) * (e.pose ? 0.8 : 1) - 18, label: e.verb || '说话' })); });
+    W.hots.forEach(h => { if (h.off || !(h.act || W.waiters[h.id])) return; const d = JX.dist(px, py, h.x, h.y); if (d < (h.r || 80)) take(d, !!W.waiters[h.id], () => ({ h, x: h.x, y: h.y - (h.up || 110), label: h.verb || '查看' })); });
     return best;
   }
   function interact(n) {
@@ -281,6 +282,7 @@
     cx = sc.w <= vw ? (sc.w - vw) / 2 : JX.clamp(cx, 0, sc.w - vw); cy = sc.h <= vh ? (sc.h - vh) / 2 : JX.clamp(cy, 0, sc.h - vh + (f.below || 0));      // focus.below：这一个镜头许它探出场景下沿多少（二楼栏杆外的天井）
     const k = W.camSnap ? 1 : Math.min(1, dt * 6);
     W.cam.x += (cx - W.cam.x) * k; W.cam.y += (cy - W.cam.y) * k; W.cam.z = z; W.camSnap = false;
+    if (sc.w > vw) W.cam.x = JX.clamp(W.cam.x, 0, sc.w - vw); if (sc.h > vh) W.cam.y = JX.clamp(W.cam.y, 0, sc.h - vh + (f.below || 0));      // 镜头拉远的那一瞬（战斗收场）也不许探出场景外面
     /* 路线指引：每 0.3 秒重算一次 */
     W.guideAt -= dt;
     if (W.guideAt <= 0) {

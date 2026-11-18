@@ -1,4 +1,4 @@
-// 第一章（目前三场）检查：真按键。对白按回车；要走路的地方只照地上的路标按方向键；到人和东西跟前按回车；顺路去看一眼题壁。
+// 第一章头三场检查（走到第四场开头就停；四至七场用 tools/ch1btest.js）：真按键。对白按回车；要走路的地方只照地上的路标按方向键；到人和东西跟前按回车；顺路去看一眼题壁。
 // 用法：node tools/ch1test.js
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const go = require('./_go');
@@ -15,7 +15,7 @@ const path = require('path');
   const seen = []; let steps = 0, enters = 0, stuck = 0, lastPos = '', tibi = false; const t0 = Date.now(); let s;
   for (;;) {
     s = await st();
-    if (s.err || s.ended || Date.now() - t0 > 420000) break;
+    if (s.err || s.ended || s.label.indexOf('第一章·四') === 0 || Date.now() - t0 > 420000) break;      // 只查头三场；后四场在 tools/ch1btest.js
     if (s.obj && seen[seen.length - 1] !== s.obj) { seen.push(s.obj); await page.screenshot({ path: 'shots/k_obj' + seen.length + '.png' }); }
     if (s.end) { await page.screenshot({ path: 'shots/k_end.png' }); await page.waitForTimeout(1000); await page.keyboard.press('Enter'); await page.waitForTimeout(1500); continue; }
     if (s.card) { await page.waitForTimeout(1300); await page.screenshot({ path: 'shots/k_card.png' }); await page.keyboard.press('Enter'); await page.waitForTimeout(600); continue; }

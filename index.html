@@ -65,7 +65,9 @@
 
   /* 选择、教学、面板 */
   #choice { left: 560px; top: 300px; width: 800px; pointer-events: auto; }
-  #choice .q { font: 600 34px var(--kai); text-align: center; color: #f6e9c8; text-shadow: 0 2px 6px #000; margin-bottom: 22px; }
+  #choice .hd { background: linear-gradient(180deg, rgba(40,27,18,.9), rgba(26,17,11,.9)); border: 1px solid rgba(215,165,68,.45); border-radius: 6px; padding: 16px 24px 14px; margin-bottom: 14px; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+  #choice .q { font: 600 34px var(--kai); text-align: center; color: #f6e9c8; text-shadow: 0 2px 6px #000; }
+  #choice .sub { font: 26px var(--kai); text-align: center; color: #e8d9b0; text-shadow: 0 2px 6px #000; margin-top: 6px; }
   .btn { display: block; width: 100%; margin: 12px 0; padding: 16px 30px; font: 32px var(--kai); color: var(--ink); text-align: center; background: linear-gradient(180deg, #f4ead2, #e3d3ad); border: 2px solid #3d2a1c; border-radius: 5px; box-shadow: 0 4px 14px rgba(0,0,0,.5), inset 0 0 0 2px rgba(168,54,42,.3); pointer-events: auto; cursor: pointer; }
   .btn.sel, .btn:hover { background: linear-gradient(180deg, #fff6dc, #f0dca8); box-shadow: 0 4px 18px rgba(0,0,0,.6), inset 0 0 0 3px #a8362a; }
   .btn.small { display: inline-block; width: auto; font-size: 26px; padding: 10px 26px; margin: 6px; }
@@ -221,7 +223,7 @@
    试了几回还不行，把话说在屏幕上，不留一块黑屏。
    地址后面带版本号，换了版本浏览器就不会拿旧文件来凑。 */
 (function () {
-  var V = window.JX_V = '0.6.0';
+  var V = window.JX_V = '0.7.0';
   var FILES = [
     'src/core.js',
     'src/paint.js',
@@ -234,6 +236,7 @@
     'src/scenes2.js',
     'src/scenes3.js',
     'src/scenes4.js',
+    'src/scenes5.js',
     'src/audio.js',
     'src/ui.js',
     'src/gallery.js',
