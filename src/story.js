@@ -1130,7 +1130,7 @@
       const leap = { name: '腾挪', kind: 'wait', tell: '脚尖点着船帮——要跳到另一条船上去', say: '梅花翅脚尖一点，往另一条船上跳——', fx: async (b, u) => {
         const e = u.ent, to = 1 - u.at, tx = SPOT[to][0], ty = SPOT[to][1], x0 = e.x, y0 = e.y; JX.audio.sfx('page'); e.dir = tx > x0 ? 3 : 1;
         await B.fx.tw(0.5, q => { e.x = x0 + (tx - x0) * q; e.y = y0 + (ty - y0) * q; e.z = Math.sin(q * Math.PI) * 140; }); e.z = 0; e.dir = 1; u.at = to; u.home = { x: tx, y: ty, dir: 1 };
-        if (b.rock) { b.rock = false; W.rocking = false; u.stun = 3; u.note = '落脚的船正晃着——站不稳'; b.slips = (b.slips || 0) + 1; JX.audio.sfx('wrong'); B.fx.floater(u, '脚下一滑', '#ffd27a'); await rockBoats(0.8); } else u.note = '';
+        if (b.rock) { b.rock = false; W.rocking = false; u.stun = 3; e.pose = 'squat'; u.note = '落脚的船正晃着——站不稳'; b.slips = (b.slips || 0) + 1; JX.audio.sfx('wrong'); B.fx.floater(u, '脚下一滑', '#ffd27a'); await rockBoats(0.8); } else u.note = '';
       } };
       const rock = (name, desc, say) => ({ id: 'huang', name, kind: 'talk', desc, say, fx: async (b, u) => { b.rock = true; W.rocking = true; JX.audio.sfx('splash'); B.fx.floater(u, '船晃起来了', '#bfe3d0'); boss(b).note = '两条小船都在晃'; await rockBoats(0.7); } });
       const rec = (b, u) => {
@@ -1174,6 +1174,7 @@
           end(b) { return b.units.find(q => q.key === 'jingzhe').hp <= 0 ? 'lose' : null; },      // 镖都是冲他去的；他倒了，这一场就算输，重来
           async after(b, u) {
             const o = boss(b);
+            if (!o.stun && o.ent.pose && o.hp > 0) o.ent.pose = null;                                    // 缓过来了，站起来
             if (!o.stun && o.note && o.note.indexOf('站不稳') >= 0) o.note = b.rock ? '两条小船都在晃' : '';
             if (b.slips === 1 && !b.said1) { b.said1 = true; await B.talk(async () => { await UI.narrate('她落下去的那条船正晃到一边。脚尖一滑，人矮了半截。'); await UI.say('meihuachi', '梅花翅', '哎呀。小二哥好坏。', 'smile'); }); }
             else if (u.side === 'ally' && b.last && b.last.a === u && b.last.r.iron && !b.said3) { b.said3 = true; await B.talk(() => UI.narrate('差着三尺。她站稳的时候，够不着。')); }
