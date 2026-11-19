@@ -257,7 +257,7 @@
       W.focus = { x: 1420, y: 520 }; const x = W.byId.xiali; if (x) x.dir = 2; W.player.dir = 2;
       await JX.tween(JX.auto ? 0.05 : 4.2, q => { W.dawn = q; }); W.geese = JX.time; JX.audio.sfx('yan', 0.35); await nap(1.6);
     },
-    async 回头() { const x = W.byId.xiali; if (x) x.dir = 1; await nap(0.5); },
+    async 夏离回头() { const x = W.byId.xiali; if (x) x.dir = 1; await nap(0.5); },
     async 夏离牵骡() {
       const x = W.byId.xiali, m = W.byId.mule, t = W.byId.tingxue; W.focus = null; delete W.exitsOff['jiangbian:boat'];
       if (t) { t.pose = null; t.bark = null; t.y = 720; }

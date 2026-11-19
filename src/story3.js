@@ -198,7 +198,7 @@
     async 小尼进去() { const n = W.byId.xiaoni, z = W.byId.zhou; if (z) JX.tween(JX.auto ? 0.02 : 0.4, q => { z.fall = q; }).then(() => JX.audio.sfx('tick')); if (n) { n.solid = false; await W.walk(n, 1780, 590, { speed: JX.auto ? 2400 : 300, straight: true, dir: 2 }); n.vis = false; } await nap(JX.auto ? 0.02 : 1.6); },
     async 小尼出来() { const n = W.byId.xiaoni; if (n) { n.vis = true; n.alpha = 1; await W.walk(n, 1780, 676, { speed: JX.auto ? 2400 : 300, straight: true, dir: 0 }); n.dir = 0; } await nap(0.3); },
     async 拎后领() { const x = W.byId.xiali, t = W.byId.tingxue; if (x && t) { await W.walk(x, t.x - 46, t.y - 6, { speed: 240, dir: 3 }); t.pose = 'squat'; await nap(0.5); t.pose = null; } },
-    async 可进门() { const z = W.byId.zhou, n = W.byId.xiaoni; if (z) { z.fall = 0; z.x = 1846; } if (n) { n.x = 1870; n.y = 690; n.dir = 1; n.solid = false; } delete W.exitsOff['shanmen:gate']; W.focus = null; },
+    async 可进山门() { const z = W.byId.zhou, n = W.byId.xiaoni; if (z) { z.fall = 0; z.x = 1846; } if (n) { n.x = 1870; n.y = 690; n.dir = 1; n.solid = false; } delete W.exitsOff['shanmen:gate']; W.focus = null; },
     /* —— 四　一启一闭 —— */
     async 入三四() { ch3(38, 1); W.remove('dao'); },
     async 刀响() { const p = W.player; p.path = null; await W.walk(p, 800, 816, { speed: 150, dir: 3 }); p.dir = 3; W.focus = { x: 920, y: 620 }; JX.audio.sfx('ming'); await nap(1.0); },

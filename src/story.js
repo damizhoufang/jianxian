@@ -917,7 +917,7 @@
       JX.audio.sfx('tick'); const x0 = p.x; await JX.tween(JX.auto ? 0.03 : 0.4, k => { p.x = x0 - Math.sin(k * Math.PI) * 12; }); p.x = x0;
       W.walk(g, 180, 440, { speed: 250, straight: true }).then(() => W.remove('ke')); await JX.sleep(JX.auto ? 0.02 : 0.7);
     },
-    async 看小台() { W.focus = { x: 1080, y: 660 }; await JX.sleep(JX.auto ? 0.02 : 1.8); },
+    async 看小台二() { W.focus = { x: 1080, y: 660 }; await JX.sleep(JX.auto ? 0.02 : 1.8); },
     async 出回想() {
       UI.tone(null); W.focus = null; const q0 = UI.quiet; UI.quiet = true; W.load('kitchen', 'fromHall'); UI.quiet = q0;
       const p = W.player, x = W.byId.xiali, t = W.byId.tingxue; p.carry = null; p.pose = null; p.x = 700; p.y = 836; p.dir = 3; if (x) { x.x = 810; x.y = 800; x.dir = 1; } if (t) { t.dir = 1; t.bark = null; }
