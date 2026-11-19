@@ -5,7 +5,7 @@ const go = require('./_go');
 const path = require('path');
 (async () => {
   const scene = process.argv[2] || 'roof', hook = process.argv[3] || '战三', n = +process.argv[4] || 40;
-  const stage = { hall: 6, alley: 8, roof: 9, huafang: 20, jiang: 26, guanshe: 31 }[scene];
+  const stage = { hall: 6, alley: 8, roof: 9, huafang: 20, jiang: 26, guanshe: 31, haichuan: 36 }[scene];
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));

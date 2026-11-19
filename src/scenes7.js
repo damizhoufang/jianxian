@@ -30,7 +30,7 @@
      甲板是一块长条：船尾在左（桨、行灶），中段靠里是竹篷的舱（十九坛酒码在里头），桅在舱前，船头在右。 */
   const DECK = [[226, 634], [300, 600], [1980, 600], [2272, 730], [1980, 900], [300, 900], [226, 866]];
   const CX0 = 640, CX1 = 1320, EAVE = 556, RIDGE = 396, FL = 692, MX = 1420;
-  function drawBoat(g) {
+  function drawBoat(g, o) {
     /* 水里的影子 */
     g.fillStyle = 'rgba(10,18,24,0.26)'; g.beginPath(); g.ellipse(1240, 998, 1090, 30, 0, 0, 6.3); g.fill();
     /* 近舷的船身：甲板以下那一截；船头翘起来 */
@@ -68,10 +68,16 @@
     g.fillStyle = '#2a1e16'; g.fillRect(CX0, EAVE - 10, CX1 - CX0, 56);
     for (let x = CX0 + 30; x < CX1; x += 44) P.line(g, x, EAVE - 8, x, 600, 1, 'rgba(160,130,80,0.18)');
     /* 酒坛：后排十只，前排九只；最右手空着的地方摆那口大瓮（单画，见各场景的人物） */
+    if (o && o.xiang) {                                              // 香船：舱里是香客的包袱、香烛箱、几只竹篓
+      const r = JX.rng(77), cols = ['#8a6a48', '#6e5a7a', '#5f7a66', '#a8843e', '#7a4a3a'];
+      for (let i = 0; i < 9; i++) { const x = 700 + i * 60, y = 646 + (i % 2) * 6; if (i % 3 === 1) { g.fillStyle = '#b89a5a'; g.fillRect(x - 22, y - 44, 44, 44); g.strokeStyle = INK(0.8); g.lineWidth = 1.4; g.strokeRect(x - 22, y - 44, 44, 44); for (let k = 1; k < 5; k++) P.line(g, x - 22, y - 44 + k * 9, x + 22, y - 44 + k * 9, 1, 'rgba(60,40,16,0.4)'); } else { g.fillStyle = cols[i % 5]; g.beginPath(); g.ellipse(x, y - 20, 24, 20 + r() * 4, 0, 0, 6.3); g.fill(); g.strokeStyle = INK(0.8); g.lineWidth = 1.4; g.stroke(); P.line(g, x - 8, y - 38, x + 8, y - 38, 3, '#e6d7b4'); } }
+      for (let i = 0; i < 5; i++) { const x = 760 + i * 96; g.fillStyle = '#9a3a2e'; g.fillRect(x - 26, 686 - 34, 52, 34); g.strokeStyle = INK(0.85); g.lineWidth = 1.5; g.strokeRect(x - 26, 686 - 34, 52, 34); g.fillStyle = '#f0d8a0'; g.font = '600 20px ' + P.KAI; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('香', x, 686 - 16); }
+    } else {
     for (let i = 0; i < 10; i++) P.jar(g, 690 + i * 56, 642, 0.74, { seed: 100 + i, text: '酒' });
     P.line(g, 664, 598, 1220, 598, 2.2, 'rgba(214,196,150,0.55)');
     for (let i = 0; i < 9; i++) P.jar(g, 718 + i * 56, 686, 0.84, { seed: 120 + i, text: '酒' });
     P.line(g, 688, 634, 1196, 634, 2.4, 'rgba(214,196,150,0.6)');
+    }
     /* 檐下挂的：蓑衣、斗笠、一串鱼干、水葫芦 */
     g.fillStyle = '#7a6238'; g.beginPath(); g.moveTo(664, 566); g.lineTo(650, 632); g.lineTo(700, 632); g.lineTo(686, 566); g.closePath(); g.fill(); for (let i = 0; i < 7; i++) P.line(g, 668 + i * 3, 570, 653 + i * 7.5, 632, 1, 'rgba(40,28,12,0.5)');
     for (let i = 0; i < 4; i++) { const y = 574 + i * 15; P.line(g, 1150, 562, 1150, y, 0.8, INK(0.6)); g.fillStyle = i % 2 ? '#b9a88a' : '#a8987a'; g.beginPath(); g.ellipse(1150, y + 4, 4, 8, 0.2, 0, 6.3); g.fill(); g.strokeStyle = INK(0.5); g.lineWidth = 0.6; g.stroke(); }
@@ -99,7 +105,7 @@
     for (let x = -210; x <= 240; x += 75) P.line(g, x, -22, x + 6, 22, 3.4, '#5a4630');
     g.restore();
     P.line(g, MX, 60, MX + 62, 66, 2.4, '#3a2a1e');
-    g.fillStyle = '#b8433a'; poly(g, [[MX + 14, 66], [MX + 58, 68], [MX + 56, 152], [MX + 36, 140], [MX + 14, 152]]); g.fill(); g.strokeStyle = INK(0.8); g.lineWidth = 1.2; g.stroke(); P.vtext(g, '酒', MX + 36, 78, 30, '#f6e9c8', '600');
+    g.fillStyle = '#b8433a'; poly(g, [[MX + 14, 66], [MX + 58, 68], [MX + 56, 152], [MX + 36, 140], [MX + 14, 152]]); g.fill(); g.strokeStyle = INK(0.8); g.lineWidth = 1.2; g.stroke(); P.vtext(g, o && o.xiang ? '香' : '酒', MX + 36, 78, 30, '#f6e9c8', '600');
     P.line(g, MX, 330, MX + 48, 338, 3, '#3a2a1e'); P.lantern(g, MX + 48, 374, 15, { cord: 18 });
     /* 船头：两根竹篙靠在舷墙上，一盘缆，一只四爪锚 */
     P.line(g, 1500, 597, 1964, 591, 5, '#b8ae6a'); P.line(g, 1500, 597, 1964, 591, 1.2, 'rgba(60,60,20,0.4)'); P.line(g, 1540, 603, 1930, 599, 5, '#a8a05e');

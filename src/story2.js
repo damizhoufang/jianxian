@@ -113,7 +113,7 @@
     box.style.opacity = 0; await JX.sleep(JX.auto ? 0.05 : 0.7); box.remove();
   }
 
-  ST._h.cutSteps = cutSteps; ST._h.ch2 = ch2;
+  ST._h.cutSteps = cutSteps; ST._h.ch2 = ch2; ST._h.overboard = e => overboard(e);
   /* ---------- 小动作 ---------- */
   /* 一个人划一道弧落到某处（跳出瓮、被丢下水都用它） */
   const arc = (e, tx, ty, h, sec) => { const x0 = e.x, y0 = e.y, z0 = e.z || 0; return JX.tween(JX.auto ? 0.03 : sec, q => { e.x = x0 + (tx - x0) * q; e.y = y0 + (ty - y0) * q; e.z = z0 * (1 - q) + Math.sin(q * Math.PI) * h; }).then(() => { e.z = 0; }); };

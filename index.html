@@ -210,12 +210,12 @@
   #gal .lb .cap { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; font: 24px var(--kai); color: #c9b282; }
   #gal .spr { left: 1290px; top: 124px; width: 580px; }
   #gal .spr canvas { display: block; width: 580px; height: 860px; background: linear-gradient(180deg, #efe4c8, #dfcfa6); border: 2px solid #3d2a1c; border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,.45), inset 0 0 0 2px rgba(168,54,42,.2); }
-  #gal .mus { left: 64px; right: 64px; top: 124px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px 14px; }      /* 十六首：六列三行（装得下十八首），“试听”放在右下角 */
-  #gal .trk { position: relative; height: 284px; padding: 14px 16px; color: var(--ink); background: linear-gradient(180deg, #f4ead2, #e2d2ac); border: 2px solid #3d2a1c; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.45), inset 0 0 0 2px rgba(168,54,42,.22); }
+  #gal .mus { left: 64px; right: 64px; top: 124px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px 12px; }      /* 十九首：七列三行（装得下二十一首），“试听”放在右下角 */
+  #gal .trk { position: relative; height: 284px; padding: 12px 12px; color: var(--ink); background: linear-gradient(180deg, #f4ead2, #e2d2ac); border: 2px solid #3d2a1c; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.45), inset 0 0 0 2px rgba(168,54,42,.22); }
   #gal .trk.on { box-shadow: 0 0 34px rgba(215,165,68,.6), inset 0 0 0 4px #a8362a; }
-  #gal .trk b { font: 600 33px var(--kai); letter-spacing: .06em; color: #8e2a20; }
-  #gal .trk .w { margin: 3px 0 6px; font: 18px/1.34 var(--kai); color: #7a5d3a; }
-  #gal .trk .h { font: 19px/1.38 var(--kai); }
+  #gal .trk b { font: 600 30px var(--kai); letter-spacing: .06em; color: #8e2a20; }
+  #gal .trk .w { margin: 3px 0 5px; font: 16px/1.3 var(--kai); color: #7a5d3a; }
+  #gal .trk .h { font: 16.5px/1.34 var(--kai); }
   #gal .trk .btn { position: absolute; right: 12px; top: auto; bottom: 10px; margin: 0; width: auto; padding: 5px 16px 6px; font-size: 22px; }
   #gal .note { left: 64px; right: 64px; bottom: 30px; font: 23px var(--kai); color: #c9b282; }
 </style>
@@ -234,7 +234,7 @@
    试了几回还不行，把话说在屏幕上，不留一块黑屏。
    地址后面带版本号，换了版本浏览器就不会拿旧文件来凑。 */
 (function () {
-  var V = window.JX_V = '0.11.0';
+  var V = window.JX_V = '0.12.0';
   var FILES = [
     'src/core.js',
     'src/paint.js',
@@ -244,6 +244,7 @@
     'src/portraits2.js',
     'src/portraits3.js',
     'src/artpack.js',
+    'src/portraits4.js',
     'src/world.js',
     'src/scenes1.js',
     'src/scenes2.js',
@@ -254,6 +255,7 @@
     'src/scenes7.js',
     'src/scenes8.js',
     'src/scenes9.js',
+    'src/scenes10.js',
     'src/decor.js',
     'src/audio.js',
     'src/ui.js',
@@ -262,11 +264,13 @@
     'data/prologue.js',
     'data/chapter1.js',
     'data/chapter2.js',
+    'data/chapter3.js',
     'data/checkpoints.js',
     'src/story.js',
     'src/story2.js',
     'src/story2b.js',
     'src/story2c.js',
+    'src/story3.js',
     'src/main.js'
   ];
   var boot = document.getElementById('boot'), TRIES = 5;

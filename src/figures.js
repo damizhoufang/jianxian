@@ -537,6 +537,15 @@
     laojun: { name: '老军', h: 148, fat: 1.12, kind: 'short', robe: '#7a5a4a', trim: '#3f2e26', pants: '#4a4540', hat: 'douli', hatCol: '#5a4c3c', beard: 'grey', skin: '#c99a72', sash: '#2a2420' },
     shitou: { name: '石头', h: 104, kind: 'short', robe: '#8a8068', trim: '#5a5444', pants: '#5c5348', hair: 'boy', blush: true, bare: true },
     haojing: { name: '郝经', h: 156, kind: 'robe', robe: '#4f5f6e', trim: '#2a343e', inner: '#e9e2d0', hair: 'gaojin', hairCol: '#8a8680', beard: 'grey', beardLong: true, wide: 1.6, sash: '#2a2420', skin: '#e6caa6' },      // 洗得发白的深青直裰
+    xiali2: { name: '夏离', h: 156, kind: 'dress', female: true, hair: 'female', hairCol: '#2a1e18', robe: '#a8352c', trim: '#e3c98a', skirt: '#ece5d4', inner: '#f0e7d2', sash: '#3a2a1e', skin: '#e2bf96', brow: 1.2 },      // 第三章起：石榴红窄袖褙子、月白裙
+    jinpipa: { name: '金琵琶', h: 164, kind: 'robe', robe: '#9a7a3a', trim: '#4a3a1e', inner: '#e6dcc0', hair: 'futou', sash: '#2a2218', skin: '#d8c08a', wide: 1.05, brow: 0.6 },      // 促织客：瘦高，蜡黄脸，金褐长衫
+    dashou: { name: '半闲堂的人', h: 158, kind: 'short', robe: '#46504a', trim: '#1f2623', pants: '#2c3230', hairCol: '#15110f', band: '#1f2623', sash: '#7a5a2a', skin: '#d0a67e', beard: 'stubble' },
+    chuanlaoda: { name: '船老大', h: 154, fat: 1.12, kind: 'short', robe: '#5a6a72', trim: '#2c363c', pants: '#3c4448', hair: 'old', hairCol: '#8a8680', beard: 'grey', skin: '#c08f66', bare: true, sash: '#8e2a20' },
+    chuangong: { name: '船工', h: 152, kind: 'short', robe: '#6a705e', trim: '#3a3e32', pants: '#45483c', hairCol: '#1e1814', band: '#3a3e32', skin: '#c08f66', bare: true, sash: '#3a3228' },
+    guyi: { name: '估衣铺的娘子', h: 142, fat: 1.08, kind: 'dress', female: true, hair: 'female', robe: '#5f7a66', trim: '#2f4038', skirt: '#4a4440', inner: '#e6dcc8', sash: '#c9a24a' },
+    xiangke: { name: '香客', h: 138, kind: 'dress', female: true, hair: 'female', hairCol: '#9a968e', robe: '#7a6e86', trim: '#3e364a', skirt: '#4a4650', inner: '#e6dcc8', sash: '#c9b27a' },
+    xiaoni: { name: '小尼', h: 120, kind: 'robe', robe: '#b9b6ae', trim: '#8a8880', inner: '#e9e6dc', hair: 'bald', hairCol: '#e6c8a8', band: '#f0d6b8', sash: '#8a8880', skin: '#f0d6b8', wide: 1.2, blush: true },
+    jizhao: { name: '寂照神尼', h: 140, kind: 'robe', robe: '#8f8d88', trim: '#5e5a52', inner: '#e9e6dc', hair: 'bald', hairCol: '#e2c4a2', band: '#e9cfae', sash: '#6a4a32', skin: '#e9cfae', wide: 1.5, brow: 0.4 },
     youhulu: { name: '油葫芦', h: 150, fat: 1.42, kind: 'short', robe: '#2a2420', trim: '#5a4a34', inner: '#3a322a', pants: '#1e1a18', hair: 'bun', hairCol: '#15110f', band: '#5a4a34', sash: '#7a5a2a', beard: 'stubble', brow: 0.8, skin: '#dcb890' },      // 促织客：圆头圆肚，发亮的黑油绸短打
     zonghuo: { name: '纵火的', h: 156, kind: 'short', robe: '#3a342e', trim: '#1e1a18', pants: '#2a2622', hairCol: '#15110f', band: '#2a2622', sash: '#4a3a2a', skin: '#c99a72', beard: 'stubble' },
     baoqi: { name: '鲍七', h: 146, kind: 'short', robe: '#6a5a6a', trim: '#3d333d', pants: '#474049', beard: 'black' },
