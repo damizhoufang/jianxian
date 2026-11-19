@@ -1000,6 +1000,45 @@ def chaoyin():
     return y * (0.162 / np.sqrt((y ** 2).mean()))
 
 
+SJ_A = bars("6:2 1':2 | 2':1 3':3~ | 2':2 1':2 | 6:4~", 4.0)
+SJ_B = bars("3:2~ 5:1 6:1 | 6:3~ 5:1 | 3:2 2:1 1:1 | 6,:4~", 4.0)
+SJ_C = bars("6:2 1':2 | 3':3~ 2':1 | 1':1 6:1 5:1 3:1 | 6:4~", 4.0)
+
+
+def shuangjiang():
+    """《霜降》：潮音洞，洞底那口剑。羽调（宫在 F4，和《阑珊》同一个调），很慢。头四小节是《阑珊》开头那一句拉长了一倍，
+    用琴的泛音一个一个点出来，像冰；中间四小节箫在低处答；末四小节两样合在一起。底下两小节一下很低的弦，是潮；
+    上头零零星星几点泛音，是洞顶滴下来的水。没有筝的流水，没有鼓。"""
+    bpm = 50
+    FA = 65
+    mel, beats = parse(SJ_A + ' | ' + SJ_B + ' | ' + SJ_C, FA)
+    mx = Mix(beats, bpm, tail=7.0)
+    spb = 60 / bpm
+    for bt, d, m, fl in mel:
+        sec = d * spb
+        if 16 <= bt < 32:                                       # 箫：低处，长音
+            mx.add(flute(m2f(m), sec * 0.97, 0.36, 'xiao', grace=(2 if d >= 3 else 0), vib=15 if '~' in fl else 5, seed=int(bt * 263)), bt, pan=-0.12, rev=0.85)
+        else:                                                   # 泛音点旋律，底下垫一个很轻的按音
+            mx.add(harmonic(m2f(m), sec + 2.6, 0.3), bt, pan=0.2, rev=0.9)
+            mx.add(pluck(m2f(m - 12), sec + 1.6, 0.5, bright=0.3, t60=3.6, pos=0.3, vib=5 if '~' in fl else 0, seed=int(bt * 269), body=0.4), bt + 0.03, pan=-0.05, rev=0.6)
+            if bt >= 32 and d >= 2:                             # 末四小节：箫在低八度跟长音
+                mx.add(flute(m2f(m - 12), sec * 0.95, 0.24, 'xiao', vib=10 if '~' in fl else 4, seed=int(bt * 271)), bt, pan=-0.2, rev=0.85)
+    roots = [6, 6, 2, 6, 3, 6, 1, 6, 6, 3, 5, 6]
+    drip = [(1.5, 16), (3.25, 21), (2.5, 12), (0.75, 19), (3.5, 16), (1.75, 24), (2.25, 21), (0.5, 12), (3.0, 19), (1.25, 16), (2.75, 24), (3.5, 21)]
+    for bar, r in enumerate(roots):
+        a, c, e = CH[r]; b0 = bar * 4
+        if bar % 2 == 0:
+            mx.add(pluck(m2f(FA + a - 24), 5.0, 0.7, bright=0.26, t60=5.0, pos=0.3, vib=3, seed=1300 + bar, body=0.45), b0, pan=-0.3, rev=0.6)
+        else:
+            mx.add(pluck(m2f(FA + e - 24), 4.0, 0.34, bright=0.28, t60=4.2, pos=0.3, seed=1320 + bar, body=0.4), b0 + 2, pan=-0.2, rev=0.6)
+        off, semi = drip[bar]
+        mx.add(harmonic(m2f(FA + 9 + semi), 1.6, 0.06), b0 + off, pan=0.6 if bar % 2 else -0.6, rev=0.98)       # 滴水：羽音往上的几个五声音
+        if bar in (3, 11):
+            mx.add(bell(1175, 3.0, 0.03), b0 + 2, pan=0.5, rev=0.98)
+    y = mx.render(t60=4.2, wet=1.25, level=0.13)
+    return y * (0.165 / np.sqrt((y ** 2).mean()))
+
+
 # ---------------------------------------------------------------- 音效
 
 G4 = 67
@@ -1099,13 +1138,22 @@ def sfx():
     n = int(2.6 * SR); k = np.arange(n) / SR; envm = np.minimum(1, k / 0.5) * np.exp(-np.maximum(0, k - 1.1) * 2.2)
     ming = (np.sin(2 * np.pi * 147 * k) + 0.5 * np.sin(2 * np.pi * 294.6 * k) + 0.22 * np.sin(2 * np.pi * 441.9 * k + 0.4) + 0.12 * np.sin(2 * np.pi * 1180 * k)) * envm * (1 + 0.25 * np.sin(2 * np.pi * 5.2 * k))
     out['ming'] = enc(ming * 0.4)
+    # 0.13.0 添的两样，也排在最后：一段可以循环的潮声（一进一退，六秒一个来回），霜降的那一点寒气（很高、很细的一声，像冰裂）
+    n = int(6.0 * SR); k = np.arange(n) / SR; b5, a5 = sg.butter(2, [70 / (SR / 2), 900 / (SR / 2)], 'band'); b6, a6 = sg.butter(2, [1400 / (SR / 2), 6000 / (SR / 2)], 'band')
+    sw = np.sin(np.pi * k / 6.0) ** 2; chao = sg.lfilter(b5, a5, rng.normal(0, 1, n)) * (0.25 + 0.75 * sw) * 1.4 + sg.lfilter(b6, a6, rng.normal(0, 1, n)) * (sw ** 3) * 0.5
+    kk = int(0.5 * SR); ramp = np.linspace(0, 1, kk); chao[:kk] = chao[:kk] * ramp + chao[-kk:] * (1 - ramp); chao = chao[:-kk]
+    out['chao'] = enc(chao * 0.45)
+    n = int(2.2 * SR); k = np.arange(n) / SR; envh = np.minimum(1, k / 0.04) * np.exp(-k * 1.7)
+    han = sum(a * np.sin(2 * np.pi * f * k + i) for i, (f, a) in enumerate([(2349, 1.0), (3136, 0.6), (3520, 0.5), (4699, 0.3), (6272, 0.16)])) * envh * (1 + 0.3 * np.sin(2 * np.pi * 9 * k))
+    han[:int(0.03 * SR)] += noise(0.03, 3000, 9000, 0.008)[:int(0.03 * SR)] * 0.6
+    out['han'] = enc(han * 0.3)
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, 'sfx.js'), 'w') as f:
         f.write('window.JX_SFX=' + json.dumps(out) + ';\n')
     print('音效：', ', '.join(out.keys()), '，共 %.0f KB' % (os.path.getsize(os.path.join(OUT, 'sfx.js')) / 1024))
 
 
-TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo, 'biancheng': biancheng, 'yingye': yingye, 'jiangxiao': jiangxiao, 'haiwu': haiwu, 'chaoyin': chaoyin}
+TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo, 'biancheng': biancheng, 'yingye': yingye, 'jiangxiao': jiangxiao, 'haiwu': haiwu, 'chaoyin': chaoyin, 'shuangjiang': shuangjiang}
 if __name__ == '__main__':
     want = sys.argv[1:] or list(TRACKS) + ['sfx']
     for name in want:

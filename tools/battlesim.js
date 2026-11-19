@@ -1,11 +1,11 @@
 // 战斗的胜率：在页面里把某一场战斗用“自带打法”连打 N 遍，闪避照实掷骰（不像自动通关那样必中）。
-// 用法：node tools/battlesim.js <alley|roof|hall|huafang|jiang> <演出名> [遍数]   例：node tools/battlesim.js roof 战三 60；node tools/battlesim.js huafang 战梅花 40；node tools/battlesim.js guanshe 战油葫芦一 30；node tools/battlesim.js jiang 战水匪 30
+// 用法：node tools/battlesim.js <alley|roof|hall|huafang|jiang> <演出名> [遍数]   例：node tools/battlesim.js roof 战三 60；node tools/battlesim.js huafang 战梅花 40；node tools/battlesim.js guanshe 战油葫芦一 30；node tools/battlesim.js jiang 战水匪 30；node tools/battlesim.js dongdi 战司辰 30；node tools/battlesim.js shanmen 守庵战 30
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const go = require('./_go');
 const path = require('path');
 (async () => {
   const scene = process.argv[2] || 'roof', hook = process.argv[3] || '战三', n = +process.argv[4] || 40;
-  const stage = { hall: 6, alley: 8, roof: 9, huafang: 20, jiang: 26, guanshe: 31, haichuan: 36 }[scene];
+  const stage = { hall: 6, alley: 8, roof: 9, huafang: 20, jiang: 26, guanshe: 31, haichuan: 36, dongdi: 40, shanmen: 41 }[scene];
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));

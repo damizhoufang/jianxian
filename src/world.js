@@ -104,6 +104,7 @@
     return true;
   }
   W.free = free;
+  W.regrid = () => buildGrid();                                     // 演出里改了 W.blocks（潮退了、路通了）以后，把寻路的格子重算一遍
   function buildGrid() {
     const sc = W.sc, gw = Math.ceil(sc.w / CELL), gh = Math.ceil(sc.h / CELL), g = new Uint8Array(gw * gh);
     for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) g[y * gw + x] = staticFree((x + 0.5) * CELL, (y + 0.5) * CELL) ? 1 : 0;

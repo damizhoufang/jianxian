@@ -281,6 +281,28 @@
       return;
     }
     if (what === 'pole') { seg(ctx, -24, 4, 30, -204, 5, INK); seg(ctx, -24, 4, 30, -204, 3, '#8a9a5a'); return; }
+    if (what === 'sword') {                                       // 霜降：窄身直剑，颜色像冬天早晨的瓦；剑身上一线白，周围一点寒气
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createRadialGradient(22, -128, 0, 22, -128, 70); gr.addColorStop(0, 'rgba(200,232,255,0.2)'); gr.addColorStop(1, 'rgba(200,232,255,0)'); ctx.fillStyle = gr; ctx.fillRect(-50, -200, 144, 144); ctx.restore();
+      seg(ctx, 8, -88, 36, -176, 5, INK); seg(ctx, 8, -88, 36, -176, 3, '#b9c8d6'); seg(ctx, 9, -90, 35, -172, 1, '#f4faff');
+      seg(ctx, 1, -86, 15, -92, 4.4, INK); seg(ctx, 1, -86, 15, -92, 2.4, '#8a94a0'); seg(ctx, 4, -76, 8, -88, 5, '#2e3a48'); P.ellipse(ctx, 3.4, -74, 2.6, 2.6, '#cfd8e0', INK, 0.8);
+      return;
+    }
+    if (what === 'chi') {                                         // 铜尺：量日影的圭尺，一尺来长，上头一格一格的刻度
+      seg(ctx, 6, -84, 30, -150, 7, INK); seg(ctx, 6, -84, 30, -150, 5, '#b08a3e'); seg(ctx, 5, -86, 28, -150, 1.2, '#e6cf8a');
+      for (let i = 1; i < 7; i++) { const x = 6 + i * 3.43, y = -84 - i * 9.43; seg(ctx, x - 2.2, y - 0.8, x + 2.2, y + 0.8, 0.9, 'rgba(50,34,10,0.8)'); }
+      return;
+    }
+    if (what === 'jiudao') {                                      // 酒刀当剑使：七寸的断刃，没有尖，刀柄上缠着红绳
+      seg(ctx, 7, -86, 24, -128, 6, INK); seg(ctx, 7, -86, 24, -128, 4, '#c5cdd0'); seg(ctx, 7, -88, 22, -126, 1, '#ffffff'); seg(ctx, 21, -129, 27, -127, 2, INK);
+      seg(ctx, 2, -76, 8, -89, 5.4, '#4b3525'); seg(ctx, 3, -78, 6, -84, 2, '#a8322a');
+      return;
+    }
+    if (what === 'oar') {                                         // 半截船桨：潮水送进洞里来的，桨叶朝上
+      seg(ctx, -14, -30, 20, -150, 5.4, INK); seg(ctx, -14, -30, 20, -150, 3.4, '#8a7350'); ctx.save(); ctx.translate(22, -158); ctx.rotate(0.28); ctx.beginPath(); ctx.moveTo(-7, 10); ctx.lineTo(-10, -38); ctx.quadraticCurveTo(0, -48, 10, -38); ctx.lineTo(7, 10); ctx.closePath(); fillStroke(ctx, '#9a845e', 1.2); seg(ctx, 0, 8, 0, -40, 0.9, 'rgba(50,36,16,0.5)'); ctx.restore();
+      return;
+    }
+    if (what === 'kuai2') { seg(ctx, 6, -86, 13, -105, 2.6, INK); seg(ctx, 6, -86, 13, -105, 1.4, '#c9a86a'); return; }      // 断剩的半截筷子
+    if (what === 'kuai') { seg(ctx, 6, -86, 22, -128, 2.6, INK); seg(ctx, 6, -86, 22, -128, 1.4, '#c9a86a'); return; }      // 一根筷子
     if (what === 'spear') { seg(ctx, -22, 2, 26, -196, 5, INK); seg(ctx, -22, 2, 26, -196, 3, '#8a6e4a'); ctx.beginPath(); ctx.moveTo(26, -196); ctx.lineTo(20, -208); ctx.lineTo(31, -226); ctx.lineTo(34, -206); ctx.closePath(); fillStroke(ctx, '#cfd6da', 1); P.ellipse(ctx, 25, -190, 4.5, 6, '#8e2a20'); return; }
     if (what === 'ruan') { seg(ctx, 6, -78, 30, -122, 5, INK); seg(ctx, 6, -78, 30, -122, 3, '#6a4a30'); ctx.beginPath(); ctx.arc(-3, -66, 16, 0, Math.PI * 2); fillStroke(ctx, '#b08a52', 1.2); P.ellipse(ctx, -3, -66, 4, 4, '#3a2a1e'); seg(ctx, -5, -80, 24, -112, 0.8, '#f0e6c8'); seg(ctx, -1, -80, 27, -116, 0.8, '#f0e6c8'); return; }
     if (what === 'brush') { seg(ctx, 4, -84, 12, -106, 2.6, INK); seg(ctx, 4, -84, 12, -106, 1.4, '#8a6a3a'); seg(ctx, 3, -82, 2, -77, 2.4, '#2a2420'); return; }
@@ -537,6 +559,9 @@
     laojun: { name: '老军', h: 148, fat: 1.12, kind: 'short', robe: '#7a5a4a', trim: '#3f2e26', pants: '#4a4540', hat: 'douli', hatCol: '#5a4c3c', beard: 'grey', skin: '#c99a72', sash: '#2a2420' },
     shitou: { name: '石头', h: 104, kind: 'short', robe: '#8a8068', trim: '#5a5444', pants: '#5c5348', hair: 'boy', blush: true, bare: true },
     haojing: { name: '郝经', h: 156, kind: 'robe', robe: '#4f5f6e', trim: '#2a343e', inner: '#e9e2d0', hair: 'gaojin', hairCol: '#8a8680', beard: 'grey', beardLong: true, wide: 1.6, sash: '#2a2420', skin: '#e6caa6' },      // 洗得发白的深青直裰
+    qiushui2: { name: '秋水', h: 146, kind: 'dress', female: true, hair: 'gaoji', robe: '#e1e8e8', trim: '#9fb4c4', skirt: '#a9b9c8', inner: '#e6cfc8', sash: '#b8433a', skin: '#f7dfcb', brow: 0.5 },      // 放下了琵琶：没有披帛，背后没有琵琶，手里是霜降（演出里另画）
+    sichen: { name: '司辰', h: 160, kind: 'robe', robe: '#2f4a5e', trim: '#c9d2d8', inner: '#e9e6dc', hair: 'bun', hairCol: '#15110f', band: '#0e0c0b', sash: '#8a6a3a', skin: '#f4e6d4', wide: 1.1, brow: 0.5 },      // 灵台郎：面白无须，深青窄袖袍，小小的黑纱冠      // 灵台郎：深青窄袖袍，小冠，面白无须
+    lingtai: { name: '灵台弟子', h: 156, kind: 'robe', robe: '#34505c', trim: '#1a2a32', inner: '#dcd6c6', hair: 'dao', hairCol: '#1e1814', sash: '#2a343c', skin: '#e2c8a6', wide: 1.2 },
     xiali2: { name: '夏离', h: 156, kind: 'dress', female: true, hair: 'female', hairCol: '#2a1e18', robe: '#a8352c', trim: '#e3c98a', skirt: '#ece5d4', inner: '#f0e7d2', sash: '#3a2a1e', skin: '#e2bf96', brow: 1.2 },      // 第三章起：石榴红窄袖褙子、月白裙
     jinpipa: { name: '金琵琶', h: 164, kind: 'robe', robe: '#9a7a3a', trim: '#4a3a1e', inner: '#e6dcc0', hair: 'futou', sash: '#2a2218', skin: '#d8c08a', wide: 1.05, brow: 0.6 },      // 促织客：瘦高，蜡黄脸，金褐长衫
     dashou: { name: '半闲堂的人', h: 158, kind: 'short', robe: '#46504a', trim: '#1f2623', pants: '#2c3230', hairCol: '#15110f', band: '#1f2623', sash: '#7a5a2a', skin: '#d0a67e', beard: 'stubble' },

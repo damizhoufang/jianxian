@@ -96,7 +96,8 @@
   async function lunge(a, t, k) { const e = a.ent, hx = e.x, hy = e.y, tx = hx + (t.ent.x - hx) * k, ty = hy + (t.ent.y - hy) * k; e.moving = true; await tw(0.2, q => { e.x = hx + (tx - hx) * q; e.y = hy + (ty - hy) * q; }, JX.ease.out); e.moving = false; }
   async function back(a) { const e = a.ent, sx = e.x, sy = e.y, h = a.home; if (JX.dist(sx, sy, h.x, h.y) < 2) return; e.moving = true; await tw(0.24, q => { e.x = sx + (h.x - sx) * q; e.y = sy + (h.y - sy) * q; }); e.moving = false; e.dir = h.dir; }
   async function shake(u) { const e = u.ent, x0 = e.x; await tw(0.3, k => { e.x = x0 + Math.sin(k * 26) * 8 * (1 - k); }); e.x = x0; }
-  async function hop(u) { const e = u.ent, h = u.home, d = u.side === 'ally' ? -1 : 1; await tw(0.34, k => { e.x = h.x + d * 46 * Math.sin(k * Math.PI); e.y = h.y + 22 * Math.sin(k * Math.PI); e.z = 30 * Math.sin(k * Math.PI); }); e.x = h.x; e.y = h.y; e.z = 0; }
+  async function hop(u) { const e = u.ent, h = u.home, d = (u.side === 'ally' ? -1 : 1) * (B.cur && B.cur.def.flip ? -1 : 1);      // flip：这一场是我方站右边、对面在左边
+    await tw(0.34, k => { e.x = h.x + d * 46 * Math.sin(k * Math.PI); e.y = h.y + 22 * Math.sin(k * Math.PI); e.z = 30 * Math.sin(k * Math.PI); }); e.x = h.x; e.y = h.y; e.z = 0; }
   B.fx = { floater, lunge, back, shake, hop, wait, tw };
 
   function strike(b, a, m, t) {
