@@ -355,4 +355,5 @@
   });
   /* 滚下山路：往左一路翻下去 */
   async function tumble(e) { e.pose = null; e.carry = null; const x0 = e.x, y0 = e.y; JX.audio.sfx('door', 0.5); await tw(0.7, k => { e.x = x0 - 340 * k; e.y = y0 + 30 * k; e.z = Math.abs(Math.sin(k * Math.PI * 3)) * 44 * (1 - k); e.alpha = 1 - Math.max(0, (k - 0.6) / 0.4); }); e.vis = false; e.z = 0; }
+  ST._h.b3 = { drawJin2, drawHalves, drawSi, pop, puff, breath, needle, tumble };      // 给第九场以后接着用
 })();

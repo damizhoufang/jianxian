@@ -37,7 +37,7 @@ const path = require('path');
       else if (/怎么对她说/.test(q)) { await page.keyboard.press('ArrowDown'); await page.waitForTimeout(120); await page.keyboard.press('ArrowDown'); await page.waitForTimeout(120); }
       await page.waitForTimeout(500); await page.keyboard.press('Enter'); await page.waitForTimeout(500); continue;
     }
-    if (s.cmd && wrong && !skipped) {                                // 故意反着来：该闪的时候摔
+    if (s.cmd && wrong && !skipped && s.cmd.items.length > 1) {      // 只有一个指令的（学剑、拔剑的头三手）没法按错，照常回车                                // 故意反着来：该闪的时候摔
       const other = s.cmd.items.indexOf(s.cmd.on) === 0 ? 'Digit2' : 'Digit1'; cmds.push('反着按 ' + other);      // 建议的是第一手就按第二手，否则按第一手
       await page.waitForTimeout(450); await page.keyboard.press(other); await page.waitForTimeout(200); await page.keyboard.press(other); await page.waitForTimeout(500); continue;
     }
