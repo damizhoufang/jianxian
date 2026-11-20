@@ -287,6 +287,12 @@
       seg(ctx, 1, -86, 15, -92, 4.4, INK); seg(ctx, 1, -86, 15, -92, 2.4, '#8a94a0'); seg(ctx, 4, -76, 8, -88, 5, '#2e3a48'); P.ellipse(ctx, 3.4, -74, 2.6, 2.6, '#cfd8e0', INK, 0.8);
       return;
     }
+    if (what === 'swordflat') {                                   // 霜降横托在手上（跪着递剑）：剑身平着朝前，剑柄在手后头
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createRadialGradient(22, -88, 0, 22, -88, 60); gr.addColorStop(0, 'rgba(200,232,255,0.18)'); gr.addColorStop(1, 'rgba(200,232,255,0)'); ctx.fillStyle = gr; ctx.fillRect(-40, -150, 124, 124); ctx.restore();
+      seg(ctx, -6, -85, 50, -89, 5, INK); seg(ctx, -6, -85, 50, -89, 3, '#b9c8d6'); seg(ctx, -4, -86, 48, -89.6, 1, '#f4faff');
+      seg(ctx, -7, -79, -6, -92, 4.4, INK); seg(ctx, -7, -79, -6, -92, 2.4, '#8a94a0'); seg(ctx, -20, -84, -8, -85, 5, '#2e3a48'); P.ellipse(ctx, -22, -84, 2.6, 2.6, '#cfd8e0', INK, 0.8);
+      return;
+    }
     if (what === 'chi') {                                         // 铜尺：量日影的圭尺，一尺来长，上头一格一格的刻度
       seg(ctx, 6, -84, 30, -150, 7, INK); seg(ctx, 6, -84, 30, -150, 5, '#b08a3e'); seg(ctx, 5, -86, 28, -150, 1.2, '#e6cf8a');
       for (let i = 1; i < 7; i++) { const x = 6 + i * 3.43, y = -84 - i * 9.43; seg(ctx, x - 2.2, y - 0.8, x + 2.2, y + 0.8, 0.9, 'rgba(50,34,10,0.8)'); }

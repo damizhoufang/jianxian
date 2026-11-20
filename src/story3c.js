@@ -155,12 +155,13 @@
       if (x) { x.pose = null; x.dir = 3; } if (q) await W.walk(q, 1500, 800, { speed: fast(260), straight: true, dir: 3 }); p.dir = 3; await nap(0.4);
     },
     async 夏离看刀() { const x = W.byId.xiali, p = W.player; if (x) { await W.walk(x, 1420, 770, { speed: fast(160), dir: 1 }); x.dir = 1; } p.dir = 3; await nap(0.3); },
+    async 秋水回望() { const q = W.byId.qiushui; if (q) q.dir = 1; await nap(0.9); },
     /* —— 十　姓辛 —— */
     async 入三十() { const p = ch3(44, 1); p.carry = null; },
     async 围坐() { const p = W.player; p.path = null; await W.walk(p, 800, 806, { speed: 180, dir: 1 }); p.dir = 1; W.focus = { x: 700, y: 640 }; await nap(0.4); },
-    async 托剑() { const q = W.byId.qiushui; if (q) { await W.walk(q, 556, 746, { speed: fast(110), straight: true, dir: 1 }); q.dir = 1; q.pose = 'squat'; JX.audio.sfx('han', 0.4); } await nap(0.8); },
+    async 托剑() { const q = W.byId.qiushui; if (q) { await W.walk(q, 556, 746, { speed: fast(110), straight: true, dir: 1 }); q.dir = 1; q.pose = 'squat'; q.carry = 'swordflat'; JX.audio.sfx('han', 0.4); } await nap(0.8); },
     async 神尼转脸() { const z = W.byId.jizhao; if (z) z.dir = 0; await nap(0.6); },
-    async 听雪近前() { const t = W.byId.tingxue, z = W.byId.jizhao, q = W.byId.qiushui; if (q) { q.pose = null; await W.walk(q, 640, 800, { speed: fast(120), straight: true, dir: 1 }); } if (t) { t.pose = null; await W.walk(t, 548, 740, { speed: fast(120), straight: true, dir: 1 }); t.dir = 1; t.pose = 'squat'; } if (z) z.dir = 3; await nap(0.6); },
+    async 听雪近前() { const t = W.byId.tingxue, z = W.byId.jizhao, q = W.byId.qiushui; if (q) { q.pose = null; q.carry = 'sword'; await W.walk(q, 640, 800, { speed: fast(120), straight: true, dir: 1 }); } if (t) { t.pose = null; await W.walk(t, 548, 740, { speed: fast(120), straight: true, dir: 1 }); t.dir = 1; t.pose = 'squat'; } if (z) z.dir = 3; await nap(0.6); },
     async 神尼闭眼() { const z = W.byId.jizhao; if (z) z.closed = true; await nap(0.8); },
     /* —— 十一　和词 —— */
     async 入三十一() { const p = ch3(45, 1); p.carry = null; },
