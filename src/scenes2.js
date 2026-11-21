@@ -26,8 +26,9 @@
       x: t.x, y: t.y, bw: TW + 30, bh: TD + TH + 30, block: [-TW / 2 - 4, -TD - 44, TW + 8, TD + 44 + 34],
       draw(g) {
         P.table(g, 0, 0, TW, TD, TH, { col: '#5c3f2a', seed });
-        P.dishes(g, 0, -TH, TW, TD, seed + 1, o.empty ? 0 : 3 + Math.floor(r() * 3));
-        if (o.candle !== false) P.candle(g, 0, -TH - TD * 0.55);
+        const bare = o.bare && o.bare();                             // 第四章第十场：范老那张桌上什么也没有了（壶和盏是另摆的）
+        if (!bare) P.dishes(g, 0, -TH, TW, TD, seed + 1, o.empty ? 0 : 3 + Math.floor(r() * 3));
+        if (!bare && o.candle !== false) P.candle(g, 0, -TH - TD * 0.55);
         if (t.n) { g.fillStyle = '#3a281c'; g.fillRect(-15, -TH + 13, 30, 22); g.strokeStyle = P.rgba(C.tenghuang, 0.8); g.lineWidth = 1; g.strokeRect(-15, -TH + 13, 30, 22); g.fillStyle = '#f0dca8'; g.font = '600 ' + (NUM[t.n].length > 1 ? 13 : 17) + 'px ' + P.KAI; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(NUM[t.n], 0, -TH + 24.5); }
       },
     });
@@ -115,7 +116,7 @@
     props: (function () {
       let ps = [];
       TABLES.forEach(t => { ps = ps.concat(tableSet(t, 400 + t.n * 3, t.n === 7 ? { back: 2, backSp: [Fig.cast.shikeA] } : t.n === 9 ? { back: 2, backSp: [Fig.cast.shikeB] } : null)); });
-      WALLT.forEach((t, i) => { ps = ps.concat(tableSet({ x: t.x, y: t.y }, 470 + i * 5, t.k === 'fan' ? { back: 0, front: 0, empty: true } : { front: i % 2 })); });
+      WALLT.forEach((t, i) => { ps = ps.concat(tableSet({ x: t.x, y: t.y }, 470 + i * 5, t.k === 'fan' ? { back: 0, front: 0, empty: true, bare: () => JX.state.stage === 56 } : { front: i % 2 })); });
       /* 柜台 */
       ps.push({ x: 700, y: 454, bw: 480, bh: 150, draw(g) {
         P.shadow(g, 0, 0, 250, 16, 0.45);

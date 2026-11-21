@@ -1,4 +1,5 @@
 // 从某一场起慢速自动走，每句旁白出来时截一张小图，编号；另存一份“编号 → 旁白”的清单。
+// （0.17 起不靠场次表，新写的场次不用先重做 checkpoints 也能截）
 // 用法：node tools/narrshot.js "第三章·一　换装" /tmp/narr [到哪一场为止（不含），不写就到全书末]；再用 python3 tools/narrsheet.py /tmp/narr 1 16 /tmp/sheet1.jpg 拼成 4×4 的小图，对着 /tmp/narr/list.txt 逐句看旁白和画面对不对得上
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const go = require('./_go');
@@ -8,8 +9,10 @@ const path = require('path'), fs = require('fs');
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));
-  await go(page, 'file://' + path.resolve('index.html')); await page.waitForTimeout(1200);
-  await Promise.all([page.waitForNavigation(), page.evaluate(l => JX.story.jump(l), label)]);
+  const url = 'file://' + path.resolve('index.html');
+  await go(page, url); await page.waitForTimeout(600);
+  await page.evaluate(l => { JX.store.set('save', { label: l, money: 60, flags: {} }); sessionStorage.setItem('jx.jump', '1'); }, label);      // 不靠场次表：直接把存档写成那一场（和 fromlabel.js 一个办法）
+  await go(page, 'about:blank').catch(() => {}); await go(page, url + '#autoslow');
   await page.waitForFunction(() => window.JX && JX.game && JX.game.playing, null, { timeout: 20000 });
   await page.evaluate(() => { JX.auto = true; JX.autoDelay = 1.5; JX.fast = 2.2; });
   let last = -1, n = 0; const list = []; const t0 = Date.now();

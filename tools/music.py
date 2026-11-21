@@ -1259,7 +1259,99 @@ def sfx():
     print('音效：', ', '.join(out.keys()), '，共 %.0f KB' % (os.path.getsize(os.path.join(OUT, 'sfx.js')) / 1024))
 
 
-TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo, 'biancheng': biancheng, 'yingye': yingye, 'jiangxiao': jiangxiao, 'haiwu': haiwu, 'chaoyin': chaoyin, 'shuangjiang': shuangjiang, 'pozhen': pozhen}
+# ---- 0.17.0 加的：第四章后半 ----
+LC_A = bars("5:1 5:0.5 6:0.5 1':1 2':1 | 3':1.5 2':0.5 1':1 6:1 | 5:0.5 6:0.5 1':0.5 2':0.5 3':1 2':1 | 1':1 6:1 5:2~ | 6:1 6:0.5 1':0.5 2':1 3':1 | 5':1.5 3':0.5 2':1 1':1 | 6:0.5 1':0.5 2':0.5 1':0.5 6:1 5:1 | 2':3~ 0:1")
+LC_B = bars("2:1 2:0.5 3:0.5 5:1 6:1 | 5:0.5 6:0.5 5:0.5 3:0.5 2:2 | 3:1 3:0.5 5:0.5 6:1 1':1 | 6:0.5 1':0.5 6:0.5 5:0.5 3:2 | 5:1 5:0.5 6:0.5 1':1 2':1 | 1':0.5 2':0.5 1':0.5 6:0.5 5:1 6:1 | 1':1 2':1 3':1 5':1 | 2':3~ 0:1")
+LC_C = bars("5:1 5:0.5 6:0.5 1':1 2':1 | 3':1.5 2':0.5 1':1 6:1 | 5:0.5 6:0.5 1':0.5 2':0.5 3':1 5':1 | 6':2~ 5':1 3':1 | 2':1 2':0.5 3':0.5 5':1 3':1 | 2':1.5 1':0.5 6:1 1':1 | 2':0.5 1':0.5 6:0.5 1':0.5 6:1 5:1 | 5:3~ 0:1")
+
+
+def lunchao():
+    """《论潮》：八月十八，江心那条船。徵调（宫在 D），不快不慢地往前赶。头八小节笛子领，筝在底下分解；中间八小节换琵琶在低处弹，
+    笛子歇着；末八小节两样合在一起。底下一直有一面大鼓半拍一下轻轻地滚——每八小节从小到大滚一回，像潮头一点一点近了；
+    句尾一串急鼓、一下镲。在对白底下放的，所以不吵。"""
+    bpm = 108
+    mel, beats = parse(LC_A + ' | ' + LC_B + ' | ' + LC_C, D4)
+    mx = Mix(beats, bpm, tail=3.5)
+    spb = 60 / bpm
+    for b, d, m, fl in mel:
+        sect = 0 if b < 32 else 1 if b < 64 else 2
+        sec = d * spb
+        if sect != 1:
+            mx.add(flute(m2f(m), sec * (0.72 if d <= 0.5 else 0.94), 0.36 if sect == 0 else 0.4, 'dizi', grace=(2 if d >= 2 else 0), vib=18 if '~' in fl else (6 if d >= 1 else 0), seed=int(b * 83)), b, pan=0.12, rev=0.4)
+        if sect != 0:
+            if d >= 1.5:
+                mx.add(tremolo(m2f(m), sec * 0.97, 0.8 if sect == 1 else 0.5, rate=13, seed=int(b * 89)), b, pan=-0.22, rev=0.3)
+            else:
+                mx.add(pluck(m2f(m), max(0.45, sec * 1.15), 0.95 if sect == 1 else 0.6, bright=0.88, t60=1.0, pos=0.1, seed=int(b * 97), body=0.22), b, pan=-0.22, rev=0.24)
+    roots = [5, 1, 5, 5, 6, 1, 2, 2, 2, 2, 3, 6, 5, 1, 1, 2, 5, 1, 5, 6, 2, 2, 5, 5]
+    for bar, r in enumerate(roots):
+        a, c, e = CH[r]
+        b0 = bar * 4
+        k = (bar % 8) / 7.0                                     # 这一回潮滚到几成了
+        mid = 8 <= bar < 16
+        for i in range(4):                                      # 阮：一拍一下
+            mx.add(pluck(m2f(D4 + (a if i % 2 == 0 else e - 12) - 24), 0.8, 0.5 if i == 0 else 0.36, bright=0.55, t60=1.0, pos=0.2, seed=bar * 43 + i, body=0.4), b0 + i, pan=0.34, rev=0.18)
+        if not mid:                                             # 笛子在的时候，筝在底下分解和音
+            for i, off in enumerate([a - 12, e - 12, c, e - 12, a, c, e, c]):
+                mx.add(pluck(m2f(D4 + off), 1.2, 0.15 if i % 2 else 0.22, bright=0.7, t60=1.8, seed=bar * 47 + i), b0 + i * 0.5, pan=-0.45 + (i % 4) * 0.08, rev=0.38)
+        for i in range(8):                                      # 潮：大鼓半拍一下，轻轻地滚着，越来越近
+            mx.add(dagu(58, 0.5, (0.07 + 0.2 * k) * (1.25 if i % 2 == 0 else 1.0), seed=bar * 53 + i), b0 + i * 0.5, pan=-0.05, rev=0.3)
+        mx.add(dagu(70, 0.8, 0.4 + 0.12 * k, seed=bar + 400), b0, pan=-0.1, rev=0.24)
+        mx.add(dagu(70, 0.7, 0.28 + 0.1 * k, seed=bar + 430), b0 + 2, pan=-0.1, rev=0.24)
+        for beat, amp in ((1.5, 0.2), (3, 0.24), (3.5, 0.2)):
+            mx.add(drum(200, 0.2, amp, seed=bar + int(beat * 2) + 460), b0 + beat, pan=0.08, rev=0.18)
+        mx.add(wood(900, 0.07, 0.07), b0 + 1, pan=-0.35, rev=0.3)
+        mx.add(wood(1100, 0.07, 0.06), b0 + 2.5, pan=-0.3, rev=0.3)
+        if bar % 8 == 7:                                        # 句尾：一串急鼓、一下镲——潮头拍在船帮上
+            for j in range(8):
+                mx.add(drum(220 - j * 8, 0.2, 0.16 + j * 0.045, seed=j + 480), b0 + 2 + j * 0.25, pan=0, rev=0.2)
+            mx.add(cymbal(0.7, 0.3, seed=bar + 490), b0 + 3.75, pan=0.25, rev=0.35)
+        if bar % 8 == 0:
+            mx.add(gong(196, 2.4, 0.3, bend=-0.04, seed=bar + 500), b0, pan=0, rev=0.4)
+    return mx.render(t60=1.5, wet=0.8, level=0.17)
+
+
+YL_A = bars("2:2 3:1 5:1 | 6:2 5:2 | 3:3 2:1 | 1:4~ | 2:2 5:2 | 3:2 2:1 1:1 | 6,:4~ | 6,:2 0:2")
+YL_B = bars("5:2~ 6:1 1':1 | 2':3~ 1':1 | 6:2 5:1 3:1 | 2:4~ | 3:2 5:1 6:1 | 5:2~ 3:1 2:1 | 1:2 2:1 3:1 | 2:4~")
+YL_C = bars("2:2 3:1 5:1 | 6:2 5:2 | 3:2 2:1 1:1 | 2:4~")
+
+
+def yuelun():
+    """《月轮》：月轮山下。商调，和《开坛》同一个调、同一句——酒窖里那一句，拉长了一倍，很慢。头八小节只有一张琴，一个音一个音地弹，
+    长音上叠一点泛音；中间八小节箫接过去，琴只在长音底下应一声；末四小节琴和箫把头一句再走一遍，落在商音上。
+    没有鼓，没有阮。四小节一下很低的弦，是潮；头上远远一声钟，是塔。"""
+    bpm = 48
+    mel, beats = parse(YL_A + ' | ' + YL_B + ' | ' + YL_C, KT)
+    mx = Mix(beats, bpm, tail=7.0)
+    spb = 60 / bpm
+    for b, d, m, fl in mel:
+        sec = d * spb
+        sect = 0 if b < 32 else 1 if b < 64 else 2
+        if sect != 1:                                           # 琴：低八度，走手音
+            mx.add(pluck(m2f(m - 12), sec + 2.2, 1.3 if sect == 0 else 1.0, bright=0.44, t60=4.2, pos=0.24, glide=0.7 if d >= 2 else 0, vib=16 if '~' in fl else 5, seed=int(b * 101), body=0.4), b, pan=-0.14, rev=0.55)
+            if d >= 2 and sect == 0:
+                mx.add(harmonic(m2f(m + 12), sec + 1.6, 0.13), b + 0.04, pan=0.3, rev=0.85)
+        if sect != 0:                                           # 箫
+            mx.add(flute(m2f(m), sec * 0.97, 0.4 if sect == 1 else 0.32, 'xiao', grace=(2 if d >= 3 else 0), vib=15 if '~' in fl else 7, seed=int(b * 103)), b, pan=0.14, rev=0.7)
+            if sect == 1 and d >= 2:                            # 长音底下琴应一声
+                mx.add(pluck(m2f(m - 12), sec + 1.4, 0.6, bright=0.4, t60=3.6, pos=0.24, vib=10, seed=int(b * 107), body=0.4), b + 1, pan=-0.2, rev=0.55)
+    roots = [2, 2, 3, 1, 2, 3, 6, 6, 5, 2, 6, 2, 3, 5, 1, 2, 2, 2, 3, 2]
+    for bar, r in enumerate(roots):
+        a, c, e = CH[r]
+        b0 = bar * 4
+        if bar % 4 == 0:                                        # 潮：四小节一下，很低
+            mx.add(pluck(m2f(KT + a - 24), 6.0, 0.62, bright=0.24, t60=5.5, pos=0.3, vib=3, seed=1500 + bar, body=0.45), b0, pan=-0.3, rev=0.6)
+        elif bar >= 8 and bar % 2 == 0:
+            mx.add(pluck(m2f(KT + e - 24), 4.0, 0.3, bright=0.28, t60=4.2, pos=0.3, seed=1520 + bar, body=0.4), b0 + 2, pan=-0.22, rev=0.6)
+        if bar in (0, 16):
+            mx.add(bell(880, 4.0, 0.035), b0, pan=0.45, rev=0.98)
+        if bar in (7, 15):
+            mx.add(harmonic(m2f(KT + 14 + 12), 3.0, 0.08), b0 + 2, pan=0.5, rev=0.9)
+    y = mx.render(t60=3.8, wet=1.15, level=0.14)
+    return y * (0.16 / np.sqrt((y ** 2).mean()))
+
+
+TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo, 'biancheng': biancheng, 'yingye': yingye, 'jiangxiao': jiangxiao, 'haiwu': haiwu, 'chaoyin': chaoyin, 'shuangjiang': shuangjiang, 'pozhen': pozhen, 'lunchao': lunchao, 'yuelun': yuelun}
 if __name__ == '__main__':
     want = sys.argv[1:] or list(TRACKS) + ['sfx']
     for name in want:

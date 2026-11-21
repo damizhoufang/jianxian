@@ -59,8 +59,10 @@
     ['jiangxiao', '江晓', '第二章：真州渡，天刚亮', '头四小节只有筝，一个音一个音地弹；然后笛子进来，筝退到底下。没有鼓。'],
     ['haiwu', '海雾', '第三章：莲花洋上的晨雾', '箫吹长音，低处一小节一下弦，像船在浪上一沉；远远一记磬。'],
     ['chaoyin', '潮音', '第三章：普陀，潮音庵', '琴一个音一个音地按，两小节一声磬；中间箫接过去，底下木鱼很轻。'],
-    ['pozhen', '破阵', '首领战：屋顶上的蟹壳青、画舫上的梅花翅、馆舍里的油葫芦、山门前的金琵琶', '琵琶当家：长音轮指，短音弹挑，每小节两回扫弦；大鼓一下一下砸着。中段箫在低处压着，末段笛子高八度跟上。羽调，比《交锋》沉。'],
+    ['pozhen', '破阵', '首领战：蟹壳青、梅花翅、油葫芦、金琵琶', '琵琶当家：长音轮指，短音弹挑，每小节两回扫弦；大鼓一下一下砸着。中段箫在低处压着，末段笛子高八度跟上。羽调，比《交锋》沉。'],
     ['shuangjiang', '霜降', '第三章：潮音洞，洞底那口剑', '《阑珊》开头那一句拉长了一倍，用琴的泛音一个一个点出来，像冰；箫在低处答。底下两小节一下很低的弦，是潮；零零星星几点泛音，是洞顶的滴水。'],
+    ['lunchao', '论潮', '第四章：八月十八，江心论潮的船', '笛子领着，筝在底下分解；中段换琵琶在低处弹。底下一面大鼓半拍一下轻轻滚着，每八小节从小到大滚一回，像潮头近了。徵调。'],
+    ['yuelun', '月轮', '第四章：江堤、空了的那张桌子、月轮山下', '《开坛》那一句拉长了一倍：先是一张琴，一个音一个音地弹；中间箫接过去。四小节一下很低的弦，是潮；远远一声钟，是塔。'],
   ];
   JX.TRACKS = TRACKS;
   const PICS = [['face', '头像'], ['half', '半身'], ['full', '全身'], ['sheet', '三视图']];
@@ -106,7 +108,7 @@
     } else {
       const PER = 21, mp = Math.min(mpage, Math.ceil(TRACKS.length / PER) - 1);      // 一页装二十一首（七列三行），多了翻页
       h += '<div class="mus">' + TRACKS.slice(mp * PER, mp * PER + PER).map(t => '<div class="trk' + (playing === t[0] ? ' on' : '') + '"><b>《' + t[1] + '》</b><div class="w">' + t[2] + '</div><div class="h">' + t[3] + '</div><div class="btn small jx-clickable" data-play="' + t[0] + '">' + (playing === t[0] ? '■ 停' : '▶ 试听') + '</div></div>').join('') + '</div>' +
-        (TRACKS.length > PER ? '<div class="mnav"><span class="btn small jx-clickable' + (mp ? '' : ' off') + '" data-mp="' + (mp - 1) + '">◀ 上一页</span><span class="btn small jx-clickable' + ((mp + 1) * PER < TRACKS.length ? '' : ' off') + '" data-mp="' + (mp + 1) + '">下一页 ▶</span></div>' : '') +
+        (TRACKS.length > PER ? '<div class="mnav"><span class="pg">第 ' + (mp + 1) + ' 页／共 ' + Math.ceil(TRACKS.length / PER) + ' 页</span><span class="btn small jx-clickable' + (mp ? '' : ' off') + '" data-mp="' + (mp - 1) + '">◀ 上一页</span><span class="btn small jx-clickable' + ((mp + 1) * PER < TRACKS.length ? '' : ' off') + '" data-mp="' + (mp + 1) + '">下一页 ▶</span></div>' : '') +
         '<div class="note">' + TRACKS.length + ' 首都是原创旋律，整首离线合成后装进游戏，游戏里只播放。一首一兆上下，点了才装载，头一回要等一两秒。</div>';
     }
     box.innerHTML = h;
@@ -138,8 +140,9 @@
       if (spr && page < CHARS.length) drawSprites(CHARS[page]);
       return;
     }
-    if (JX.input.hit('left') || JX.input.hit('a')) { page = (page + n - 1) % n; JX.audio.sfx('page'); render(); }
-    else if (JX.input.hit('right') || JX.input.hit('d')) { page = (page + 1) % n; JX.audio.sfx('page'); render(); }
+    const mus = page >= CHARS.length, mps = Math.ceil(TRACKS.length / 21);      // 配乐页自己有两页：左右键先在这两页里翻，翻到头再换到人物
+    if (JX.input.hit('left') || JX.input.hit('a')) { if (mus && mpage > 0) mpage--; else { page = (page + n - 1) % n; mpage = page >= CHARS.length ? mps - 1 : 0; } JX.audio.sfx('page'); render(); }
+    else if (JX.input.hit('right') || JX.input.hit('d')) { if (mus && mpage < mps - 1) mpage++; else { page = (page + 1) % n; mpage = 0; } JX.audio.sfx('page'); render(); }
     else if (JX.input.hit('cancel') || JX.input.hit('menu')) { JX.input.eat('cancel'); JX.input.eat('menu'); UI.closeGallery(); return; }
     if (spr && page < CHARS.length) drawSprites(CHARS[page]);
   }

@@ -117,7 +117,7 @@
         W.add('tingxue', 'tingxue', 1180, 850, { dir: 0, tag: '听雪', solid: false, reach: 150, draw: drawPai, pai: 1 });
         const a = W.byId.agui; if (a) { a.vis = true; a.x = 330; a.y = 700; }
         if (fan) { fan.pose = 'sit'; fan.seat = 34; fan.bark = null; }
-        W.add('hu', { h: 1 }, 1432, 441, { solid: false, draw: drawHu });
+        W.add('hu', { h: 1 }, 1432, 428, { solid: false, draw: drawHu, sy: 486 });      // 排在桌子（480）后头画，不然给桌面盖住（0.16.0 里这只壶其实是看不见的）
       }
     }
     if (id === 'alley' && sg === 47) {

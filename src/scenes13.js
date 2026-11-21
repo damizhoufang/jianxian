@@ -99,13 +99,13 @@
   S.jiangdi = {
     name: '钱塘江堤', sub: '八月十八 · 观潮', w: DW, h: 1080, ambient: '#e2dccb', music: 'jiangxiao', outside: '#1c2026', amb: ['shi', 0.26], step: 'cao',
     walk: [[90, 668, DW - 150, 884]],
-    spawns: { start: { x: 540, y: 790, dir: 3 }, tai: { x: 3460, y: 830, dir: 2 } },
+    spawns: { start: { x: 540, y: 790, dir: 3 }, tai: { x: 3460, y: 830, dir: 2 }, tan: { x: 1760, y: 800, dir: 3 }, lao: { x: 2300, y: 820, dir: 3 } },
     exits: [],
     blocks: [[LING.x0 - 24, 640, LING.n * LING.cw + 48, 30]],
     lights: [{ x: 3800, y: 220, r: 2400, c: '#fff0d0', a: 0.5, ey: 0.6 }, { x: 1300, y: 420, r: 2300, c: '#ffeccb', a: 0.36, ey: 0.6 }],
     marks: [{ t: '六和塔', x: 330, y: 96 }, { t: '水军', x: 1150, y: 300 }, { t: '弄潮儿', x: 2010, y: 430 }, { t: '观潮台', x: 3820, y: 160 }],
     paint(c) {
-      const r = JX.rng(1301);
+      const r = JX.rng(1301), empty = JX.state.stage >= 58;      // 第十二场：看潮的人散了三天了——没有船、没有人、没有白绫，观潮台和大旗也拆了
       /* 天、对岸的山、江 */
       c.fillStyle = P.vgrad(c, 0, 0, HZ + 10, [[0, '#9dbacd'], [0.6, '#dfe0cf'], [1, '#f6e6bc']]); c.fillRect(0, 0, DW, HZ + 10);
       P.glow(c, 4100, 150, 420, '#fff2c8', 0.75); P.ellipse(c, 4100, 150, 44, 44, '#fff7dc');
@@ -118,8 +118,7 @@
       for (let i = 0; i < 70; i++) { const x = r() * 620, y = 230 + r() * 320; if (y < 250 + (x > 400 ? (x - 400) * 1.05 : 0) - (x < 400 ? 60 : 0)) continue; P.ellipse(c, x, y, 20 + r() * 22, 13 + r() * 10, P.mix('#4f7058', '#7a9870', r()), 'rgba(30,44,34,0.35)', 1); }
       pagoda(c, 330, 252, 0.92);
       /* 水军的战船，两列；东头江心另有几条等着论潮的大船 */
-      SHIPS.slice().sort((a, b) => a.y - b.y).forEach(q => warship(c, q.x, q.y, q.s));
-      TB.forEach(q => warship(c, q[0], q[1], q[2]));
+      if (!empty) { SHIPS.slice().sort((a, b) => a.y - b.y).forEach(q => warship(c, q.x, q.y, q.s)); TB.forEach(q => warship(c, q[0], q[1], q[2])); }
       /* 弄潮儿站的那一片沙滩，和下去的石阶 */
       c.fillStyle = P.vgrad(c, 0, 500, 80, [[0, '#d9cda8'], [1, '#c2b48c']]); c.beginPath(); c.moveTo(GAP[0] - 60, RY + 20); c.quadraticCurveTo(GAP[0] + 80, 488, 2010, 492); c.quadraticCurveTo(GAP[1] - 80, 488, GAP[1] + 60, RY + 20); c.closePath(); c.fill(); c.strokeStyle = 'rgba(250,252,246,0.7)'; c.lineWidth = 3; c.stroke();
       for (let i = 0; i < 60; i++) P.ellipse(c, GAP[0] + 40 + r() * (GAP[1] - GAP[0] - 80), 512 + r() * 56, 2 + r() * 3, 1.2, 'rgba(120,104,70,0.35)');
@@ -128,15 +127,15 @@
       for (let x = 0; x < DW; x += 78) P.line(c, x + r() * 16, RY + 2, x + r() * 16, TOP, 1.2, 'rgba(30,34,32,0.45)'); [RY + 28, RY + 56].forEach(y => P.line(c, 0, y, DW, y, 1.2, 'rgba(30,34,32,0.35)'));
       for (let i = 0; i < 6; i++) { c.fillStyle = P.mix('#b4b6ac', '#8a8d86', i / 6); c.fillRect(GAP[0] + 30, RY + i * 14, GAP[1] - GAP[0] - 60, 15); c.strokeStyle = 'rgba(30,34,32,0.4)'; c.lineWidth = 1; c.strokeRect(GAP[0] + 30, RY + i * 14, GAP[1] - GAP[0] - 60, 15); }
       /* 观潮台（在人群和白绫后头） */
-      tai(c);
+      if (!empty) tai(c);
       /* 堤面：土、当中一条石板路、两边的草 */
       P.earth(c, 0, TOP, DW, 1080 - TOP, { seed: 1303, col: '#bfae86' });
       c.save(); poly(c, [[0, 742], [900, 730], [2200, 748], [3400, 734], [DW, 744], [DW, 836], [3400, 850], [2200, 838], [900, 852], [0, 838]]); c.clip(); P.tiles(c, 0, 720, DW, 140, { seed: 1304, s: 74, col: '#aaa99c', bond: true }); c.restore();
       for (let i = 0; i < 9; i++) { const x = 120 + i * 500 + r() * 120, w = 300 + r() * 160; P.patch(c, x + w / 2, 1000, w / 2, 70, 1310 + i, () => P.grass(c, x, 930, w, 140, { seed: 1320 + i, dry: i % 3 === 1 })); }
       for (let i = 0; i < 12; i++) { const x = 200 + i * 360 + r() * 100; P.patch(c, x, 690, 90, 16, 1340 + i, () => P.grass(c, x - 90, 674, 180, 32, { seed: 1350 + i })); }
-      crowd(c);
+      if (!empty) crowd(c);
       /* 白绫两头各一杆大旗 */
-      [[LING.x0 - 70, '#a8362a'], [LING.x0 + LING.n * LING.cw + 70, '#c9a24a']].forEach(q => { P.shadow(c, q[0], 660, 18, 6, 0.3); P.line(c, q[0], 660, q[0], 360, 6, '#4a3a2a'); c.fillStyle = q[1]; poly(c, [[q[0] + 4, 366], [q[0] + 66, 374], [q[0] + 62, 520], [q[0] + 36, 500], [q[0] + 4, 520]]); c.fill(); c.strokeStyle = INK(); c.lineWidth = 1.6; c.stroke(); });
+      if (!empty) [[LING.x0 - 70, '#a8362a'], [LING.x0 + LING.n * LING.cw + 70, '#c9a24a']].forEach(q => { P.shadow(c, q[0], 660, 18, 6, 0.3); P.line(c, q[0], 660, q[0], 360, 6, '#4a3a2a'); c.fillStyle = q[1]; poly(c, [[q[0] + 4, 366], [q[0] + 66, 374], [q[0] + 62, 520], [q[0] + 36, 500], [q[0] + 4, 520]]); c.fill(); c.strokeStyle = INK(); c.lineWidth = 1.6; c.stroke(); });
       P.paper(c, DW, 1080, 131, 0.3);
     },
     props: [
@@ -153,24 +152,30 @@
       { x: 2760, y: 1078, bw: 380, bh: 190, draw(g) { shed(g, 340, 1373); } },
       /* 老道的摊子：一张小桌、一把旧伞、一摞图 */
       { x: 2620, y: 716, bw: 220, bh: 250, block: [-66, -22, 132, 26], draw(g) {
-        P.line(g, 60, 0, 52, -226, 5, '#5a4630'); g.fillStyle = '#8a8266'; g.beginPath(); g.moveTo(-58, -200); g.quadraticCurveTo(52, -262, 150, -196); g.lineTo(52, -218); g.closePath(); g.fill(); g.strokeStyle = INK(); g.lineWidth = 1.4; g.stroke(); for (let i = -2; i <= 2; i++) P.line(g, 52, -238, 52 + i * 44, -198, 1, 'rgba(40,34,20,0.5)'); g.fillStyle = 'rgba(60,54,36,0.5)'; g.fillRect(10, -214, 30, 9);      // 伞上一块补丁
+        if (JX.state.stage < 58) umbrella(g);                    // 第十二场伞是单摆的（老道要把它收起来带走）
         P.shadow(g, 0, 0, 70, 12, 0.35); g.fillStyle = '#6a4a32'; g.fillRect(-60, -62, 120, 12); g.strokeRect(-60, -62, 120, 12); g.fillRect(-54, -50, 8, 50); g.fillRect(46, -50, 8, 50); g.strokeRect(-54, -50, 8, 50); g.strokeRect(46, -50, 8, 50);
         for (let i = 0; i < 5; i++) { g.fillStyle = i === 4 ? '#f4eedc' : '#e6dec6'; g.fillRect(-40 + i, -72 - i * 2.4, 64, 10); g.strokeStyle = INK(0.6); g.lineWidth = 1; g.strokeRect(-40 + i, -72 - i * 2.4, 64, 10); } g.strokeStyle = 'rgba(46,90,102,0.8)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(-30, -78); g.quadraticCurveTo(-10, -86, 6, -78); g.quadraticCurveTo(14, -74, 22, -80); g.stroke(); P.ellipse(g, 40, -70, 9, 6, '#3a3632', INK(), 1);
       } },
       /* 卖茶的担子、卖糕的案子 */
-      { x: 1420, y: 708, bw: 210, bh: 150, block: [-70, -20, 140, 24], draw(g) { P.shadow(g, 0, 0, 80, 12, 0.32); [-50, 50].forEach(x => { g.fillStyle = '#8a6a44'; g.beginPath(); g.ellipse(x, -22, 30, 22, 0, 0, 6.3); g.fill(); g.strokeStyle = INK(); g.lineWidth = 1.4; g.stroke(); for (let k = -2; k <= 2; k++) P.line(g, x - 28, -22 + k * 7, x + 28, -22 + k * 7, 1, 'rgba(40,28,12,0.4)'); }); P.line(g, -70, -84, 70, -84, 5, '#6a5238'); P.line(g, -50, -84, -50, -40, 1.6, '#3a2a1e'); P.line(g, 50, -84, 50, -40, 1.6, '#3a2a1e'); P.ellipse(g, -50, -46, 22, 8, '#c9d6d8', INK(), 1.2); for (let i = 0; i < 4; i++) P.ellipse(g, 34 + i * 10, -48, 5, 4, '#e9e3d0', INK(0.7), 1); } },
-      { x: 2960, y: 706, bw: 200, bh: 170, block: [-64, -20, 128, 24], draw(g) { P.shadow(g, 0, 0, 74, 12, 0.32); g.fillStyle = '#6a4a32'; g.fillRect(-64, -64, 128, 12); g.strokeStyle = INK(); g.lineWidth = 1.4; g.strokeRect(-64, -64, 128, 12); g.fillRect(-58, -52, 8, 52); g.fillRect(50, -52, 8, 52); P.steamer(g, -22, -66, 30, 3); for (let i = 0; i < 5; i++) P.ellipse(g, 20 + (i % 3) * 16, -70 - Math.floor(i / 3) * 9, 8, 5, '#f0e2b8', INK(0.7), 1); P.line(g, 64, 0, 64, -150, 4, '#5a4630'); g.fillStyle = '#a8362a'; g.fillRect(40, -150, 44, 60); g.strokeRect(40, -150, 44, 60); P.vtext(g, '糕', 62, -132, 30, '#f3e6c4'); } },
+      { x: 1420, y: 708, bw: 210, bh: 150, block: [-70, -20, 140, 24], draw(g) { if (JX.state.stage >= 58) return; P.shadow(g, 0, 0, 80, 12, 0.32); [-50, 50].forEach(x => { g.fillStyle = '#8a6a44'; g.beginPath(); g.ellipse(x, -22, 30, 22, 0, 0, 6.3); g.fill(); g.strokeStyle = INK(); g.lineWidth = 1.4; g.stroke(); for (let k = -2; k <= 2; k++) P.line(g, x - 28, -22 + k * 7, x + 28, -22 + k * 7, 1, 'rgba(40,28,12,0.4)'); }); P.line(g, -70, -84, 70, -84, 5, '#6a5238'); P.line(g, -50, -84, -50, -40, 1.6, '#3a2a1e'); P.line(g, 50, -84, 50, -40, 1.6, '#3a2a1e'); P.ellipse(g, -50, -46, 22, 8, '#c9d6d8', INK(), 1.2); for (let i = 0; i < 4; i++) P.ellipse(g, 34 + i * 10, -48, 5, 4, '#e9e3d0', INK(0.7), 1); } },
+      { x: 2960, y: 706, bw: 200, bh: 170, block: [-64, -20, 128, 24], draw(g) { if (JX.state.stage >= 58) return; P.shadow(g, 0, 0, 74, 12, 0.32); g.fillStyle = '#6a4a32'; g.fillRect(-64, -64, 128, 12); g.strokeStyle = INK(); g.lineWidth = 1.4; g.strokeRect(-64, -64, 128, 12); g.fillRect(-58, -52, 8, 52); g.fillRect(50, -52, 8, 52); P.steamer(g, -22, -66, 30, 3); for (let i = 0; i < 5; i++) P.ellipse(g, 20 + (i % 3) * 16, -70 - Math.floor(i / 3) * 9, 8, 5, '#f0e2b8', INK(0.7), 1); P.line(g, 64, 0, 64, -150, 4, '#5a4630'); g.fillStyle = '#a8362a'; g.fillRect(40, -150, 44, 60); g.strokeRect(40, -150, 44, 60); P.vtext(g, '糕', 62, -132, 30, '#f3e6c4'); } },
     ],
-    setup(W) { W.lingN = W.lingN || 0; W.add('ling', { h: 1 }, LING.x0, LING.y, { solid: false, draw: drawLing }); for (let i = 0; i < 6; i++) { const e = W.add('nong' + i, NONG(i), 1780 + i * 92 + (i % 2) * 14, 534 + (i % 3) * 9, { dir: [2, 3, 0, 1, 2, 0][i], solid: false, draw: drawNong }); e.k = i; } },
+    setup(W) { if (JX.state.stage >= 58) return; W.lingN = W.lingN || 0; W.add('ling', { h: 1 }, LING.x0, LING.y, { solid: false, draw: drawLing }); for (let i = 0; i < 6; i++) { const e = W.add('nong' + i, NONG(i), 1780 + i * 92 + (i % 2) * 14, 534 + (i % 3) * 9, { dir: [2, 3, 0, 1, 2, 0][i], solid: false, draw: drawNong }); e.k = i; } },
     under(c, t) {
       for (let i = 0; i < 26; i++) { const y = HZ + 14 + (i * 37) % (RY - HZ - 30), x = (i * 331 + t * (5 + (i % 4) * 3)) % (DW + 200) - 100; P.line(c, x, y, x + 40 + (i % 5) * 16, y, 1.2, 'rgba(250,252,246,0.22)'); }
       const flag = (x, y, s, col, ph) => { c.fillStyle = col; c.beginPath(); c.moveTo(x, y); for (let i = 1; i <= 5; i++) c.lineTo(x + i * 9 * s, y + 1 + Math.sin(t * 3 + ph + i) * 3 * s * (i / 5)); for (let i = 5; i >= 0; i--) c.lineTo(x + i * 9 * s, y + 18 * s + Math.sin(t * 3 + ph + i + 0.5) * 3 * s * (i / 5)); c.closePath(); c.fill(); c.strokeStyle = 'rgba(43,34,28,0.6)'; c.lineWidth = 1; c.stroke(); };
+      if (JX.state.stage >= 58) return;
       SHIPS.forEach((q, i) => flag(q.x + 6 * q.s, q.y - 156 * q.s, q.s * 1.5, '#b8362a', i));                    // 桅上的旗，一色朝东
       TB.forEach((q, i) => flag(q[0] + 6 * q[2], q[1] - 156 * q[2], q[2] * 1.6, ['#c9a24a', '#2e7a86'][i], i * 2));
     },
   };
+  /* 老道那把旧伞（撑开的） */
+  function umbrella(g) {
+    P.line(g, 60, 0, 52, -226, 5, '#5a4630'); g.fillStyle = '#8a8266'; g.beginPath(); g.moveTo(-58, -200); g.quadraticCurveTo(52, -262, 150, -196); g.lineTo(52, -218); g.closePath(); g.fill(); g.strokeStyle = INK(); g.lineWidth = 1.4; g.stroke(); for (let i = -2; i <= 2; i++) P.line(g, 52, -238, 52 + i * 44, -198, 1, 'rgba(40,34,20,0.5)'); g.fillStyle = 'rgba(60,54,36,0.5)'; g.fillRect(10, -214, 30, 9);      // 伞上一块补丁
+  }
   /* 看棚 */
   function shed(g, w, seed) {
+    if (JX.state.stage >= 58) return;                            // 看潮的人散了：看棚也拆了
     const r = JX.rng(seed), hw = w / 2;
     for (let x = -hw + 10; x <= hw - 10; x += (w - 20) / 3) { g.fillStyle = '#7a8a4e'; g.fillRect(x - 5, -150, 10, 150); g.strokeStyle = INK(0.8); g.lineWidth = 1.2; g.strokeRect(x - 5, -150, 10, 150); }
     g.fillStyle = '#6a4a32'; g.fillRect(-hw + 24, -30, w - 48, 12); g.strokeRect(-hw + 24, -30, w - 48, 12);
@@ -178,5 +183,5 @@
     g.fillStyle = P.vgrad(g, 0, -186, 44, [[0, '#c2ac7c'], [1, '#9a8458']]); poly(g, [[-hw - 14, -142], [-hw + 16, -184], [hw - 16, -184], [hw + 14, -142]]); g.fill(); g.strokeStyle = INK(); g.lineWidth = 1.6; g.stroke();
     for (let i = 1; i < 12; i++) P.line(g, -hw + 16 + (w - 32) * i / 12, -184, -hw - 14 + (w + 28) * i / 12, -142, 1, 'rgba(60,44,24,0.4)');
   }
-  JX.scenes13 = { LING, TAI, GAP, DW, drawLing };
+  JX.scenes13 = { LING, TAI, GAP, DW, drawLing, pagoda, umbrella };
 })();

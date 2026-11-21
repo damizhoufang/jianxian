@@ -16,6 +16,7 @@ const path = require('path');
   await page.evaluate(() => document.querySelectorAll('#gal .tab')[2].click()); await page.waitForTimeout(300);
   const ids = await page.evaluate(() => JX.TRACKS.map(t => t[0]));
   for (const id of ids) {
+    if (!(await page.$('#gal [data-play="' + id + '"]'))) { await page.click('#gal .mnav span:last-child'); await page.waitForTimeout(300); console.log('翻到下一页'); }      // 一页二十一首，多出来的在第二页
     await page.click('#gal [data-play="' + id + '"]'); 
     await page.waitForFunction(i => JX.audio.cur && JX.audio.cur.id === i, id, { timeout: 15000 });
     const r = await page.evaluate(i => ({ id: i, cur: JX.audio.cur.id, dur: +JX.audio.bufs[i].buf.duration.toFixed(1), ch: JX.audio.bufs[i].buf.numberOfChannels, on: !!document.querySelector('#gal .trk.on') }), id);

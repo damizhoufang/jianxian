@@ -9,7 +9,7 @@ const path = require('path'), fs = require('fs');
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.addInitScript(() => { const s = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === 'jx.save') (window.__cps = window.__cps || []).push(v); return s.apply(this, arguments); }; });
   await go(page, 'file://' + path.resolve('index.html') + '#auto');
-  await page.waitForFunction(() => window.JX && (JX.ended || JX.lastError), null, { timeout: 420000 });
+  await page.waitForFunction(() => window.JX && (JX.ended || JX.lastError), null, { timeout: 900000 });
   const out = await page.evaluate(() => ({ err: JX.lastError || null, cps: window.__cps || [], labels: JX.story.beats.filter(b => b.t === 'label').map(b => b.name) }));
   await browser.close();
   if (out.err || errs.length) { console.log('出错', out.err, errs.join('\n')); process.exit(1); }
