@@ -228,7 +228,7 @@
       const all = JX.story.scenes(), cur = JX.game.playing ? all.indexOf(st.label) : -1, nx = all[cur + 1];
       const CHN = { 一: '钗头凤', 二: '扬州慢', 三: '渔家傲', 四: '望海潮' }, chap = l => { const m = /^第(.)章·/.exec(l); return m ? '第' + m[1] + '章　' + (CHN[m[1]] || '') : '序章　青玉案'; }, short = l => l.replace(/^第.章·/, '');      // 原来只认第一、二章，第三章的十二场排在了第二个“序章”底下
       const groups = []; all.forEach((l, i) => { const g = chap(l); if (!groups.length || groups[groups.length - 1].name !== g) groups.push({ name: g, items: [] }); groups[groups.length - 1].items.push([l, i]); });
-      h += '<p style="font-size:23px;line-height:1.4;margin:0 0 4px">测试用：点哪一场，就跳到那一场的开头。游戏里随时可按 <kbd>]</kbd> 下一场、<kbd>[</kbd> 上一场。</p>' +
+      h += '<p style="font-size:23px;line-height:1.4;margin:0 0 4px">点哪一场，就跳到那一场的开头。游戏里随时可按 <kbd>]</kbd> 下一场、<kbd>[</kbd> 上一场。</p>' +
         (all.length ? '' : '<p style="color:#8e2a20">场次表没有载入到。<span class="btn small jx-clickable" data-act="title">重新载入页面</span></p>') +
         '<div class="scwrap">' + groups.map(g => '<div class="grp">' + g.name + '</div><div class="scenes">' + g.items.map(([l, i]) => '<div class="sc jx-clickable' + (i === cur ? ' on' : '') + '" data-jump="' + i + '">' + JX.esc(short(l)) + (i === cur ? '<i>现在</i>' : '') + '</div>').join('') + '</div>').join('') + '</div>' +
         (cur >= 0 ? '<div class="btn small jx-clickable' + (nx ? '' : ' off') + '" data-act="next">' + (nx ? '跳到下一场 ▶　' + JX.esc(short(nx)) : '已经是最后一场') + '</div><div class="btn small jx-clickable" data-act="again">这一场从头再来</div>' : '');
@@ -266,7 +266,7 @@
     if (menu && (tab === 5 || tab === 4)) { const w = menu.querySelector('.scwrap'); if (w) { if (JX.input.down('up') || JX.input.down('w')) w.scrollTop -= 16; if (JX.input.down('down') || JX.input.down('s')) w.scrollTop += 16; } }
     if (menu && (JX.input.hit('menu') || JX.input.hit('cancel'))) { JX.input.eat('menu'); JX.input.eat('cancel'); UI.toggleMenu(); }
     else if (!menu && !UI.galleryOpen() && JX.game && JX.game.playing && !document.getElementById('mini') && JX.input.hit('menu')) { JX.input.eat('menu'); JX.input.eat('cancel'); UI.toggleMenu(); }      // 对白、演出、战斗里也能开（出菜口那块小面板自己用 Esc，除外）
-    /* 测试用的跳场键：] 下一场，[ 上一场 */
+    /* 跳场键：] 下一场，[ 上一场（原先标着“测试用”；2026-11-21 用户定了正式版也留着） */
     if (JX.game && JX.game.playing && !UI.galleryOpen()) { if (JX.input.hit('BracketRight')) JX.story.jumpBy(1); else if (JX.input.hit('BracketLeft')) JX.story.jumpBy(-1); }
   });
   UI.openScenes = function () { tab = 3; if (!menu) UI.toggleMenu(); else renderMenu(); };

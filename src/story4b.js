@@ -34,7 +34,7 @@
   JX.populate = function (id) {
     pop5(id);
     const sg = JX.state.stage;
-    Fig.cast.jingzhe.towel = !(sg >= 53 && sg <= 58);                 // 第六场放下的那条手巾（“放手巾”那一下拿掉的），卷一里没有再搭回去
+    Fig.cast.jingzhe.towel = !(sg >= 53);                 // 第六场放下的那条手巾（“放手巾”那一下拿掉的），卷一里没有再搭回去
     if (id !== 'jiangxin' || sg < 51 || sg > 54) return;
     const he = W.add('he', 'he', 960, 606, { dir: 0, tag: '贺元度', solid: false, pose: sg <= 52 ? 'sit' : null, seat: 34 });
     W.add('siyi', 'siyi', 1250, 650, { dir: 0, tag: '司仪', solid: false, carry: 'brush' });

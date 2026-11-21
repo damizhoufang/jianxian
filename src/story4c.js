@@ -124,6 +124,7 @@
     async 卷一完() {
       const p = W.player, d = W.byId.laodao; if (d) { d.path = null; d.vis = false; } p.vis = true; p.x = 2300; p.y = 830; p.dir = 0; p.pose = null; W.zoom = 1; W.focus = null;
       ST._endHtml = '<h2>卷一《惊蛰》　完</h2><p>《青玉案》《钗头凤》《扬州慢》《渔家傲》《望海潮》，五章到这里。</p><p>跑堂的阿蛰说出了自己的姓。四个人往北去了。</p><p>卷二还没有做。</p><div class="btn jx-clickable" data-a="stay">留在江堤上看看</div><div class="btn jx-clickable" data-a="title">回到标题画面</div>';
+      JX.state.stage = 59;                                         // 卷一演完了：线索页里“演完第十二场才出现”的那一条，这样才看得见
       await H.试玩到此二();
     },
   });

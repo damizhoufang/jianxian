@@ -29,7 +29,7 @@
     const st = JX.state, d = new Date();
     JX.store.set('save', { label: st.label, money: st.money, maxed: st.maxed, flags: st.flags, when: (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') });
   };
-  /* 跳场（测试用）：把那一场开头的快照写成存档，重新装载页面，启动时不过标题直接接上。
+  /* 跳场（正式版也留着）：把那一场开头的快照写成存档，重新装载页面，启动时不过标题直接接上。
      这样不管此刻是在对白、演出还是战斗里，都能干净地跳过去。 */
   ST.scenes = () => (window.JX_CHECKPOINTS || []).map(c => c.label);
   ST.jump = function (label) {
