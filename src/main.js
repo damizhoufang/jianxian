@@ -31,6 +31,7 @@
     W.focus = null; UI.quiet = false; JX.audio.hold = false;
     let label = null;
     if (act === 'load') { const s = JX.store.get('save'); if (s) { label = s.label; JX.state.money = s.money || 0; JX.state.maxed = !!s.maxed; JX.state.flags = s.flags || {}; } }
+    if (label && /^第.章·/.test(label) && !/^第.章·一　/.test(label) && UI.recap) { JX.state.label = label; await UI.recap(); }      // 接着上回：先出一张前情提要（章首那一场剧本里自己会出）
     JX.story.run(JX.fullScript(), label);
   };
 })();

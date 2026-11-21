@@ -365,7 +365,7 @@
   }
 
   function drawFront(ctx, sp, ph, o, back) {
-    const mv = o.moving ? 1 : 0, sw = Math.sin(ph), d = dims(sp), sway = mv * sw * 1.6;
+    const mv = o.moving ? 1 : 0, sw = Math.sin(ph), d = dims(sp), sway = mv * sw * 1.6 + (o.idle || 0) * 0.9;
     if (o.pose === 'sit' || o.pose === 'squat' || o.pose === 'slump') { ctx.save(); ctx.beginPath(); ctx.rect(-80, -200, 160, 200 - 60); ctx.clip(); }
     else shoesFront(ctx, sp, d, sw, mv);
     if (back && sp.pole) seg(ctx, -62, -112, 62, -110, 4, '#7a5a34');
@@ -413,7 +413,7 @@
     }
   }
   function drawSide(ctx, sp, ph, o) {
-    const mv = o.moving ? 1 : 0, sw = Math.sin(ph), d = dims(sp), f = d.f, col = sp.robe, sway = -mv * (1.5 + Math.abs(sw));
+    const mv = o.moving ? 1 : 0, sw = Math.sin(ph), d = dims(sp), f = d.f, col = sp.robe, sway = -mv * (1.5 + Math.abs(sw)) + (o.idle || 0) * 0.8;
     const arm = (ang, shade) => {
       ctx.save(); ctx.translate(1, -108); ctx.rotate(ang);
       const wide = sp.wide || 1;

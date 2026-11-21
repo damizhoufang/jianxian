@@ -1080,6 +1080,58 @@ def jiangxiao():
     return mx.render(t60=2.2, wet=1.0, level=0.17)
 
 
+# ---- 0.15.0 加的：首领战 ----
+PZ_A = bars("6:1! 6:0.5 6:0.5 1':1 2':1 | 3':1.5 2':0.5 1':1 6:1 | 5:1 6:0.5 1':0.5 2':1 1':1 | 6:3~ 0:1 | 3':1! 3':0.5 3':0.5 5':1 6':1 | 5':1.5 3':0.5 2':1 3':1 | 2':0.5 1':0.5 6:0.5 5:0.5 6:1 1':1 | 6:3~ 0:1")
+PZ_B = bars("2':0.5 3':0.5 2':0.5 1':0.5 6:1 6:1 | 1':0.5 2':0.5 1':0.5 6:0.5 5:1 5:1 | 6:0.5 1':0.5 2':0.5 3':0.5 5':1 3':1 | 2':2~ 3':2~ | 5':0.5 6':0.5 5':0.5 3':0.5 2':1 2':1 | 3':0.5 5':0.5 3':0.5 2':0.5 1':1 1':1 | 6:1 1':1 2':1 3':1 | 6':4!")
+
+
+def pozhen():
+    """《破阵》：首领战。羽调（宫在 D），比《交锋》慢一点、沉一点。琵琶当家：长音轮指、短音弹挑、每小节两回扫弦；大鼓一下一下砸着；
+    中段箫在低八度压着，最后一段笛子高八度跟上。三段各八小节。"""
+    bpm = 132
+    mel, beats = parse(PZ_A + ' | ' + PZ_B + ' | ' + PZ_A, D4)
+    mx = Mix(beats, bpm, tail=3.5)
+    spb = 60 / bpm
+    for b, d, m, fl in mel:
+        sect = 0 if b < 32 else 1 if b < 64 else 2
+        sec = d * spb
+        acc = (1.25 if '!' in fl else 1.0) * (1.18 if sect == 0 else 1.0)
+        if d >= 1.5:
+            mx.add(tremolo(m2f(m), sec * 0.97, 1.0 * acc, rate=14, seed=int(b * 61)), b, pan=0.2, rev=0.28)
+        else:
+            mx.add(pluck(m2f(m), max(0.4, sec * 1.1), 0.95 * acc, bright=0.9, t60=0.9, pos=0.09, seed=int(b * 67), body=0.2), b, pan=0.2, rev=0.2)
+            if d >= 1:
+                mx.add(pluck(m2f(m - 12), 0.5, 0.3, bright=0.85, t60=0.7, pos=0.1, seed=int(b * 71), body=0.2), b, pan=0.35, rev=0.15)
+        if sect == 1 and d >= 1:
+            mx.add(flute(m2f(m - 12), sec * 0.95, 0.42, 'xiao', vib=10, seed=int(b * 73)), b, pan=-0.3, rev=0.45)
+        if sect == 2:
+            mx.add(flute(m2f(m + 12 if m < 80 else m), sec * (0.7 if d <= 0.5 else 0.93), 0.3, 'dizi', grace=(2 if d >= 2 else 0), vib=20 if d >= 2 else 0, seed=int(b * 79)), b, pan=-0.15, rev=0.3)
+    roots = [6, 6, 5, 6, 3, 3, 2, 6, 2, 1, 6, 2, 5, 3, 6, 6, 6, 6, 5, 6, 3, 3, 2, 6]
+    for bar, r in enumerate(roots):
+        a, c, e = CH[r]
+        b0 = bar * 4
+        mid = 8 <= bar < 16
+        mx.add(strum([D4 + a - 24, D4 + e - 24, D4 + a - 12, D4 + c - 12], 1.1, 0.4, seed=bar + 200), b0, pan=0.4, rev=0.2)
+        mx.add(strum([D4 + a - 24, D4 + e - 24, D4 + a - 12], 0.8, 0.3, seed=bar + 250), b0 + 2, pan=0.4, rev=0.2)
+        for i in range(4):                                                                                                    # 低音一拍一下，沉
+            mx.add(pluck(m2f(D4 + (a if i != 3 else e - 12) - 24), 0.7, 0.46 if i % 2 == 0 else 0.34, bright=0.55, t60=0.9, pos=0.2, seed=bar * 41 + i, body=0.4), b0 + i, pan=-0.4, rev=0.15)
+        pat = [(0, 'd', 0.52), (1.5, 'd', 0.32), (2, 'd', 0.44), (3, 'x', 0.34), (3.5, 'x', 0.3)] if not mid else [(0, 'd', 0.5), (1, 'd', 0.36), (1.5, 'x', 0.26), (2, 'd', 0.44), (3, 'd', 0.36), (3.5, 'x', 0.3)]
+        for beat, what, amp in pat:
+            if what == 'd':
+                mx.add(dagu(64, 0.7, amp, seed=bar + int(beat * 2) + 300), b0 + beat, pan=-0.1, rev=0.22)
+            else:
+                mx.add(drum(190, 0.2, amp, seed=bar + int(beat * 2) + 300), b0 + beat, pan=0.05, rev=0.18)
+        if bar % 4 == 3:
+            mx.add(cymbal(0.5, 0.26, seed=bar + 320), b0 + 3, pan=0.3, rev=0.3)
+        if bar % 8 == 0:
+            mx.add(gong(220, 2.6, 0.42, bend=-0.05, seed=bar + 330), b0, pan=0, rev=0.4)
+            mx.add(cymbal(0.9, 0.36, seed=bar + 340), b0, pan=0.2, rev=0.35)
+        if bar % 8 == 7:
+            for j in range(6):                                                                                                # 句尾一串急鼓
+                mx.add(drum(210 - j * 10, 0.2, 0.26 + j * 0.05, seed=j + 350), b0 + 2.5 + j * 0.25, pan=0, rev=0.2)
+    return mx.render(t60=1.3, wet=0.7, level=0.2)
+
+
 def sfx():
     rng = np.random.default_rng(3)
 
@@ -1147,13 +1199,67 @@ def sfx():
     han = sum(a * np.sin(2 * np.pi * f * k + i) for i, (f, a) in enumerate([(2349, 1.0), (3136, 0.6), (3520, 0.5), (4699, 0.3), (6272, 0.16)])) * envh * (1 + 0.3 * np.sin(2 * np.pi * 9 * k))
     han[:int(0.03 * SR)] += noise(0.03, 3000, 9000, 0.008)[:int(0.03 * SR)] * 0.6
     out['han'] = enc(han * 0.3)
+    # 0.15.0 添的七样，也排在最后：三种脚步声（木板、石板、草和土），四段可以循环的环境声（水声、风、秋虫、市声）
+    mu = drum(130, 0.13, 0.7, seed=31); mu[:len(mu)] += np.pad(noise(0.04, 500, 2500, 0.01) * 0.3, (0, len(mu) - int(0.04 * SR)))[:len(mu)]
+    fade = lambda y: y * np.minimum(1, np.arange(len(y)) / 40.0) * np.minimum(1, (len(y) - 1 - np.arange(len(y))) / 260.0)      # 头尾收一下，免得“嗒”一声
+    out['bu_mu'] = enc(fade(mu))
+    shi = noise(0.08, 1200, 5000, 0.02) * 0.6; shi[:int(0.03 * SR)] += wood(900, 0.03, 0.25)[:int(0.03 * SR)]
+    out['bu_shi'] = enc(fade(shi))
+    cao = noise(0.16, 1500, 6500, 0.05); cao[:300] *= np.linspace(0, 1, 300)
+    out['bu_cao'] = enc(fade(cao))
+
+    def loop(y, k=0.4):                                           # 尾巴叠回开头，循环起来没有缝
+        kk = int(k * SR); ramp = np.linspace(0, 1, kk); y = y.copy(); y[:kk] = y[:kk] * ramp + y[-kk:] * (1 - ramp); return y[:-kk]
+
+    def band(lo, hi, n):
+        bb, aa = sg.butter(2, [lo / (SR / 2), hi / (SR / 2)], 'band'); return sg.lfilter(bb, aa, rng.normal(0, 1, n))
+    T = 6.4; n = int(T * SR); k = np.arange(n) / SR
+    # 水声：低处一片，随着两三个慢的起伏涨落；高处是拍在船帮上的碎响
+    lap = (0.5 + 0.5 * np.sin(2 * np.pi * k / 3.0 + 0.6)) ** 2
+    shui = band(140, 1300, n) * (0.35 + 0.65 * lap) * 1.3 + band(1800, 5200, n) * (lap ** 3) * (0.5 + 0.5 * np.sin(2 * np.pi * k * 1.5)) * 0.35
+    out['shui'] = enc(loop(shui) * 0.5)
+    # 风：三股不一样粗细的气，各有各的涨落（都是整数个周期，接得上）
+    feng = band(70, 420, n) * (0.55 + 0.45 * np.sin(2 * np.pi * k / 6.0)) * 1.5 + band(300, 900, n) * (0.5 + 0.5 * np.sin(2 * np.pi * k / 3.0 + 1.3)) ** 2 * 0.7 + band(900, 2200, n) * (0.5 + 0.5 * np.sin(2 * np.pi * k / 2.0 + 2.1)) ** 4 * 0.22
+    out['feng'] = enc(loop(feng) * 0.5)
+    # 秋虫：两只蟋蟀，一只三声一句，一只两声一句，一问一答
+    T2 = 5.4; n2 = int(T2 * SR); chong = np.zeros(n2)
+
+    def chirp(f, at, reps, amp):
+        for j in range(reps):
+            ln = int(0.02 * SR); i0 = int((at + j * 0.034) * SR); tt = np.arange(ln) / SR
+            if i0 + ln < n2:
+                chong[i0:i0 + ln] += amp * np.sin(2 * np.pi * f * tt) * np.sin(np.pi * tt / 0.02) ** 2
+    for j in range(12):
+        chirp(4300, 0.1 + j * 0.45, 3, 1.0)
+    for j in range(8):
+        chirp(5050, 0.33 + j * 0.675, 2, 0.6)
+    chong += band(3000, 7000, n2) * 0.02
+    out['chong'] = enc(chong * 0.5)
+    # 市声：远远一片人声。几十个“音节”——一串脉冲过两道共鸣（像元音），高高低低、长长短短地撒开；再垫一层很轻的底噪，偶尔一下木头响
+    T3 = 6.4; n3 = int(T3 * SR); shi2 = np.zeros(n3 + SR)
+    VOW = [(800, 1200), (500, 900), (500, 1800), (300, 2300), (350, 800), (650, 1100)]
+    for j in range(84):
+        dur = rng.uniform(0.1, 0.3); ln = int(dur * SR); tt = np.arange(ln) / SR; f0 = rng.uniform(105, 250) * (1 + 0.04 * np.sin(2 * np.pi * rng.uniform(3, 6) * tt))
+        src = 2 * ((np.cumsum(f0) / SR) % 1) - 1
+        f1, f2 = VOW[int(rng.integers(0, len(VOW)))]
+        b1, a1 = sg.butter(2, [f1 * 0.85 / (SR / 2), f1 * 1.15 / (SR / 2)], 'band'); b2, a2 = sg.butter(2, [f2 * 0.9 / (SR / 2), f2 * 1.1 / (SR / 2)], 'band')
+        syl = (sg.lfilter(b1, a1, src) + 0.5 * sg.lfilter(b2, a2, src)) * np.sin(np.pi * tt / dur) ** 1.5 * rng.uniform(0.3, 1.0)
+        i0 = int(rng.uniform(0, T3) * SR); shi2[i0:i0 + ln] += syl
+    shi2[:SR] += shi2[n3:n3 + SR]; shi2 = shi2[:n3]                 # 超出去的那一秒折回开头
+    bl, al = sg.butter(2, 2600 / (SR / 2), 'low'); shi2 = sg.lfilter(bl, al, shi2)
+    ir = rng.normal(0, 1, int(0.5 * SR)) * np.exp(-np.arange(int(0.5 * SR)) / (0.14 * SR)); ir /= np.sqrt((ir ** 2).sum())      # 糊一下：像隔着半条街
+    wetp = sg.fftconvolve(np.concatenate([shi2, shi2[:len(ir)]]), ir)[len(ir):len(ir) + n3]
+    shi2 = shi2 * 0.35 + wetp * 0.9 + band(200, 1500, n3) * 0.05
+    for at in (1.3, 3.9, 5.2):
+        w0 = wood(520, 0.1, 0.25); i0 = int(at * SR); shi2[i0:i0 + len(w0)] += w0 * 0.5
+    out['shi'] = enc(loop(shi2) * 0.5)
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, 'sfx.js'), 'w') as f:
         f.write('window.JX_SFX=' + json.dumps(out) + ';\n')
     print('音效：', ', '.join(out.keys()), '，共 %.0f KB' % (os.path.getsize(os.path.join(OUT, 'sfx.js')) / 1024))
 
 
-TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo, 'biancheng': biancheng, 'yingye': yingye, 'jiangxiao': jiangxiao, 'haiwu': haiwu, 'chaoyin': chaoyin, 'shuangjiang': shuangjiang}
+TRACKS = {'zhuti': zhuti, 'yuanxi': yuanxi, 'xueye': xueye, 'kaitan': kaitan, 'zaohuo': zaohuo, 'dengshi': dengshi, 'lanshan': lanshan, 'anliu': anliu, 'jiaofeng': jiaofeng, 'shisheng': shisheng, 'wazi': wazi, 'meichuang': meichuang, 'xingchuan': xingchuan, 'yebo': yebo, 'biancheng': biancheng, 'yingye': yingye, 'jiangxiao': jiangxiao, 'haiwu': haiwu, 'chaoyin': chaoyin, 'shuangjiang': shuangjiang, 'pozhen': pozhen}
 if __name__ == '__main__':
     want = sys.argv[1:] or list(TRACKS) + ['sfx']
     for name in want:

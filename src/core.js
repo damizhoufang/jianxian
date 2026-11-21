@@ -104,7 +104,7 @@
     cancel: ['Escape', 'KeyX', 'Backspace'],
     up: ['ArrowUp'], down: ['ArrowDown'], left: ['ArrowLeft'], right: ['ArrowRight'],
     w: ['KeyW'], a: ['KeyA'], s: ['KeyS'], d: ['KeyD'],
-    guide: ['KeyH'], god: ['KeyV', 'Tab'], menu: ['Escape', 'KeyM'],
+    guide: ['KeyH'], god: ['KeyV', 'Tab'], menu: ['Escape', 'KeyM'], log: ['KeyL', 'PageUp'],
   };
   JX.input = {
     down: name => (MAP[name] || [name]).some(c => down.has(c)),

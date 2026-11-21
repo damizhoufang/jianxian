@@ -18,14 +18,28 @@
   function pool(c, t, x0, x1, y0, y1, a, seed) {
     const cx = (x0 + x1) / 2, hw = (x1 - x0) / 2, N = 12;
     const edge = (k, sg, w) => { const y = y0 + (y1 - y0) * k / N; return [cx + sg * w * (1 + 0.16 * Math.sin(k * 1.7 + seed * 2.1 + sg) + 0.08 * Math.sin(k * 3.9 + seed)), y]; };
-    const shape = w => { c.beginPath(); for (let k = 0; k <= N; k++) { const q = edge(k, -1, w); k ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]); } for (let k = N; k >= 0; k--) { const q = edge(k, 1, w); c.lineTo(q[0], q[1]); } c.closePath(); };
+    /* 水边是圆的：折线的拐角用曲线带过去（0.15.0 以前是一段一段的直线，像撕出来的纸边） */
+    const shape = w => {
+      const pts = []; for (let k = 0; k <= N; k++) pts.push(edge(k, -1, w)); for (let k = N; k >= 0; k--) pts.push(edge(k, 1, w));
+      const n = pts.length, mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], m0 = mid(pts[n - 1], pts[0]);
+      c.beginPath(); c.moveTo(m0[0], m0[1]);
+      for (let k = 0; k < n; k++) { const m = mid(pts[k], pts[(k + 1) % n]); c.quadraticCurveTo(pts[k][0], pts[k][1], m[0], m[1]); }
+      c.closePath();
+    };
     c.fillStyle = 'rgba(22,36,46,' + (0.2 + 0.14 * (1 - a)) + ')'; shape(hw * 1.08); c.fill();                                    // 水退以后留下的湿石头
     if (a <= 0.03) { for (let i = 0; i < 6; i++) P.ellipse(c, x0 + 26 + ((i * 97 + seed * 31) % (x1 - x0 - 52)), y0 + 34 + ((i * 53 + seed * 17) % (y1 - y0 - 70)), 16 + (i % 3) * 9, 5 + (i % 2) * 3, 'rgba(150,196,210,0.34)'); return; }
-    const w = hw * (0.22 + 0.78 * a), g = c.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, 'rgba(96,150,164,' + (0.5 + 0.4 * a) + ')'); g.addColorStop(1, 'rgba(44,92,112,' + (0.6 + 0.36 * a) + ')');
-    c.fillStyle = g; shape(w); c.fill(); c.strokeStyle = 'rgba(226,244,248,' + (0.5 * a + 0.2) + ')'; c.lineWidth = 2.2; c.stroke();
+    const w = hw * (0.22 + 0.78 * a), g = c.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, 'rgba(92,132,146,' + (0.5 + 0.4 * a) + ')'); g.addColorStop(1, 'rgba(40,76,96,' + (0.6 + 0.36 * a) + ')');
+    c.fillStyle = g; shape(w); c.fill();
     c.save(); shape(w); c.clip();
-    for (let i = 0; i < 10; i++) { const y = y0 + 16 + ((i * 37 + seed * 11) % (y1 - y0 - 30)), x = cx - w + ((i * 131 + t * (16 + (i % 3) * 7) + seed * 40) % (2 * w)); P.line(c, x, y, x + 30 + (i % 4) * 12, y, 1.5, 'rgba(226,244,248,' + (0.4 * a + 0.1) + ')'); }
+    const dg = c.createRadialGradient(cx, (y0 + y1) / 2, 10, cx, (y0 + y1) / 2, (y1 - y0) * 0.62); dg.addColorStop(0, 'rgba(14,34,48,' + (0.5 * a) + ')'); dg.addColorStop(1, 'rgba(14,34,48,0)');      // 当中深，边上浅
+    c.fillStyle = dg; c.fillRect(cx - hw * 1.3, y0, hw * 2.6, y1 - y0);
+    for (let i = 0; i < 9; i++) {                                                                                                // 水面的光：一小段一小段的弧，慢慢漂
+      const y = y0 + 22 + ((i * 37 + seed * 11) % (y1 - y0 - 44)), x = cx - w + ((i * 131 + t * (10 + (i % 3) * 5) + seed * 40) % (2 * w)), L = 26 + (i % 4) * 12;
+      c.strokeStyle = 'rgba(226,244,248,' + (0.34 * a + 0.08) + ')'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + L / 2, y - 3 - (i % 2) * 2, x + L, y); c.stroke();
+    }
     c.restore();
+    shape(w); c.strokeStyle = 'rgba(226,244,248,' + (0.22 * a + 0.1) + ')'; c.lineWidth = 6; c.stroke();                          // 水边一圈白：外头一道淡的、宽的，里头一道细的
+    shape(w); c.strokeStyle = 'rgba(232,246,250,' + (0.5 * a + 0.2) + ')'; c.lineWidth = 1.8; c.stroke();
   }
 
   const POOLS = [[760, 960], [1420, 1660], [2080, 2320]];                 // 三处低洼的 x 范围

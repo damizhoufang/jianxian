@@ -285,6 +285,13 @@
         for (let y = 344; y < 910; y += 28) { c.strokeStyle = 'rgba(14,18,36,0.3)'; c.lineWidth = 1.5; c.beginPath(); c.arc(x + 15, y, 15, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke(); }
       }
       for (let i = 0; i < 26; i++) { const x = r() * 1920, y = 360 + r() * 520; c.fillStyle = 'rgba(60,90,70,' + (0.1 + r() * 0.16) + ')'; c.fillRect(x, y, 20 + r() * 40, 10 + r() * 16); }                    // 青苔
+      /* 0.15.0 添的：月光在瓦上斜斜地铺一道；屋脊边一座烟囱；左下檐口靠着一架梯子、码着一摞备用的瓦——这片屋顶原来只有瓦，太空 */
+      { const mg = c.createLinearGradient(0, 0, 1150, 0); mg.addColorStop(0, 'rgba(214,226,255,0.05)'); mg.addColorStop(0.28, 'rgba(214,226,255,0.16)'); mg.addColorStop(1, 'rgba(214,226,255,0)'); c.fillStyle = mg; c.fillRect(0, 330, 1150, 580); }
+      { const x = 1290, y = 426; P.shadow(c, x + 30, y + 4, 60, 9, 0.4); c.fillStyle = P.vgrad(c, 0, y - 98, 98, [[0, '#59607a'], [1, '#3c4258']]); c.fillRect(x, y - 98, 64, 98); c.strokeStyle = 'rgba(8,10,20,0.8)'; c.lineWidth = 1.6; c.strokeRect(x, y - 98, 64, 98);
+        for (let j = 0; j < 6; j++) for (let i = 0; i < 3; i++) { c.strokeStyle = 'rgba(8,10,20,0.3)'; c.strokeRect(x + (j % 2 ? 0 : -10) + i * 26, y - 98 + j * 16, 26, 16); }
+        c.fillStyle = '#2a2f42'; c.fillRect(x - 7, y - 108, 78, 12); c.strokeRect(x - 7, y - 108, 78, 12); c.fillStyle = '#0c0e16'; c.fillRect(x + 12, y - 106, 40, 7); }
+      { const x = 232, y = 932; c.strokeStyle = '#5a4630'; c.lineWidth = 7; c.lineCap = 'round'; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 16, y - 92); c.moveTo(x + 46, y); c.lineTo(x + 62, y - 92); c.stroke(); c.lineWidth = 5; for (let j = 0; j < 4; j++) { c.beginPath(); c.moveTo(x + 4 + j * 4, y - 14 - j * 22); c.lineTo(x + 50 + j * 4, y - 14 - j * 22); c.stroke(); }
+        for (let j = 0; j < 5; j++) { P.ellipse(c, 372, 884 - j * 7, 30, 9, j % 2 ? '#4a5270' : '#565e7c', 'rgba(8,10,20,0.75)', 1.3); } P.shadow(c, 372, 892, 34, 7, 0.4); }
       /* 檐口与檐下的灯河 */
       for (let x = 0; x < 1920; x += 46) { P.ellipse(c, x + 15, 914, 15, 10, '#2c3146', 'rgba(0,0,0,0.7)', 1.2); P.ellipse(c, x + 15, 914, 7, 5, '#3c4258'); }
       const st = c.createLinearGradient(0, 924, 0, 1080); st.addColorStop(0, '#2a1a14'); st.addColorStop(0.4, '#7a4a22'); st.addColorStop(1, '#d08a3a'); c.fillStyle = st; c.fillRect(0, 926, 1920, 154);
@@ -296,6 +303,9 @@
     props: [
       { x: ROPE.x, y: ROPE.y, bw: 80, bh: 150, block: [-14, -10, 28, 16], draw(g) { P.shadow(g, 0, 0, 18, 6, 0.5); g.fillStyle = '#3a241a'; g.fillRect(-6, -110, 12, 110); g.strokeStyle = P.rgba(C.ink, 0.85); g.lineWidth = 1.3; g.strokeRect(-6, -110, 12, 110); g.fillStyle = '#8e2a20'; g.fillRect(-9, -104, 18, 10); g.fillRect(-9, -84, 18, 6); } },
     ],
+  };
+  S.roof.anim = function (c, t) {                                 // 烟囱里一缕烟，慢慢往上散（画在屋脊以上，不会盖到人）
+    for (let i = 0; i < 6; i++) { const u = (t * 0.11 + i / 6) % 1, x = 1322 + Math.sin(u * 5 + i) * 14 + u * 46, y = 318 - u * 190, r = 12 + u * 34; c.fillStyle = 'rgba(190,198,220,' + (0.17 * (1 - u)).toFixed(3) + ')'; c.beginPath(); c.arc(x, y, r, 0, 6.3); c.fill(); }
   };
   /* 屋顶上那条灯索：从桩上牵到街对面。k 是断开的程度（0 完好） */
   JX.drawRope = function (g, k) {

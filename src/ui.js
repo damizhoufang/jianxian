@@ -9,7 +9,7 @@
     root = JX.uiRoot;
     obj = root.appendChild(el('div', 'hide')); obj.id = 'obj';
     purse = root.appendChild(el('div', 'hide')); purse.id = 'purse';
-    keys = root.appendChild(el('div', 'hide', '方向键 / WASD 走动　回车 互动　H 指引　V 俯瞰　F 全屏　Esc 菜单')); keys.id = 'keys';
+    keys = root.appendChild(el('div', 'hide', '方向键 / WASD 走动　回车 互动　H 指引　V 俯瞰　L 回看　F 全屏　Esc 菜单')); keys.id = 'keys';
     banner = root.appendChild(el('div', '', '<div class="n"></div><div class="l"></div><div class="s"></div>')); banner.id = 'banner';
     toast = root.appendChild(el('div', '', '<span></span>')); toast.id = 'toast';
     cap = root.appendChild(el('div', '', '<div class="t"></div><div class="s"></div>')); cap.id = 'cap';
@@ -91,8 +91,10 @@
       const hs = JX._upd = JX._upd || []; hs.push(tick);
     });
   }
+  UI.log = [];                                                      // 说过的话（对白回看用）：最近八十句
+  const logPush = (n, t) => { UI.log.push([n || '', t]); if (UI.log.length > 80) UI.log.shift(); };
   UI.say = async function (id, name, text, mood) {
-    UI.modal++;
+    UI.modal++; logPush(name, text);
     narr.classList.add('hide'); dlg.classList.remove('hide');
     const cv = dlg.querySelector('.med'), c = cv.getContext('2d');
     const art = id && JX.Art && JX.Art.has(id) ? JX.Art.avatar(id, mood) : null;      // 主角用单独画的头像，其余人用小像
@@ -107,7 +109,7 @@
     dlg.classList.add('hide'); UI.modal--;
   };
   UI.narrate = async function (text) {
-    UI.modal++;
+    UI.modal++; logPush('', text);
     dlg.classList.add('hide'); narr.classList.remove('hide');
     await typeInto(narr.querySelector('.txt'), text);
     narr.classList.add('hide'); UI.modal--;
@@ -149,8 +151,8 @@
       function finish(i) { const k = hs.indexOf(tick); if (k >= 0) hs.splice(k, 1); choiceBox.classList.add('hide'); UI.modal--; JX.audio && JX.audio.sfx('tick'); res(i); }
     });
   };
-  UI.tutorial = async function (title, html) {
-    UI.modal++;
+  UI.tutorial = async function (title, html, cls) {
+    UI.modal++; tut.className = cls || '';
     tut.innerHTML = '<h3>' + JX.esc(title) + '</h3><p>' + html + '</p><div class="ok">回车 知道了 ▾</div>';
     tut.classList.remove('hide'); await waitConfirm(0.4); tut.classList.add('hide'); UI.modal--;
   };
@@ -185,8 +187,8 @@
     return '<div class="row"><span>' + label + '</span><span class="opts">' + opts.map(o => '<span class="jx-clickable' + (JX.settings[key] === o[0] ? ' on' : '') + '" data-k="' + key + '" data-v="' + o[0] + '">' + o[1] + '</span>').join('') + '</span></div>';
   }
   function renderMenu() {
-    const st = JX.state, tabs = ['人物', '设置', '存档', '场次'];
-    const show = JX.game.playing ? [0, 1, 2, 3] : [3, 1];      // 标题画面上开的：只有选场和设置
+    const st = JX.state, tabs = ['人物', '设置', '存档', '场次', '线索', '回看'];
+    const show = JX.game.playing ? [0, 4, 5, 1, 2, 3] : [3, 1];      // 标题画面上开的：只有选场和设置
     if (show.indexOf(tab) < 0) tab = show[0];
     let h = '<div class="tabs">' + show.map(i => '<div class="tab jx-clickable' + (i === tab ? ' on' : '') + '" data-tab="' + i + '">' + tabs[i] + '</div>').join('') + '</div>';
     if (tab === 0) {
@@ -212,6 +214,16 @@
         optRow('画面亮度', 'bright', [[1, '标准'], [1.1, '亮'], [1.22, '更亮']]) +
         optRow('对话框', 'dlgAlpha', [[0.94, '不透明'], [0.72, '半透明'], [0.5, '更透']]) +
         '<p style="font-size:24px;color:#7a5d3a">方向键任何时候都是四个固定方向。俯瞰（V）时点地面，人会自己走过去。</p>';
+    } else if (tab === 4) {                                         // 线索：眼下要办的事、悬着的事、已经了结的
+      const s = st.stage || 0, now = (JX.nows || []).filter(q => s >= q[0]).pop(), all = JX.threads || [];
+      const open = all.filter(q => s > q.a && !(q.z && s > q.z)), done = all.filter(q => q.z && s > q.z);
+      h += '<div class="scwrap thw"><div class="grp">眼下</div><div class="th now">' + JX.esc(now ? now[1] : '') + '<i>' + JX.esc(st.label || '') + '</i></div>' +
+        '<div class="grp">悬着的事</div>' + (open.length ? open.map(q => '<div class="th">' + JX.esc(q.t) + '</div>').reverse().join('') : '<div class="th">眼下还没有。</div>') +
+        (done.length ? '<div class="grp">已经了结的</div>' + done.map(q => '<div class="th done">' + JX.esc(q.t) + '<i>' + JX.esc(q.d || '') + '</i></div>').reverse().join('') : '') + '</div>' +
+        '<div class="btn small jx-clickable" data-act="map">行程图</div><div class="btn small jx-clickable" data-act="recap">前情提要</div>';
+    } else if (tab === 5) {                                         // 回看：说过的话
+      h += '<div class="scwrap logw">' + (UI.log.length ? UI.log.map(q => '<div class="lg' + (q[0] ? '' : ' nr') + '">' + (q[0] ? '<b>' + JX.esc(q[0]) + '</b>' : '') + JX.esc(q[1]) + '</div>').join('') : '<div class="lg nr">这一回还没有人说过话。</div>') + '</div>' +
+        '<p style="font-size:22px;margin:6px 0 0;color:#7a5d3a">游戏里随时按 <kbd>L</kbd> 打开这一页；<kbd>↑</kbd> <kbd>↓</kbd> 或滚轮翻看，再按一次 <kbd>L</kbd> 收起。只记最近八十句，换一场、重开页面就清空。</p>';
     } else if (tab === 3) {
       const all = JX.story.scenes(), cur = JX.game.playing ? all.indexOf(st.label) : -1, nx = all[cur + 1];
       const CHN = { 一: '钗头凤', 二: '扬州慢', 三: '渔家傲', 四: '望海潮' }, chap = l => { const m = /^第(.)章·/.exec(l); return m ? '第' + m[1] + '章　' + (CHN[m[1]] || '') : '序章　青玉案'; }, short = l => l.replace(/^第.章·/, '');      // 原来只认第一、二章，第三章的十二场排在了第二个“序章”底下
@@ -228,6 +240,7 @@
     }
     h += '<div class="foot"><span>《剑仙情缘恩仇录》试玩 ' + JX.VERSION + '</span><span class="jx-clickable" data-act="close" style="color:#8e2a20;font-size:28px">Esc 关闭</span></div>';
     menu.innerHTML = h;
+    if (tab === 5) { const w = menu.querySelector('.logw'); w.scrollTop = w.scrollHeight; }
     if (tab === 0) { const id = party()[mem].id, c = menu.querySelector('canvas').getContext('2d'); if (JX.Art && JX.Art.has(id)) c.drawImage(JX.Art.avatar(id), 0, 0, 380, 436); else c.drawImage(Fig.medallion(id), 10, 76, 360, 360); }
     menu.onclick = e => {
       const t = e.target.closest('[data-tab],[data-k],[data-act],[data-jump],[data-mem]'); if (!t) return;
@@ -242,11 +255,15 @@
         JX.settings[t.dataset.k] = v; JX.saveSettings(); UI.applyText(); JX.audio && JX.audio.applyVolume(); renderMenu();
       } else if (t.dataset.act === 'close') UI.toggleMenu();
       else if (t.dataset.act === 'title') location.reload();
+      else if (t.dataset.act === 'map') { UI.toggleMenu(); UI.routeMap && UI.routeMap(); }
+      else if (t.dataset.act === 'recap') { UI.toggleMenu(); UI.recap && UI.recap(); }
       else if (t.dataset.act === 'gallery') { UI.toggleMenu(); UI.gallery(null, () => { JX.audio.hold = false; const sc = JX.world.sc; if (sc && sc.music) JX.audio.music(sc.music, sc.muffle); }); }
       else if (t.dataset.act === 'max') { const on = !JX.state.maxed, keep = JX.store.get('save'); JX.state.maxed = on; if (keep) { keep.maxed = on; JX.store.set('save', keep); } JX.audio && JX.audio.sfx(on ? 'gong' : 'tick'); UI.toast(on ? '功力全开' : '功力收回了'); renderMenu(); }      // 只改存档里的这一个开关，进度还是这一场的开头
     };
   }
   JX.on('update', () => {
+    if (JX.input.hit('log') && JX.game && JX.game.playing && !UI.galleryOpen() && !document.getElementById('mini') && !UI.overlay) { if (menu && tab === 5) UI.toggleMenu(); else { tab = 5; if (menu) renderMenu(); else UI.toggleMenu(); } return; }      // L：对白回看
+    if (menu && (tab === 5 || tab === 4)) { const w = menu.querySelector('.scwrap'); if (w) { if (JX.input.down('up') || JX.input.down('w')) w.scrollTop -= 16; if (JX.input.down('down') || JX.input.down('s')) w.scrollTop += 16; } }
     if (menu && (JX.input.hit('menu') || JX.input.hit('cancel'))) { JX.input.eat('menu'); JX.input.eat('cancel'); UI.toggleMenu(); }
     else if (!menu && !UI.galleryOpen() && JX.game && JX.game.playing && !document.getElementById('mini') && JX.input.hit('menu')) { JX.input.eat('menu'); JX.input.eat('cancel'); UI.toggleMenu(); }      // 对白、演出、战斗里也能开（出菜口那块小面板自己用 Esc，除外）
     /* 测试用的跳场键：] 下一场，[ 上一场 */

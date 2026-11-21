@@ -85,7 +85,7 @@
     const JIAO = { id: 'jiao', name: '吹角连营', kind: 'talk', say: '陆惊蛰：吹角连营', desc: phase === 1 ? '第二式。角声一营接着一营传过去：一刀出去，后头还跟着两刀。' : '第二式。角声从远处来——站远了出剑。秋水起了调以后用，踩着她的拍子，就是合击“词剑合璧”：必断他一根弦。',
       fx: async (b, u) => { const Jx = J(b), Q = ally(b, 'qiushui');
         if (phase === 1) { await B.fx.lunge(u, Jx, 0.86); JX.audio.sfx('page'); const e = Jx.ent, x0 = e.x; await B.fx.tw(0.16, k => { e.x = x0 - 40 * k; }); B.fx.floater(u, '出得太近，力道散了', '#ff9a8a'); await B.fx.wait(0.5); await B.fx.back(u); e.x = x0; return; }
-        if (b.sing > 0 && Q && Q.hp > 0) { b.sing--; JX.audio.sfx('xian'); B.fx.floater(Q, '“梦回吹角连营——”', '#cfe3f0'); await B.fx.wait(0.35); JX.audio.sfx('ming', 0.6); await needle(u.ent, Jx.ent, JX.auto ? 0.02 : 0.32); await needle(Q.ent, Jx.ent, JX.auto ? 0.02 : 0.26); B.fx.floater(Jx, '词剑合璧！', '#fff2c0'); await snap(b); }
+        if (b.sing > 0 && Q && Q.hp > 0) { b.sing--; JX.audio.sfx('xian'); B.fx.floater(Q, '“梦回吹角连营——”', '#cfe3f0'); await B.fx.wait(0.35); JX.audio.sfx('ming', 0.6); await needle(u.ent, Jx.ent, JX.auto ? 0.02 : 0.32); await needle(Q.ent, Jx.ent, JX.auto ? 0.02 : 0.26); B.fx.floater(Jx, '词剑合璧！', '#fff2c0'); if (UI.cutBanner) { await UI.cutBanner(['jingzhe', 'qiushui'], '词剑合璧', b.heji ? 0.85 : 1.5); b.heji = true; } await snap(b); }
         else { JX.audio.sfx('page'); await needle(u.ent, Jx.ent, JX.auto ? 0.02 : 0.36); B.fx.floater(Jx, '没有拍子，他让开了', '#cfd8e0'); await B.fx.wait(0.3); } } };
     const QI = { id: 'qi', name: '起调', kind: 'talk', say: '秋水开口，起了一句——', desc: '开口起一句：“梦回吹角连营”。阿蛰下一回使“吹角连营”，踩着这一句的拍子，就是合击“词剑合璧”。最多攒两句。',
       fx: async (b, u) => { b.sing = Math.min(2, (b.sing || 0) + 1); JX.audio.sfx('xian', 0.6); B.fx.floater(u, b.sing > 1 ? '又接了一句' : '起了调', '#cfe3f0'); } };
@@ -111,7 +111,7 @@
       const me = { ent: p, key: 'jingzhe', name: '陆惊蛰', hp: 130, spd: 13, atk: 22, def: 6, season: 0, cmds: [TIAO, JIAO, PILI] };
       if (phase === 1) [TIAO, PILI, JIAO].forEach((m, i) => { m.when = b => b.step === i; }); else [TIAO, PILI, JIAO].forEach(m => { delete m.when; });
       const r = await B.run({
-        goal: (phase === 1 ? '照师父教的，三式各使一回' : '挑开琴声、断他的弦；她起调，你出剑') + '<br>铁琵琶的弦 ' + (phase === 1 ? '●●●●' : '●●●○'), music: 'jiaofeng', season: 0, seasonEvery: 5, zoom: 1.04, focus: { x: 1240, y: 720 }, flip: true,
+        goal: (phase === 1 ? '照师父教的，三式各使一回' : '挑开琴声、断他的弦；她起调，你出剑') + '<br>铁琵琶的弦 ' + (phase === 1 ? '●●●●' : '●●●○'), music: 'pozhen', season: 0, seasonEvery: 5, zoom: 1.04, focus: { x: 1240, y: 720 }, flip: true,
         allies: phase === 1 ? [me] : [me, { ent: q, key: 'qiushui', name: '辛秋水', hp: 105, spd: 12.5, atk: 26, def: 5, season: 2, cmds: [QI, PING, LENG] }],
         foes: [{ ent: jin, key: 'jin', name: '金琵琶', hp: 999, spd: 11, atk: 16, def: 0, boss: true, keep: true, showHp: false, n: 0, ai: (b, u) => (++u.n % 2 ? bo : lun) }],
         start(b) { b.xian = phase === 1 ? 4 : 3; b.step = 0; b.sing = 0; b.tiao = false; b.ext = false; b.snapNow = false; setGoal(b); },

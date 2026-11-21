@@ -113,8 +113,11 @@
     let r = strike(b, a, m, t); if (b.def.resolve) r = b.def.resolve(b, a, m, t, r) || r;
     b.last = { a, m, t, r };
     if (r.evade) { floater(t, '闪', '#bfe3d0'); JX.audio.sfx('page'); await hop(t); }
-    else if (r.iron) { floater(t, r.iron, '#c9d2d8'); JX.audio.sfx('gong'); await wait(0.35); }
+    else if (r.iron) { floater(t, r.iron, '#c9d2d8'); JX.audio.sfx('gong'); W.fx && W.fx('ring', t.ent.x, t.ent.y - 80, { s: 0.9, col: 'rgba(201,210,216,0.9)' }); await wait(0.35); }
     else {
+      if (W.fx) { const heavy = m.type === 'heavy' || r.dmg >= 40, fromLeft = a.ent.x < t.ent.x;      // 观感：刀光一道、命中一闪、重的一下镜头震一震；挡住了只是一圈
+        if (r.block || !r.dmg) W.fx('ring', t.ent.x, t.ent.y - 80, { s: 0.8, col: 'rgba(240,220,168,0.9)' });
+        else { W.fx('slash', t.ent.x, t.ent.y - 78, { s: heavy ? 1.3 : 1, rot: fromLeft ? 0.35 : Math.PI - 0.35 }); W.fx('flash', t.ent.x, t.ent.y - 80, { s: heavy ? 1.15 : 0.75 }); W.shakeAmp = Math.max(W.shakeAmp || 0, heavy ? 9 : 3.5); } }
       t.hp = Math.max(0, t.hp - r.dmg); floater(t, r.dmg ? '−' + r.dmg : '接住', r.block ? '#f0dca8' : '#ff8a70'); JX.audio.sfx(r.block ? 'tick' : 'wrong'); refresh(b); await shake(t);
       if (t.hp <= 0) { if (t.side === 'foe') { if (!t.keep) { await tw(0.5, k => { t.ent.alpha = 1 - k; }); t.ent.vis = false; } } else t.ent.pose = 'squat'; }
     }

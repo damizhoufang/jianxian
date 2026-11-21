@@ -136,7 +136,7 @@
         { id: 'tui', name: '绵掌·推', kind: 'attack', type: 'light', pow: 0.9, desc: '一掌按在胸口，劲是往外送的。' },
         { id: 'shan', name: '闪', kind: 'dodge', desc: '身子一矮，从刀底下钻过去。' }, press] });
       const r = await B.run({
-        goal: fireBar(), music: 'jiaofeng', season: 0, seasonEvery: 5, zoom: 1.04, focus: { x: 1300, y: 700 },
+        goal: fireBar(), music: 'pozhen', season: 0, seasonEvery: 5, zoom: 1.04, focus: { x: 1300, y: 700 },
         allies: team,
         foes: [{ ent: yo, key: 'you', name: '油葫芦', hp: HP, spd: 10.5, atk: 30, def: 6, boss: true, keep: true, up: true, last: 'hulu', note: '扔完葫芦，人还直着腰',
           ai: (b, u) => (fs.gourds > 0 && u.last !== 'hulu' ? hulu : dao) }],      // 刚扔过、又没被按住：就地一刀；不然有葫芦就扔

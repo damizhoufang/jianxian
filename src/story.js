@@ -61,13 +61,13 @@
       if (q.t === 'label') labels++;
       else if (q.cmd === '乐') ids[q.arg.trim()] = 1;
       else if (q.cmd === '场景') { const sc = JX.scenes[q.arg.split(/\s+/)[0]]; if (sc && sc.music) ids[sc.music] = 1; }
-      else if (q.cmd === '做' && /战|相扑|学剑|守庵/.test(q.arg)) ids.jiaofeng = 1;
+      else if (q.cmd === '做' && /战|相扑|学剑|守庵/.test(q.arg)) { ids.jiaofeng = 1; if (/战三|战梅花|战油葫芦|战金琵琶[甲乙]|战贺/.test(q.arg)) ids.pozhen = 1; }
     }
     JX.audio.prefetch(Object.keys(ids));
   }
   async function exec(b) {
-    if (b.t === 'label') { JX.state.label = b.name; ST.save(); ahead(); return; }
-    if (b.t === 'say') { const e = talker(b.who); W.talker = e; await UI.say(NAMES[b.who], b.who, b.text, b.mood); W.talker = null; return; }
+    if (b.t === 'label') { JX.state.label = b.name; ST.save(); ahead(); ST.labelsSeen = (ST.labelsSeen || 0) + 1; const k = ST.scenes().indexOf(b.name) + 1; if (k > (JX.store.get('far') || 0)) JX.store.set('far', k); return; }      // far：故事走到过第几场（图鉴按它解锁）
+    if (b.t === 'say') { const e = talker(b.who); W.talker = e; W.talkMood = b.mood; await UI.say(NAMES[b.who], b.who, b.text, b.mood); W.talker = null; W.talkMood = null; return; }
     if (b.t === 'narr') { await UI.narrate(b.text); return; }
     const a = b.arg, parts = a.split('|').map(s => s.trim());
     switch (b.cmd) {
@@ -78,6 +78,8 @@
       case '字幕': await UI.caption(parts[0], parts[1]); break;
       case '题词': await UI.card(parts[0], parts[1].split('/'), parts[2]); break;
       case '教学': await UI.tutorial(parts[0], parts[1]); break;
+      case '前情': if ((ST.labelsSeen || 0) <= 1 && UI.recap) await UI.recap(a); break;      // 前情提要：只在“这一回是从这一场开始的”时候出（读档、跳场）；一口气从上一章演过来的不出
+      case '行程': if (UI.routeMap) await UI.routeMap(a); break;                              // 行程图：演这一章要走的那一段路
       case '乐': if (a === '还') { JX.audio.hold = false; if (W.sc && W.sc.music) JX.audio.music(W.sc.music, W.sc.muffle); } else { JX.audio.hold = true; JX.audio.music(a); } break;   // 临时换一首；“还”是换回这个场景本来的曲子
       case '停': await JX.sleep(JX.auto ? 0.02 : parseFloat(a)); break;
       case '指引': W.objective = { text: parts[0], at: parseTargets(parts[1] || '') }; UI.objective(parts[0], parts[2] ? parts[2].split('/') : null); W.guideAt = 0; break;      // 第三段是补充说明，用 / 分行
@@ -98,7 +100,7 @@
     }
   }
   ST.run = async function (script, label) {
-    ST.beats = ST.parse(script); ST.i = 0;
+    ST.beats = ST.parse(script); ST.i = 0; ST.labelsSeen = 0;
     if (label) { const k = ST.beats.findIndex(b => b.t === 'label' && b.name === label); if (k >= 0) ST.i = k; }
     JX.game.playing = true;
     while (ST.i < ST.beats.length) {
@@ -834,7 +836,7 @@
         let pos = 0, cup = false;
         const note = () => (pos >= 2 ? '脚下就是灯索' : '离灯索还有 ' + '两一'[pos] + ' 步');
         const r = await B.run({
-          goal: '铁臂打不动。闪开重拳，把他引到灯索旁', music: 'jiaofeng', season: 0, seasonEvery: 5, zoom: 1.12, focus: { x: 1000, y: 640 },
+          goal: '铁臂打不动。闪开重拳，把他引到灯索旁', music: 'pozhen', season: 0, seasonEvery: 5, zoom: 1.12, focus: { x: 1000, y: 640 },
           allies: fighters(p, x),
           foes: [{ ent: k, key: 'xieke', name: '蟹壳青', hp: 300, spd: 9.5, atk: 30, def: 10, boss: true, keep: true, n: 0, note: note(), ai: (b, u) => (++u.n % 2 ? jab : hook) }],
           allow: rec,
@@ -1176,7 +1178,7 @@
         team[0].cmds.push(rock('竹篙·拨船', '拿竹篙去拨她脚下那两条小船。船一晃，她下一回落脚就站不稳。', '陆惊蛰一篙点在小船的船帮上——'));
         team[1].cmds.push(rock('踩铁索', '一脚踩在连船的铁索上，那头的小船跟着一荡。船一晃，她下一回落脚就站不稳。', '夏离一脚踩在连船的铁索上——'));
         const r = await B.run({
-          goal: '趁她跳船，把船晃起来——落脚不稳再打', music: 'jiaofeng', season: 0, seasonEvery: 5, zoom: 1.08, focus: { x: 1850, y: 690 },
+          goal: '趁她跳船，把船晃起来——落脚不稳再打', music: 'pozhen', season: 0, seasonEvery: 5, zoom: 1.08, focus: { x: 1850, y: 690 },
           allies: team,
           foes: [{ ent: m, key: 'meihuachi', name: '梅花翅', hp: 300, spd: 12, atk: 30, def: 4, boss: true, keep: true, n: 0, at: 0, ai: (b, u) => (++u.n % 2 ? dart : leap) }],
           allow: rec,

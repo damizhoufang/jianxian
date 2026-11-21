@@ -15,7 +15,7 @@
   W.load = function (id, spawn) {
     const sc = JX.scenes[id];
     if (!sc) throw new Error('没有这个场景：' + id);
-    W.id = id; W.sc = sc; W.ents = []; W.byId = {}; W.hots = []; W.bubbles = []; W.guide = null; W.focus = null; W.talker = null;
+    W.id = id; W.sc = sc; W.ents = []; W.byId = {}; W.hots = []; W.bubbles = []; W.guide = null; W.focus = null; W.talker = null; W.fxs = []; W.shakeAmp = 0;
     W.blocks = (sc.blocks || []).slice();
     (sc.props || []).forEach(p => { if (p.block) W.blocks.push([p.x + p.block[0], p.y + p.block[1], p.block[2], p.block[3]]); });
     W.prerender();
@@ -266,9 +266,11 @@
         }
       }
     } else if (p && !p.path) p.moving = false;
+    if (W.shakeAmp) W.shakeAmp *= Math.exp(-dt * 9);
     W.ents.forEach(e => {
       if (e.path) followPath(e, dt);
-      if (e.moving) e.ph += dt * (e.isPlayer ? 9.5 * Math.sqrt(JX.settings.walk) : 8.5);
+      if (e.moving) { const p0 = e.ph; e.ph += dt * (e.isPlayer ? 9.5 * Math.sqrt(JX.settings.walk) : 8.5);
+        if (e.isPlayer && !e.draw && W.sc && W.sc.step !== false && Math.floor(e.ph / Math.PI) !== Math.floor(p0 / Math.PI) && JX.audio && !JX.auto) JX.audio.sfx('bu_' + (W.sc.step || 'shi'), 0.16 + Math.random() * 0.06, 0.9 + Math.random() * 0.22); }      // 主角的脚步声：一步一声，按这个场景的地面（step：mu 木板、shi 石板、cao 草和土）
       else e.ph = 0.5;
       e.blink -= dt; if (e.blink < -0.13) e.blink = 2.5 + Math.random() * 4;
     });
@@ -336,11 +338,20 @@
     c.lineWidth = size * 0.22; c.strokeStyle = 'rgba(20,12,8,0.85)'; c.lineJoin = 'round'; c.strokeText(text, x, y);
     c.fillStyle = col || '#f6e9c8'; c.fillText(text, x, y);
   }
+  const EMO = { surprise: ['！', '#a8362a', 26], angry: ['！！', '#a8362a', 22], sad: ['……', '#5a6a78', 20], closed: ['……', '#5a6a78', 20], smile: ['♪', '#8e2a20', 24], grin: ['♪', '#8e2a20', 24], smirk: ['哼', '#6a5236', 20], cold: ['…', '#5a6a78', 22] };
+  W.fxs = []; W.shakeAmp = 0;
+  /* 加一处刀光／一闪／一圈：kind 是 slash、flash、ring；o 可给 s 大小、col 颜色、rot 角度、dur 秒数 */
+  W.fx = function (kind, x, y, o) { o = o || {}; W.fxs.push({ kind, x, y, t0: JX.time, dur: o.dur || (kind === 'slash' ? 0.22 : 0.3), s: o.s || 1, rot: o.rot == null ? Math.random() * 6.3 : o.rot, col: o.col || (kind === 'slash' ? 'rgba(255,248,225,0.95)' : 'rgba(255,214,150,0.5)') }); };
   function drawEnt(c, e) {
     if (e.vis === false) return;
     c.save(); c.translate(e.x, e.y - (e.z || 0)); if (e.alpha < 1) c.globalAlpha = e.alpha;
     if (e.draw) e.draw(c, e);
-    else Fig.draw(c, e.sp, e.dir, e.ph, { moving: e.moving, pose: e.pose, carry: e.carry, seat: e.seat, lap: e.lap, closed: e.closed || e.blink < 0, smile: e.smile, shadow: !e.pose || e.pose === 'squat' });
+    else {
+      if (e.bph == null) e.bph = Math.random() * 6.3;
+      const idle = e.moving ? 0 : Math.sin(JX.time * 1.1 + e.bph);                     // 站着的人不是死的：一呼一吸身子有一点起伏，衣摆轻轻摆
+      if (!e.moving) c.scale(1, 1 + (e.pose ? 0.004 : 0.0075) * Math.sin(JX.time * 1.75 + e.bph));
+      Fig.draw(c, e.sp, e.dir, e.ph, { moving: e.moving, pose: e.pose, carry: e.carry, seat: e.seat, lap: e.lap, idle, closed: e.closed || e.blink < 0, smile: e.smile, shadow: !e.pose || e.pose === 'squat' });
+    }
     c.restore();
   }
   function draw() {
@@ -349,7 +360,8 @@
     c.fillStyle = (sc && sc.outside) || '#0b0908'; c.fillRect(0, 0, cw, ch);
     if (!sc || !W.bg) return;
     const z = W.cam.z, t = JX.time;
-    c.setTransform(S * z, 0, 0, S * z, -W.cam.x * S * z, -W.cam.y * S * z);
+    const sk = W.shakeAmp > 0.2 ? W.shakeAmp : 0, skx = sk ? Math.sin(t * 71) * sk : 0, sky = sk ? Math.cos(t * 59) * sk * 0.7 : 0;      // 战斗里挨了重的一下：镜头震一震（W.shakeAmp，自己衰减）
+    c.setTransform(S * z, 0, 0, S * z, (-W.cam.x + skx) * S * z, (-W.cam.y + sky) * S * z);
     c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
     c.drawImage(W.bg, 0, 0, sc.w, sc.h);
     if (sc.below && W.cam.y + JX.H / z > sc.h + 1) sc.below(c, t, W);
@@ -368,6 +380,15 @@
     });
     c.globalAlpha = 1;
     if (sc.glow) sc.glow(c, t, W);
+    for (let i = W.fxs.length - 1; i >= 0; i--) {                      // 刀光、命中的一闪：画在“加亮”这一层
+      const f = W.fxs[i], k = (t - f.t0) / f.dur; if (k >= 1) { W.fxs.splice(i, 1); continue; }
+      c.save(); c.translate(f.x, f.y);
+      if (f.kind === 'slash') { c.rotate(f.rot); c.globalAlpha = 1 - k; c.strokeStyle = f.col; c.lineCap = 'round'; const a0 = -1.1 + k * 0.5, a1 = a0 + 1.5 * Math.min(1, k * 3); for (let j = 0; j < 3; j++) { c.lineWidth = (7 - j * 2.2) * f.s * (1 - k * 0.5); c.beginPath(); c.arc(0, 0, (62 + j * 9) * f.s, a0, a1); c.stroke(); } }
+      else if (f.kind === 'flash') { const r = (40 + 90 * k) * f.s, g = c.createRadialGradient(0, 0, 0, 0, 0, r); g.addColorStop(0, 'rgba(255,250,235,' + (0.85 * (1 - k)).toFixed(3) + ')'); g.addColorStop(0.4, f.col); g.addColorStop(1, 'rgba(255,220,160,0)'); c.globalAlpha = 1 - k; c.fillStyle = g; c.fillRect(-r, -r, r * 2, r * 2);
+        c.strokeStyle = 'rgba(255,246,220,0.9)'; c.lineWidth = 2.4; for (let j = 0; j < 7; j++) { const a = f.rot + j * 0.9, r0 = r * 0.35, r1 = r * (0.7 + (j % 3) * 0.16); c.beginPath(); c.moveTo(Math.cos(a) * r0, Math.sin(a) * r0); c.lineTo(Math.cos(a) * r1, Math.sin(a) * r1); c.stroke(); } }
+      else if (f.kind === 'ring') { c.globalAlpha = (1 - k) * 0.8; c.strokeStyle = f.col; c.lineWidth = 3 * f.s; c.beginPath(); c.ellipse(0, 0, (20 + 70 * k) * f.s, (9 + 30 * k) * f.s, 0, 0, 6.3); c.stroke(); }
+      c.restore();
+    }
     c.globalCompositeOperation = 'source-over';
     if (sc.top) sc.top(c, t, W);
     /* 路线指引 */
@@ -411,7 +432,9 @@
     if (W.talker && W.talker.vis !== false) {
       const e = W.talker, y = e.y - (e.z || 0) - (e.sp.h || 150) * (e.pose ? 0.82 : 1) - 30 + Math.sin(t * 5) * 4;      // 人被抬高了（站在瓮里、跳起来）时，说话的小泡泡也跟着抬高，不压在脸上
       c.fillStyle = '#f6e9c8'; c.strokeStyle = 'rgba(60,40,26,0.9)'; c.lineWidth = 1.6; c.beginPath(); c.roundRect(e.x - 21, y - 15, 42, 24, 11); c.fill(); c.stroke();
-      c.fillStyle = '#8e2a20'; for (let i = -1; i <= 1; i++) { c.beginPath(); c.arc(e.x + i * 10, y - 3, 2.6 + (Math.floor(t * 4) % 3 === i + 1 ? 1 : 0), 0, 6.3); c.fill(); }
+      const em = EMO[W.talkMood];                                 // 剧本里标了表情的话：泡泡里换成一个记号（主角的画像只有一种表情，靠它补一点神气）
+      if (em) { c.fillStyle = em[1]; c.font = '600 ' + em[2] + 'px "Kaiti SC","STKaiti","KaiTi",serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(em[0], e.x, y - 2); c.textBaseline = 'alphabetic'; }
+      else { c.fillStyle = '#8e2a20'; for (let i = -1; i <= 1; i++) { c.beginPath(); c.arc(e.x + i * 10, y - 3, 2.6 + (Math.floor(t * 4) % 3 === i + 1 ? 1 : 0), 0, 6.3); c.fill(); } }
     }
     /* 俯瞰时的标注 */
     if (W.god > 0.5) {

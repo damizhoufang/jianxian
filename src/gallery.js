@@ -13,7 +13,7 @@
       acts: [['持弓', { carry: 'bow' }], ['落座', { pose: 'sit', seat: 26 }, 'stool']] },
     { id: 'qiushui', bio: '十九岁。软红院里只唱词的歌伎，艺名阑珊。十三岁没入乐籍，琵琶从不离身。每年有几个月“回乡养病”，没人知道她去了哪里。',
       acts: [['抱琵琶', { carry: 'pipa' }], ['坐弹', { carry: 'pipa', pose: 'sit', seat: 26 }, 'stool']] },
-    { id: 'tingxue', bio: '十八岁。东辽宰相耶律德生的小女儿，偷跑到临安来看灯。娇生惯养，饭量惊人，掌力更惊人。脖子上挂着一颗旧佛珠，从小戴着，不知道哪来的。',
+    { id: 'tingxue', bio: '十八岁。北边来的小娘子，自称宰相的女儿——“不是你们的宰相”。偷跑到临安来看灯。娇生惯养，饭量惊人，掌力更惊人。脖子上挂着一颗旧佛珠，从小戴着，不知道哪来的。',
       acts: [['捧面碗', { carry: 'bowl' }], ['坐着吃', { carry: 'bowl', pose: 'sit', seat: 26 }, 'stool']] },
     /* —— 以下是重点配角 —— */
     { id: 'fan', bio: '六十二岁。靠窗第三张桌，面前永远是一只空壶，赊了三年的账。身后题壁墙上那首七绝是他写的。看人先问手稳不稳，说完就打鼾。',
@@ -34,6 +34,10 @@
       acts: [['落座', { pose: 'sit', seat: 26 }, 'stool']] },
   ];
   const LEADS = 5, GROUPS = [['主角', 0], ['配角', LEADS], ['配乐', -1]];
+  /* 按进度解锁：故事走到第几场（JX.store 里的 far），这个人的一页才打开。娜仁托娅那一页要到后面的卷里。“测试用：全部解开”记在 galAll。 */
+  const NEED = { jingzhe: 0, xiali: 5, naren: 999, qiushui: 4, tingxue: 6, fan: 2, he: 4, laodao: 3, siniang: 1, laochu: 1, agui: 1, xieke: 9, zhong: 9 };
+  const far = () => { if (JX.store.get('galAll')) return 1e9; const s = JX.store.get('save'), k = s ? (window.JX_CHECKPOINTS || []).findIndex(c => c.label === s.label) + 1 : 0; return Math.max(JX.store.get('far') || 0, k); };
+  const locked = ch => (NEED[ch.id] || 0) > far();
   const MOODS = [['', '平常'], ['smile', '笑'], ['grin', '嬉'], ['smirk', '撇嘴'], ['cold', '冷'], ['angry', '怒'], ['surprise', '惊'], ['closed', '闭目'], ['sad', '黯然']];
   const TRACKS = [
     ['zhuti', '惊蛰', '标题画面、三楼听潮阁、序章结尾 · 全剧主题', '箫领，筝的分解和音托着。宫调慢板。'],
@@ -44,7 +48,7 @@
     ['xueye', '雪夜', '回忆 · 宝祐四年冬', '箫与古琴，中间留白。主题转到羽调。'],
     ['anliu', '暗流', '不对劲的时候；后巷与屋顶；架阁库、公堂；夜渡大江', '很低的箫，古琴，心跳一样的鼓。角音上压着清角。'],
     ['lanshan', '阑珊', '阑珊的曲子：词会上唱《青玉案》、一方印、她走上公堂、章末的软红院', '琵琶轮指唱前半，箫接后半，筝在底下。羽调慢板。'],
-    ['jiaofeng', '交锋', '动手的时候（第六场的教学战起；画舫上对梅花翅）', '大鼓和钹催着，琵琶扫弦，笛子在上面。羽调急板。'],
+    ['jiaofeng', '交锋', '动手的时候：寻常的对手', '大鼓和钹催着，琵琶扫弦，笛子在上面。羽调急板。'],
     ['shisheng', '市声', '白天的临安：府衙门外的街、白天的醉春楼、北关码头', '筝弹旋律，阮一步一步垫着，碰铃和板点着拍子，中段笛子接过去。徵调，没有鼓。'],
     ['wazi', '瓦子', '北瓦', '琵琶一句一顿，顿的地方锣鼓接话；中段笛子唱开，回来时齐奏。商调快板，说唱的路子。'],
     ['meichuang', '梅窗', '白天安静的屋子里：软红院、仁寿堂、公堂散后', '古琴先弹，泛音点着；后半箫进来，句尾筝轻轻一拂。宫调慢板。'],
@@ -55,12 +59,13 @@
     ['jiangxiao', '江晓', '第二章：真州渡，天刚亮', '头四小节只有筝，一个音一个音地弹；然后笛子进来，筝退到底下。没有鼓。'],
     ['haiwu', '海雾', '第三章：莲花洋上的晨雾', '箫吹长音，低处一小节一下弦，像船在浪上一沉；远远一记磬。'],
     ['chaoyin', '潮音', '第三章：普陀，潮音庵', '琴一个音一个音地按，两小节一声磬；中间箫接过去，底下木鱼很轻。'],
+    ['pozhen', '破阵', '首领战：屋顶上的蟹壳青、画舫上的梅花翅、馆舍里的油葫芦、山门前的金琵琶', '琵琶当家：长音轮指，短音弹挑，每小节两回扫弦；大鼓一下一下砸着。中段箫在低处压着，末段笛子高八度跟上。羽调，比《交锋》沉。'],
     ['shuangjiang', '霜降', '第三章：潮音洞，洞底那口剑', '《阑珊》开头那一句拉长了一倍，用琴的泛音一个一个点出来，像冰；箫在低处答。底下两小节一下很低的弦，是潮；零零星星几点泛音，是洞顶的滴水。'],
   ];
   JX.TRACKS = TRACKS;
   const PICS = [['face', '头像'], ['half', '半身'], ['full', '全身'], ['sheet', '三视图']];
   const painted = ch => !!(Art.painted && Art.painted(ch.id));
-  let box = null, page = 0, spr = null, onClose = null, playing = null, zoom = null;      // zoom：正在放大看第几张（没有就是 null）
+  let box = null, page = 0, spr = null, onClose = null, playing = null, zoom = null, mpage = 0;      // zoom：正在放大看第几张（没有就是 null）
 
   function stool(c) { c.fillStyle = '#6a3f26'; c.strokeStyle = '#231a14'; c.lineWidth = 1.4; c.beginPath(); c.moveTo(-17, -30); c.quadraticCurveTo(-23, -15, -16, 0); c.lineTo(16, 0); c.quadraticCurveTo(23, -15, 17, -30); c.closePath(); c.fill(); c.stroke(); P.ellipse(c, 0, -30, 18, 5.5, '#8a5634', '#231a14', 1.2); }
   function drawSprites(ch) {
@@ -80,10 +85,12 @@
   function render() {
     const grp = page >= CHARS.length ? 2 : page >= LEADS ? 1 : 0;
     const tabs = GROUPS.map((g, i) => '<div class="tab jx-clickable' + (i === grp ? ' on' : '') + '" data-p="' + (g[1] < 0 ? CHARS.length : g[1]) + '">' + g[0] + '</div>').join('') + '<div class="sep"></div>' +
-      CHARS.map((ch, i) => (grp === 2 || (i >= LEADS) !== (grp === 1)) ? '' : '<div class="sub jx-clickable' + (i === page ? ' on' : '') + '" data-p="' + i + '">' + Art.chars[ch.id].name + '</div>').join('');
+      CHARS.map((ch, i) => (grp === 2 || (i >= LEADS) !== (grp === 1)) ? '' : '<div class="sub jx-clickable' + (i === page ? ' on' : '') + '" data-p="' + i + '">' + (locked(ch) ? '？？？' : Art.chars[ch.id].name) + '</div>').join('');
     let h = '<div class="bar"><h2>图鉴</h2>' + tabs + '<div class="close jx-clickable" data-act="close">← → 翻页　Esc 返回</div></div>';
     spr = null;
-    if (page < CHARS.length) {
+    if (page < CHARS.length && locked(CHARS[page])) {
+      h += '<div class="lock"><b>？</b><p>故事走到那里，这一页才打开。</p>' + (NEED[CHARS[page].id] > 900 ? '<p class="s">这一位，要到后面的卷里才见得到。</p>' : '') + '<div class="btn small jx-clickable" data-act="unlock">测试用：全部解开</div></div>';
+    } else if (page < CHARS.length) {
       const ch = CHARS[page], a = Art.chars[ch.id], pt = painted(ch);
       const info = '<div class="info"><h3>' + a.name + '</h3><div class="ti">' + (a.support ? '' : a.season + '　·　') + a.title + '</div><p class="bio">' + ch.bio + '</p><p class="q">“' + a.line + '”</p></div>';
       if (pt) {                                                     // 主角：用画像。左边一张大的，底下四张小的，点哪张都放大看
@@ -97,11 +104,14 @@
       h += '<div class="spr"><h4>场景里的样子</h4><canvas width="1160" height="1720"></canvas></div>';
       if (pt && zoom != null) h += '<div class="lb jx-clickable" data-zoom="x"><img src="' + Art.pic(ch.id, PICS[zoom][0]) + '" alt=""><div class="cap">' + a.name + '　·　' + PICS[zoom][1] + '　　← → 换一张　　点一下或按 Esc 收起</div></div>';
     } else {
-      h += '<div class="mus">' + TRACKS.map(t => '<div class="trk' + (playing === t[0] ? ' on' : '') + '"><b>《' + t[1] + '》</b><div class="w">' + t[2] + '</div><div class="h">' + t[3] + '</div><div class="btn small jx-clickable" data-play="' + t[0] + '">' + (playing === t[0] ? '■ 停' : '▶ 试听') + '</div></div>').join('') + '</div>' +
-        '<div class="note">十六首都是原创旋律，整首离线合成后装进游戏，游戏里只播放。一首一兆上下，点了才装载，头一回要等一两秒。</div>';
+      const PER = 21, mp = Math.min(mpage, Math.ceil(TRACKS.length / PER) - 1);      // 一页装二十一首（七列三行），多了翻页
+      h += '<div class="mus">' + TRACKS.slice(mp * PER, mp * PER + PER).map(t => '<div class="trk' + (playing === t[0] ? ' on' : '') + '"><b>《' + t[1] + '》</b><div class="w">' + t[2] + '</div><div class="h">' + t[3] + '</div><div class="btn small jx-clickable" data-play="' + t[0] + '">' + (playing === t[0] ? '■ 停' : '▶ 试听') + '</div></div>').join('') + '</div>' +
+        (TRACKS.length > PER ? '<div class="mnav"><span class="btn small jx-clickable' + (mp ? '' : ' off') + '" data-mp="' + (mp - 1) + '">◀ 上一页</span><span class="btn small jx-clickable' + ((mp + 1) * PER < TRACKS.length ? '' : ' off') + '" data-mp="' + (mp + 1) + '">下一页 ▶</span></div>' : '') +
+        '<div class="note">' + TRACKS.length + ' 首都是原创旋律，整首离线合成后装进游戏，游戏里只播放。一首一兆上下，点了才装载，头一回要等一两秒。</div>';
     }
     box.innerHTML = h;
-    if (page < CHARS.length && painted(CHARS[page])) { spr = box.querySelector('.spr canvas'); drawSprites(CHARS[page]); }
+    if (page < CHARS.length && locked(CHARS[page])) { /* 没解开：没有图可画 */ }
+    else if (page < CHARS.length && painted(CHARS[page])) { spr = box.querySelector('.spr canvas'); drawSprites(CHARS[page]); }
     else if (page < CHARS.length) {
       const ch = CHARS[page];
       const bg = box.querySelector('.port-bg').getContext('2d'), a = Art.chars[ch.id];                    // 立绘背后：一轮淡淡的光和一个季节的字
@@ -140,10 +150,12 @@
     onClose = done || null; zoom = null; UI.modal++;
     box = UI.root().appendChild(el('div')); box.id = 'gal';
     box.onclick = e => {
-      const t = e.target.closest('[data-p],[data-act],[data-play],[data-zoom]'); if (!t) return;
+      const t = e.target.closest('[data-p],[data-act],[data-play],[data-zoom],[data-mp]'); if (!t) return;
+      if (t.dataset.mp != null) { if (!t.classList.contains('off')) { mpage = +t.dataset.mp; JX.audio.sfx('page'); render(); } return; }
       if (t.dataset.zoom != null) { zoom = t.dataset.zoom === 'x' ? null : +t.dataset.zoom; JX.audio.sfx('page'); render(); }
       else if (t.dataset.p != null) { zoom = null; page = +t.dataset.p; JX.audio.sfx('page'); render(); }
       else if (t.dataset.play) play(t.dataset.play);
+      else if (t.dataset.act === 'unlock') { JX.store.set('galAll', true); JX.audio.sfx('gong'); render(); }
       else UI.closeGallery();
     };
     render();

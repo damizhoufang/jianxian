@@ -53,10 +53,10 @@
     g.gain.value = 0; g.gain.setTargetAtTime(1, A.ctx.currentTime, 0.5); src.connect(g); g.connect(filter); src.start();
     A.cur = { id, src, g };
   };
-  A.sfx = function (id, vol) {
+  A.sfx = function (id, vol, rate) {                              // rate：放快放慢一点（脚步声每一步略有不同）
     if (!A.ctx || !JX.settings.sfx) return;
     const b = A.sbufs[id]; if (!b) return;
-    const src = A.ctx.createBufferSource(), g = A.ctx.createGain(); src.buffer = b; g.gain.value = vol == null ? 1 : vol; src.connect(g); g.connect(sfxGain); src.start();
+    const src = A.ctx.createBufferSource(), g = A.ctx.createGain(); src.buffer = b; if (rate) src.playbackRate.value = rate; g.gain.value = vol == null ? 1 : vol; src.connect(g); g.connect(sfxGain); src.start();
   };
   /* 环境声：循环着放的一段（雨声）。换场景就停；id 给空也是停 */
   A.amb = function (id, vol) {
@@ -79,5 +79,5 @@
     if (A.want) { const w = A.want; A.want = null; A.music(w.id, w.muffle); }
     if (A.ambWant) { const w = A.ambWant; A.amb(w.id, w.vol); }
   });
-  JX.on('sceneEnter', sc => { if (sc.music && !A.hold) A.music(sc.music, sc.muffle); A.amb(null); });
+  JX.on('sceneEnter', sc => { if (sc.music && !A.hold) A.music(sc.music, sc.muffle); const am = typeof sc.amb === 'function' ? sc.amb() : sc.amb; if (am) A.amb(am[0], am[1]); else A.amb(null); });      // 场景自带的环境声（amb: ['shi', 0.2]）；演出里另叫的（雨、火、潮）照旧
 })();
