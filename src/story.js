@@ -50,7 +50,7 @@
     s.split(/\s+/).forEach(tok => { const k = tok.indexOf(':'); if (k < 0) return; const sc = tok.slice(0, k), rest = tok.slice(k + 1), o = {}; rest.split(',').forEach(kv => { const [a, b] = kv.split('='); o[a] = isNaN(+b) ? b : +b; }); at[sc] = o; });
     return at;
   }
-  function talker(who) { const id = NAMES[who]; if (!id) return null; if (W.player && (W.player.sp === Fig.cast[id])) return W.player; return W.byId[id] || null; }
+  function talker(who) { const id = NAMES[who]; if (!id) return null; if (W.player && (W.player.sp === Fig.cast[id])) return W.player; return W.byId[id] || W.byId[String(id).replace(/2$/, '')] || null; }      // 换了衣裳的人（xiali2、qiushui2）在场景里还是原来那个名字
 
   /* 每一场开头：把这一场和下一场要用的曲子先取下来（只取文件，不出声） */
   function ahead() {
@@ -625,7 +625,7 @@
   });
 
   /* ---------- 演出 ---------- */
-  ST._h = { cutIn, cutBg, cutVig, fighters, giveUp, until, ch1 };      // 后面各章的演出（story2.js 起）要用的几样工具
+  ST._h = { cutIn, cutBg, cutVig, fighters, giveUp, until, ch1, ren, drawNa, drawHand };      // 后面各章的演出（story2.js 起）要用的几样工具
   ST.alias = (name, id) => { NAMES[name] = id; };                     // 对白里的另一个叫法（“俘虏”用水匪的小像）
   const HOOKS = ST.hooks = {
     async 入场一() { const st = JX.state; st.stage = 1; st.flags = {}; st.money = 0; W.setPlayer('jingzhe'); UI.purse(null); UI.tone(null); },

@@ -566,6 +566,4 @@ window.JX_SCRIPTS.chapter3 = `
 @乐 zhuti
 @字幕 九万里风鹏正举。风休住，蓬舟吹取三山去。 | ——李清照《渔家傲》
 @字幕 第三章　渔家傲　完
-@场景 guichuan bow 静
-@做 试玩到此七
 `;

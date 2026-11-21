@@ -97,7 +97,8 @@
   UI.cutBanner = async function (ids, text, sec) {
     if (JX.auto) return;
     const A = JX.Art, pic = id => (A && A.pic && A.painted && A.painted(id) ? '<img src="' + A.pic(id, 'half') + '" alt="">' : '');
-    const box = UI.root().appendChild(el('div', '', '<div class="l">' + pic(ids[0]) + '</div><div class="r">' + pic(ids[1]) + '</div><div class="t">' + JX.esc(text) + '</div>')); box.id = 'cutb';
+    const four = ids.length >= 4;                                 // 四个人的合击：一边两张
+    const box = UI.root().appendChild(el('div', '', '<div class="l">' + pic(ids[0]) + (four ? pic(ids[1]) : '') + '</div><div class="r">' + (four ? pic(ids[2]) + pic(ids[3]) : pic(ids[1])) + '</div><div class="t">' + JX.esc(text) + '</div>')); box.id = 'cutb'; if (four) box.classList.add('four');
     void box.offsetWidth; box.classList.add('in'); JX.audio && JX.audio.sfx('gong');
     await JX.sleep(sec || 1.5); box.classList.remove('in'); box.classList.add('out'); await JX.sleep(0.35); box.remove();
   };
@@ -109,7 +110,7 @@
   const AMB = { street: ['shi', 0.2], hall: ['shi', 0.15], beiwa: ['shi', 0.24], matou: ['shi', 0.15], dinghai: ['shi', 0.13], yangzhou: ['shi', 0.1],
     chuan: ['shui', 0.2], chuanye: ['shui', 0.18], jiang: ['shui', 0.22], haichuan: ['shui', 0.2], guichuan: ['shui', 0.2], xihu: ['shui', 0.16], huafang: ['shui', 0.14], jiangbian: ['shui', 0.18],
     alley: ['feng', 0.12], yingwai: ['feng', 0.14], ying: ['feng', 0.12], snow: ['feng', 0.18], shanmen: ['feng', 0.09],
-    roof: () => (JX.state.stage === 42 ? ['chong', 0.13] : ['feng', 0.15]),                // 忆三是去年九月：屋顶上有秋虫
+    roof: () => (JX.state.stage === 42 || JX.state.stage === 48 ? ['chong', 0.13] : ['feng', 0.15]),                // 忆三是去年九月：屋顶上有秋虫
     anneiye: ['chong', 0.09], haibian: ['chao', 0.2] };
   const STEP = { cellar: 'cao', kitchen: 'shi', hall: 'mu', street: 'shi', snow: 'cao', floor2: 'mu', tingchao: 'mu', alley: 'shi', roof: 'shi', yamen: 'shi', yaopu: 'shi', beiwa: 'cao', ruanhong: 'mu', shufang: 'mu', jiage: 'shi',
     xihu: false, huafang: 'mu', gongtang: 'shi', matou: 'shi', chuan: 'mu', chuanye: 'mu', chuanyu: 'mu', jiang: 'mu', yangzhou: 'cao', yingwai: 'cao', ying: 'cao', guanshe: 'shi', jiangbian: 'cao',

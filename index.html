@@ -80,6 +80,9 @@
   #cutb.in { opacity: 1; transform: none; } #cutb.out { opacity: 0; transform: scaleY(.2); }
   #cutb .l, #cutb .r { position: absolute; top: 0; width: 520px; height: 300px; overflow: hidden; transition: transform .32s cubic-bezier(.2,.9,.2,1); } #cutb .l { left: 180px; transform: translateX(-700px); } #cutb .r { right: 180px; transform: translateX(700px); }
   #cutb.in .l, #cutb.in .r { transform: none; } #cutb img { width: 520px; height: 780px; object-fit: cover; object-position: 50% 0; margin-top: -40px; display: block; } #cutb .l img { -webkit-mask-image: linear-gradient(90deg, #000 60%, transparent); mask-image: linear-gradient(90deg, #000 60%, transparent); } #cutb .r img { -webkit-mask-image: linear-gradient(270deg, #000 60%, transparent); mask-image: linear-gradient(270deg, #000 60%, transparent); }
+  #cutb.four .l, #cutb.four .r { width: 620px; } #cutb.four .l { left: 40px; } #cutb.four .r { right: 40px; }
+  #cutb.four img { position: absolute; top: 0; width: 360px; height: 540px; margin-top: -24px; } #cutb.four .l img:nth-child(2) { left: 260px; } #cutb.four .r img:nth-child(1) { right: 260px; } #cutb.four .r img:nth-child(2) { right: 0; }
+  #cutb.four .t { font-size: 104px; top: 96px; }
   #cutb .t { position: absolute; left: 0; right: 0; top: 84px; text-align: center; font: 600 124px var(--kai); letter-spacing: .28em; text-indent: .28em; color: #f8ecd0; text-shadow: 0 0 26px rgba(215,165,68,.9), 0 4px 0 #3d2a1c; }
   #tut h3 { margin: 0 0 16px; font: 600 36px var(--kai); color: var(--gold); letter-spacing: .2em; }
   #tut p { margin: 0; font: calc(31px * var(--ts)) / 1.75 var(--kai); color: #f4e8cc; }
@@ -250,7 +253,7 @@
    试了几回还不行，把话说在屏幕上，不留一块黑屏。
    地址后面带版本号，换了版本浏览器就不会拿旧文件来凑。 */
 (function () {
-  var V = window.JX_V = '0.15.0';
+  var V = window.JX_V = '0.16.0';
   var FILES = [
     'src/core.js',
     'src/paint.js',
@@ -275,6 +278,7 @@
     'src/scenes10.js',
     'src/scenes11.js',
     'src/scenes12.js',
+    'src/scenes13.js',
     'src/decor.js',
     'src/audio.js',
     'src/ui.js',
@@ -285,6 +289,7 @@
     'data/chapter1.js',
     'data/chapter2.js',
     'data/chapter3.js',
+    'data/chapter4.js',
     'data/recap.js',
     'data/checkpoints.js',
     'src/story.js',
@@ -294,6 +299,7 @@
     'src/story3.js',
     'src/story3b.js',
     'src/story3c.js',
+    'src/story4.js',
     'src/main.js'
   ];
   var boot = document.getElementById('boot'), TRIES = 5;
