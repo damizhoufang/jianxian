@@ -121,9 +121,11 @@
     marks: [{ t: '山门', x: 1780, y: 300 }, { t: '放生池', x: 760, y: 560 }],
     paint(c) {
       const r = JX.rng(1041);
-      c.fillStyle = P.vgrad(c, 0, 0, 360, [[0, '#9fbccc'], [1, '#e2e6d8']]); c.fillRect(0, 0, 2400, 360);
-      c.fillStyle = P.vgrad(c, 0, 250, 120, [[0, '#b4cccc'], [1, '#86aab0']]); c.fillRect(0, 250, 700, 120);                   // 左边山坳里露出一角海
+      c.fillStyle = P.vgrad(c, 0, 0, 480, [[0, '#9fbccc'], [0.75, '#e2e6d8'], [1, '#e2e6d8']]); c.fillRect(0, 0, 2400, 480);
+      c.fillStyle = P.vgrad(c, 0, 250, 230, [[0, '#b4cccc'], [1, '#86aab0']]); c.fillRect(0, 250, 2400, 230);                 // 山后头是海：从山坳里露出来（原来只画了左边一块，右边齐刷刷断掉，山低的地方还露出一条没画的底）
+      c.fillStyle = P.vgrad(c, 0, 238, 26, [[0, 'rgba(226,230,216,0)'], [0.5, 'rgba(226,230,216,0.6)'], [1, 'rgba(226,230,216,0)']]); c.fillRect(0, 238, 2400, 26);      // 水天相接处一道薄雾
       for (let i = 0; i < 16; i++) { const y = 262 + r() * 96, x = r() * 640; P.line(c, x, y, x + 30 + r() * 60, y, 1.2, 'rgba(250,252,250,0.3)'); }
+      { const r2 = JX.rng(1044); for (let i = 0; i < 40; i++) { const y = 262 + r2() * 110, x = 640 + r2() * 1700; P.line(c, x, y, x + 30 + r2() * 60, y, 1.2, 'rgba(250,252,250,0.3)'); } }
       P.hills(c, 0, 470, 2400, 330, { seed: 1042, layers: 3, col: '#4f7450', far: '#9db8a4', mist: true, trees: true });     // 一层一层的山，长满了树
       P.grass(c, 0, 440, 2400, 640, { seed: 1043, flowers: true, bare: 5 });
       /* 竹林（左）、松（右后） */
@@ -196,6 +198,7 @@
     },
     props: [
       { x: 700, y: 800, bw: 110, bh: 40, draw(g) { P.ellipse(g, 0, -10, 46, 16, '#8a7248', INK(), 1.5); P.ellipse(g, 0, -14, 40, 12, '#a88c58'); } },        // 给客人的蒲团
+      { x: 960, y: 790, sortY: 750, bw: 132, bh: 46, draw(g) { P.ellipse(g, 0, -10, 58, 18, '#7a6440', INK(), 1.5); P.ellipse(g, 0, -15, 51, 14, '#9a8050'); } },      // 老尼坐的那一只（旁白说“蒲团上坐着一位老尼”，原来她身子底下什么也没有）
       { x: 1240, y: 700, bw: 90, bh: 70, block: [-34, -12, 68, 16], draw(g) { P.shadow(g, 0, 0, 30, 7, 0.35); g.fillStyle = '#7a4a2a'; g.beginPath(); g.ellipse(0, -24, 30, 24, 0, 0, 6.3); g.fill(); g.strokeStyle = INK(); g.lineWidth = 1.5; g.stroke(); P.line(g, -18, -20, 18, -20, 2, '#2e1e14'); P.line(g, 26, -44, 46, -64, 3, '#5a3a22'); } },      // 木鱼
       { x: 250, y: 664, bw: 100, bh: 150, block: [-26, -12, 52, 16], draw(g) { P.potted(g, 0, 0, 1.4, 'orchid', { seed: 91, stand: 36 }); } },
       { x: 1700, y: 664, bw: 100, bh: 150, block: [-26, -12, 52, 16], draw(g) { P.potted(g, 0, 0, 1.4, 'pine', { seed: 92, stand: 36 }); } },

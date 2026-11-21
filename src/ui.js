@@ -67,7 +67,8 @@
   };
   UI.objHow = function (text) { UI._how = text; const h = obj.querySelector('.h'); if (!h) return; if (h.textContent !== text) h.textContent = text; h.classList.toggle('hide', !text); };
   UI.roam = function (on) { keys.classList.toggle('hide', !on); };
-  UI.purse = function (n) { if (n == null) purse.classList.add('hide'); else { purse.textContent = '赏钱 ' + n + ' 文'; purse.classList.remove('hide'); } };
+  UI.purse = function (n) { if (n == null || (JX.state && JX.state.stage > 10)) purse.classList.add('hide'); else {      // 赏钱只在序章（当跑堂的那一晚）有用；出了序章就不再挂在右上角，菜单人物页里还看得到
+    purse.textContent = '赏钱 ' + n + ' 文'; purse.classList.remove('hide'); } };
 
   /* ---------- 对白 ---------- */
   function typeInto(node, text) {
@@ -156,6 +157,24 @@
 
   /* ---------- 菜单 ---------- */
   const MOVES = ['挑灯看剑', '吹角连营', '霹雳弦惊', '蓦然回首', '几番风雨', '气吞万里'];
+  let mem = 0;
+  /* 眼下同行的人（菜单人物页用）。数值照战斗里的写；身份只写这时候玩家已经知道的 */
+  function party() {
+    const st = JX.state, f = st.flags || {}, s = st.stage || 0, L = [];
+    L.push({ id: 'jingzhe', name: '陆惊蛰', full: '阿蛰（户籍上写的是阮蛰）', season: '春', hp: 130, spd: 13, atk: 22, def: 6,
+      role: s >= 43 ? '醉春楼的行菜——做到今年四月为止' : '醉春楼 · 行菜', nei: f.haoran ? '浩然诀' : '一套“喘气的法子”，没有名字',
+      art: '稼轩剑', moves: MOVES.map((n, i) => [n, s >= 42 && i < 3]) });
+    if (s >= 8) L.push({ id: 'xiali', name: '夏离', full: s >= 33 ? '夏离（化名；“离”字是真的）' : '夏离', season: '夏', hp: 120, spd: 11, atk: 28, def: 8,
+      role: s >= 36 ? '北边来的姑娘。来历，她说到了该说的时候再说' : s >= 23 ? '贩酒的夏掌柜' : '北边口音的客人，自称做生意的', nei: '没有听她说过',
+      art: '弯刀与跤', moves: [['弯刀·斩', 1], ['弯刀·格', 1], ['摔', 1]] });
+    if (f.tx) L.push({ id: 'tingxue', name: '耶律听雪', full: '耶律听雪', season: '冬', hp: 110, spd: 12, atk: 24, def: 5,
+      role: '北边来的小娘子，自称“我爹是宰相”。当保镖抵碗债', nei: '没有听她说过',
+      art: '掌', moves: [['绵掌·推', 1], ['闪', 1]].concat(s >= 31 ? [['掌风·压火', 1]] : []) });
+    if (f.qsIn) L.push({ id: 'qiushui', name: '辛秋水', full: '辛秋水（软红院里叫阑珊）', season: '秋', hp: 105, spd: 12.5, atk: 26, def: 5,
+      role: '辛家的后人。霜降剑如今是她的', nei: '寂照神尼教的',
+      art: '霜降剑', moves: [['大珠小珠', 1], ['银瓶乍破', 1], ['冷月无声', 1]] });
+    return L;
+  }
   let menu = null, tab = 0;
   UI.menuOpen = () => !!menu;
   UI.toggleMenu = function () {
@@ -171,15 +190,17 @@
     if (show.indexOf(tab) < 0) tab = show[0];
     let h = '<div class="tabs">' + show.map(i => '<div class="tab jx-clickable' + (i === tab ? ' on' : '') + '" data-tab="' + i + '">' + tabs[i] + '</div>').join('') + '</div>';
     if (tab === 0) {
-      const mx = st.maxed;
-      h += '<div class="stat"><canvas width="380" height="436"></canvas><div><table>' +
-        '<tr><td>姓名</td><td>阿蛰（户籍上写的是阮蛰）</td></tr><tr><td>身份</td><td>醉春楼 · 行菜</td></tr>' +
-        '<tr><td>境界</td><td>' + (mx ? '得道（坐忘七阶之末）' : '不入流——至少看上去是') + '</td></tr>' +
-        '<tr><td>气血</td><td>' + (mx ? 9999 : 120) + '</td></tr><tr><td>内力</td><td>' + (mx ? 999 : 30) + '</td></tr><tr><td>身法</td><td>' + (mx ? 255 : 18) + '</td></tr>' +
-        '<tr><td>赏钱</td><td>' + (st.money || 0) + ' 文</td></tr></table></div></div>' +
-        '<div class="moves">稼轩剑　' + MOVES.map((m, i) => '<span class="' + (mx ? 'got' : '') + '">' + m + '</span>').join('') + '</div>' +
-        '<p style="margin-top:18px">' + (mx ? '功力已经全开：六式稼轩剑与满级内力都在身上。战斗从第六场起接入，到时直接生效。' : '想跳过修炼，可以一键把功力提到满级。按下之前会自动存一次档。') + '</p>' +
-        '<div class="btn small jx-clickable' + (mx ? ' off' : '') + '" data-act="max">' + (mx ? '功力已全开' : '功力全开') + '</div><div class="btn small jx-clickable" data-act="gallery">人物图鉴 · 配乐</div>';
+      const mx = st.maxed, team = party(); if (mem >= team.length) mem = 0; const m = team[mem];
+      h += (team.length > 1 ? '<div class="pty">' + team.map((q, i) => '<span class="jx-clickable' + (i === mem ? ' on' : '') + '" data-mem="' + i + '">' + q.name + ' · ' + q.season + '</span>').join('') + '</div>' : '') +
+        '<div class="stat"><canvas width="380" height="436"></canvas><div><table>' +
+        '<tr><td>姓名</td><td>' + m.full + '</td></tr><tr><td>身份</td><td>' + m.role + '</td></tr>' +
+        '<tr><td>时令</td><td>' + m.season + '（轮到这一季，出手重两成半）</td></tr>' +
+        '<tr><td>气血</td><td>' + m.hp + '　　身法 ' + m.spd + '　　攻 ' + m.atk + '　　防 ' + m.def + '</td></tr>' +
+        '<tr><td>内功</td><td>' + m.nei + '</td></tr>' +
+        (mem === 0 ? '<tr><td>赏钱</td><td>' + (st.money || 0) + ' 文</td></tr>' : '') + '</table></div></div>' +
+        '<div class="moves">' + m.art + '　' + m.moves.map(q => '<span class="' + (q[1] ? 'got' : '') + '">' + q[0] + '</span>').join('') + '</div>' +
+        '<p style="margin-top:14px">' + (mx ? '功力已经全开：战斗里我方出手重三倍，挨打只算两成半。要讲打法的对手（铁臂、够不着、数弦的）照样得按打法来——照着红字提示按就行。' : '嫌打得慢，可以把功力全开：战斗里我方出手重三倍，挨打只算两成半。随时可以收回。') + '</p>' +
+        '<div class="btn small jx-clickable" data-act="max">' + (mx ? '收回功力' : '功力全开') + '</div><div class="btn small jx-clickable" data-act="gallery">人物图鉴 · 配乐</div>';
     } else if (tab === 1) {
       h += optRow('行走速度', 'walk', [[0.6, '慢'], [0.8, '稍慢'], [1, '中'], [1.3, '快']]) +
         optRow('操作方式', 'controls', [['rel', 'W 前进 · A/D 转向 · S 掉头'], ['abs', 'WASD 四向']]) +
@@ -193,7 +214,7 @@
         '<p style="font-size:24px;color:#7a5d3a">方向键任何时候都是四个固定方向。俯瞰（V）时点地面，人会自己走过去。</p>';
     } else if (tab === 3) {
       const all = JX.story.scenes(), cur = JX.game.playing ? all.indexOf(st.label) : -1, nx = all[cur + 1];
-      const chap = l => (l.indexOf('第二章·') === 0 ? '第二章　扬州慢' : l.indexOf('第一章·') === 0 ? '第一章　钗头凤' : '序章　青玉案'), short = l => l.replace(/^第[一二]章·/, '');
+      const CHN = { 一: '钗头凤', 二: '扬州慢', 三: '渔家傲', 四: '望海潮' }, chap = l => { const m = /^第(.)章·/.exec(l); return m ? '第' + m[1] + '章　' + (CHN[m[1]] || '') : '序章　青玉案'; }, short = l => l.replace(/^第.章·/, '');      // 原来只认第一、二章，第三章的十二场排在了第二个“序章”底下
       const groups = []; all.forEach((l, i) => { const g = chap(l); if (!groups.length || groups[groups.length - 1].name !== g) groups.push({ name: g, items: [] }); groups[groups.length - 1].items.push([l, i]); });
       h += '<p style="font-size:23px;line-height:1.4;margin:0 0 4px">测试用：点哪一场，就跳到那一场的开头。游戏里随时可按 <kbd>]</kbd> 下一场、<kbd>[</kbd> 上一场。</p>' +
         (all.length ? '' : '<p style="color:#8e2a20">场次表没有载入到。<span class="btn small jx-clickable" data-act="title">重新载入页面</span></p>') +
@@ -207,11 +228,12 @@
     }
     h += '<div class="foot"><span>《剑仙情缘恩仇录》试玩 ' + JX.VERSION + '</span><span class="jx-clickable" data-act="close" style="color:#8e2a20;font-size:28px">Esc 关闭</span></div>';
     menu.innerHTML = h;
-    if (tab === 0) { const c = menu.querySelector('canvas').getContext('2d'); if (JX.Art && JX.Art.has('jingzhe')) c.drawImage(JX.Art.avatar('jingzhe'), 0, 0, 380, 436); else c.drawImage(Fig.medallion('jingzhe'), 10, 76, 360, 360); }
+    if (tab === 0) { const id = party()[mem].id, c = menu.querySelector('canvas').getContext('2d'); if (JX.Art && JX.Art.has(id)) c.drawImage(JX.Art.avatar(id), 0, 0, 380, 436); else c.drawImage(Fig.medallion(id), 10, 76, 360, 360); }
     menu.onclick = e => {
-      const t = e.target.closest('[data-tab],[data-k],[data-act],[data-jump]'); if (!t) return;
+      const t = e.target.closest('[data-tab],[data-k],[data-act],[data-jump],[data-mem]'); if (!t) return;
       JX.audio && JX.audio.sfx('tick');
       if (t.dataset.tab) { tab = +t.dataset.tab; renderMenu(); }
+      else if (t.dataset.mem) { mem = +t.dataset.mem; renderMenu(); }
       else if (t.dataset.jump) JX.story.jump(JX.story.scenes()[+t.dataset.jump]);
       else if (t.dataset.act === 'next') JX.story.jumpBy(1);
       else if (t.dataset.act === 'again') JX.story.jumpBy(0);
@@ -221,7 +243,7 @@
       } else if (t.dataset.act === 'close') UI.toggleMenu();
       else if (t.dataset.act === 'title') location.reload();
       else if (t.dataset.act === 'gallery') { UI.toggleMenu(); UI.gallery(null, () => { JX.audio.hold = false; const sc = JX.world.sc; if (sc && sc.music) JX.audio.music(sc.music, sc.muffle); }); }
-      else if (t.dataset.act === 'max' && !JX.state.maxed) { JX.story.save(); JX.state.maxed = true; JX.story.save(); JX.audio && JX.audio.sfx('gong'); UI.toast('功力全开'); renderMenu(); }
+      else if (t.dataset.act === 'max') { const on = !JX.state.maxed, keep = JX.store.get('save'); JX.state.maxed = on; if (keep) { keep.maxed = on; JX.store.set('save', keep); } JX.audio && JX.audio.sfx(on ? 'gong' : 'tick'); UI.toast(on ? '功力全开' : '功力收回了'); renderMenu(); }      // 只改存档里的这一个开关，进度还是这一场的开头
     };
   }
   JX.on('update', () => {
@@ -244,13 +266,16 @@
       const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel)); paint();
       const finish = a => { hs.splice(hs.indexOf(tick), 1); t.remove(); JX.audio && JX.audio.sfx('gong'); res(a); };
       const gal = p => { JX.audio && JX.audio.sfx('page'); t.classList.add('hide'); UI.gallery(p, () => { t.classList.remove('hide'); JX.audio.hold = true; JX.audio.music('zhuti'); }); };
-      const go = a => { if (a === 'full') UI.fullscreen(); else if (a === 'gallery') gal(); else if (a === 'scenes') UI.openScenes(); else finish(a); };
+      let asking = false;      // 有存档时点“新的故事”：先问一句，免得一下把进度盖掉（存档只有一个）
+      const go = a => { if (asking) return; if (a === 'full') UI.fullscreen(); else if (a === 'gallery') gal(); else if (a === 'scenes') UI.openScenes();
+        else if (a === 'new' && s) { const mn = t.querySelector('.menu'); asking = true; mn.style.visibility = 'hidden'; UI.choice('从头开始？', ['算了', '从头开始'], { sub: '现在的进度（' + s.label + '）会被盖掉。', sel: 0, top: 420 }).then(k => { asking = false; mn.style.visibility = ''; if (k === 1) finish('new'); }); }
+        else finish(a); };
       t.onclick = e => { const b = e.target.closest('[data-a]'); if (b) go(b.dataset.a); };
       if (UI.openGalleryAt != null) { const p = UI.openGalleryAt; UI.openGalleryAt = null; gal(p); }
       const tick = () => {
         if (UI.galleryOpen()) return;
         if (JX.auto) return finish(JX.autoLoad && s ? 'load' : 'new');
-        if (menu) return;                                       // “选一场开始”那一页开着
+        if (menu || asking) return;                             // “选一场开始”那一页开着，或者正在问要不要从头开始
         if (JX.input.hit('up') || JX.input.hit('w')) { sel = (sel + btns.length - 1) % btns.length; paint(); }
         if (JX.input.hit('down') || JX.input.hit('s')) { sel = (sel + 1) % btns.length; paint(); }
         if (JX.input.hit('confirm')) { JX.input.eat('confirm'); go(btns[sel].dataset.a); }

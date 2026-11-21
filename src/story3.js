@@ -70,7 +70,7 @@
       off['shanmen:gate'] = '小尼拿扫帚拦着。';
     }
     if (id === 'annei') {
-      W.add('jizhao', 'jizhao', 960, 770, { dir: 0, tag: '寂照神尼', pose: 'sit', seat: 12, reach: 170, solid: false });
+      W.add('jizhao', 'jizhao', 960, 770, { dir: 0, tag: '寂照神尼', pose: 'sit', seat: 12, lap: true, reach: 170, solid: false });
       off['annei:out'] = '话还没有说完。';
     }
   };
@@ -133,7 +133,7 @@
       const bo = { name: '裂帛', kind: 'wait', tell: '手指按上了弦——要拨了', say: '金琵琶五指一划——',
         fx: async (b, u) => { JX.audio.sfx('tiexian'); ring(); await B.fx.wait(0.35);
           if (b.ding) { b.ding = false; allies(b).forEach(q => B.fx.floater(q, '气定，琴声进不来', '#f0e2b0')); }
-          else { allies(b).forEach(q => { q.stun = Math.max(q.stun, 1); q.hp = Math.max(1, q.hp - 10); B.fx.floater(q, '内息一乱', '#ff9a8a'); B.fx.shake(q); }); }
+          else { allies(b).forEach(q => { q.stun = Math.max(q.stun, 1); q.hp = Math.max(1, q.hp - B.soak(10)); B.fx.floater(q, '内息一乱', '#ff9a8a'); B.fx.shake(q); }); }
           await B.fx.wait(0.4); } };
       const lun = { name: '轮指', kind: 'wait', tell: '手指在弦上慢慢轮着——这一手不伤人', say: '金琵琶的手指在弦上慢慢轮着。', fx: async () => { JX.audio.sfx('xian', 0.4); await B.fx.wait(0.3); } };
       const ding = { id: 'ding', name: '浩然诀·定气', kind: 'talk', desc: '把一口气沉到底。下一声琴响，三个人都不受扰。', say: '陆惊蛰把一口气沉了下去——', fx: async (b, u) => { b.ding = true; B.fx.floater(u, '气定', '#f0e2b0'); } };

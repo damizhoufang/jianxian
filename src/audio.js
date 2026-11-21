@@ -20,12 +20,24 @@
     n = n || 0;
     return new Promise(res => { const s = document.createElement('script'); s.src = src + (n ? '?retry=' + n : ''); s.onload = () => res(true); s.onerror = () => { s.remove(); if (n >= 2) res(false); else setTimeout(() => loadScript(src, n + 1).then(res), 600 * (n + 1)); }; document.head.appendChild(s); });
   }
-  async function getMusic(id) {
-    if (A.bufs[id]) return A.bufs[id];
-    if (!window.JX_MUSIC[id]) await loadScript('music/' + id + '.js');
-    const m = window.JX_MUSIC[id]; if (!m) return null;
-    try { const buf = await A.ctx.decodeAudioData(b64buf(m.b64)); A.bufs[id] = { buf, loop: m.loop }; m.b64 = null; return A.bufs[id]; } catch (e) { return null; }
+  /* 曲子的文件一首一兆多，头一回用到才取。fetchMusic 只取文件、不解码，可以提前叫（A.prefetch）；
+     解码好的一首要占十几兆内存，只留最近用过的 KEEP 首，别的扔掉，再用到时从留着的文件重新解码（0.14.1 以前是全留着，一口气玩完三章要占三四百兆）。 */
+  const loading = {}, KEEP = 6;
+  function fetchMusic(id) {
+    if (window.JX_MUSIC[id]) return Promise.resolve(true);
+    return loading[id] || (loading[id] = loadScript('music/' + id + '.js').then(ok => { delete loading[id]; return ok; }));
   }
+  function touch(id) {
+    A.order = (A.order || []).filter(x => x !== id); A.order.push(id);
+    for (let i = 0; A.order.length > KEEP && i < A.order.length;) { const old = A.order[i]; if ((A.cur && A.cur.id === old) || (A.want && A.want.id === old)) { i++; continue; } A.order.splice(i, 1); delete A.bufs[old]; }
+  }
+  async function getMusic(id) {
+    if (A.bufs[id]) { touch(id); return A.bufs[id]; }
+    await fetchMusic(id);
+    const m = window.JX_MUSIC[id]; if (!m || !m.b64) return null;
+    try { const buf = await A.ctx.decodeAudioData(b64buf(m.b64)); A.bufs[id] = { buf, loop: m.loop }; touch(id); return A.bufs[id]; } catch (e) { return null; }
+  }
+  A.prefetch = function (ids) { (ids || []).forEach(id => { if (id && id !== '还' && window.JX_MUSIC && !window.JX_MUSIC[id]) fetchMusic(id); }); };      // 快要用到的曲子先把文件取下来，换场景时就不用干等
   /* 换曲：旧的淡出，新的淡入。muffle 是低通的截止频率（隔着楼板听）。 */
   A.music = async function (id, muffle) {
     A.want = { id, muffle };

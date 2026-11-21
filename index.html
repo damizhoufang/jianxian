@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>剑仙情缘恩仇录 · 试玩</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23a8362a'/%3E%3Ctext x='32' y='47' font-size='42' text-anchor='middle' fill='%23f8ecd0' font-family='Kaiti SC,STKaiti,KaiTi,serif'%3E剑%3C/text%3E%3C/svg%3E">
 <style>
   :root { --kai: "Kaiti SC","STKaiti","KaiTi","楷体","LXGW WenKai","Noto Serif CJK SC","Songti SC",serif; --song: "Songti SC","STSong","Noto Serif CJK SC","Source Han Serif SC","SimSun",serif; --ink:#2b221c; --paper:#efe4c8; --gold:#d7a544; --red:#a8362a; --ts:1; --da:.72; }
   * { box-sizing: border-box; }
@@ -96,10 +97,12 @@
   #menu .scenes .sc i { float: right; font-style: normal; font-size: 21px; color: #e4cf9a; }
   #menu kbd, #obj kbd { display: inline-block; min-width: 1.5em; text-align: center; padding: 0 .35em; border: 1.5px solid currentColor; border-radius: 5px; font: 600 .82em/1.5 ui-monospace, Menlo, monospace; }
   #mini .memo { font-size: 24px; line-height: 1.5; color: #5a4128; }
+  #menu .pty { margin: 0 0 12px; } #menu .pty span { display: inline-block; padding: 3px 18px; margin-right: 10px; border: 1.5px solid rgba(61,42,28,.5); border-radius: 4px; cursor: pointer; pointer-events: auto; font: 25px var(--kai); }
+  #menu .pty span.on { background: #3d2a1c; color: #f8ecd0; }
   #menu .stat { display: flex; gap: 40px; }
   #menu .stat canvas { width: 218px; height: 250px; background: linear-gradient(180deg, #efe4c8, #dccba0); border: 2px solid #3d2a1c; border-radius: 5px; }
   #menu .stat table { font: 28px/1.6 var(--kai); border-collapse: collapse; }
-  #menu .stat td { padding: 2px 22px 2px 0; } #menu .stat td:first-child { color: #7a5d3a; }
+  #menu .stat td { padding: 2px 22px 2px 0; vertical-align: top; } #menu .stat td:first-child { color: #7a5d3a; white-space: nowrap; }
   #menu .moves { margin-top: 12px; font: 26px/1.7 var(--kai); }
   #menu .moves span { display: inline-block; margin: 4px 10px 4px 0; padding: 2px 16px; border: 1.5px solid rgba(61,42,28,.45); border-radius: 4px; color: rgba(43,34,28,.45); }
   #menu .moves span.got { color: #8e2a20; border-color: #8e2a20; background: rgba(168,54,42,.08); }
@@ -234,7 +237,7 @@
    试了几回还不行，把话说在屏幕上，不留一块黑屏。
    地址后面带版本号，换了版本浏览器就不会拿旧文件来凑。 */
 (function () {
-  var V = window.JX_V = '0.14.0';
+  var V = window.JX_V = '0.14.1';
   var FILES = [
     'src/core.js',
     'src/paint.js',

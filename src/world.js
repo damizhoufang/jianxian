@@ -340,7 +340,7 @@
     if (e.vis === false) return;
     c.save(); c.translate(e.x, e.y - (e.z || 0)); if (e.alpha < 1) c.globalAlpha = e.alpha;
     if (e.draw) e.draw(c, e);
-    else Fig.draw(c, e.sp, e.dir, e.ph, { moving: e.moving, pose: e.pose, carry: e.carry, seat: e.seat, closed: e.closed || e.blink < 0, smile: e.smile, shadow: !e.pose || e.pose === 'squat' });
+    else Fig.draw(c, e.sp, e.dir, e.ph, { moving: e.moving, pose: e.pose, carry: e.carry, seat: e.seat, lap: e.lap, closed: e.closed || e.blink < 0, smile: e.smile, shadow: !e.pose || e.pose === 'squat' });
     c.restore();
   }
   function draw() {

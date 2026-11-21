@@ -25,7 +25,7 @@ const path = require('path');
   const seen = [], picks = [], cmds = []; let gotWrong = false, skipped = false; let steps = 0, enters = 0, stuck = 0, lastPos = '', nCut = 0, nCard = 0, lastQ = '', lastCmdBeat = -1; const t0 = Date.now(); let s;
   for (;;) {
     s = await st();
-    if (s.err || s.ended || Date.now() - t0 > 900000) break;
+    if (s.err || s.ended || Date.now() - t0 > (+process.env.JX_T || 900000)) break;
     if (s.obj && seen[seen.length - 1] !== s.obj) { seen.push(s.obj); await page.screenshot({ path: PRE + 'obj' + seen.length + '.png' }); }
     if (s.end) { await page.screenshot({ path: PRE + 'end.png' }); await page.waitForTimeout(1000); await page.keyboard.press('Enter'); await page.waitForTimeout(1500); continue; }
     if (s.tut) { await page.screenshot({ path: PRE + 'tut.png' }); await page.waitForTimeout(500); await page.keyboard.press('Enter'); await page.waitForTimeout(400); continue; }

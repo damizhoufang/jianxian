@@ -52,8 +52,21 @@
   }
   function talker(who) { const id = NAMES[who]; if (!id) return null; if (W.player && (W.player.sp === Fig.cast[id])) return W.player; return W.byId[id] || null; }
 
+  /* 每一场开头：把这一场和下一场要用的曲子先取下来（只取文件，不出声） */
+  function ahead() {
+    if (!JX.audio || !JX.audio.prefetch || JX.auto) return;
+    const ids = {}; let labels = 0;
+    for (let k = ST.i; k < ST.beats.length && labels < 2; k++) {
+      const q = ST.beats[k];
+      if (q.t === 'label') labels++;
+      else if (q.cmd === '乐') ids[q.arg.trim()] = 1;
+      else if (q.cmd === '场景') { const sc = JX.scenes[q.arg.split(/\s+/)[0]]; if (sc && sc.music) ids[sc.music] = 1; }
+      else if (q.cmd === '做' && /战|相扑|学剑|守庵/.test(q.arg)) ids.jiaofeng = 1;
+    }
+    JX.audio.prefetch(Object.keys(ids));
+  }
   async function exec(b) {
-    if (b.t === 'label') { JX.state.label = b.name; ST.save(); return; }
+    if (b.t === 'label') { JX.state.label = b.name; ST.save(); ahead(); return; }
     if (b.t === 'say') { const e = talker(b.who); W.talker = e; await UI.say(NAMES[b.who], b.who, b.text, b.mood); W.talker = null; return; }
     if (b.t === 'narr') { await UI.narrate(b.text); return; }
     const a = b.arg, parts = a.split('|').map(s => s.trim());

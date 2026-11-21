@@ -99,11 +99,13 @@
   async function hop(u) { const e = u.ent, h = u.home, d = (u.side === 'ally' ? -1 : 1) * (B.cur && B.cur.def.flip ? -1 : 1);      // flip：这一场是我方站右边、对面在左边
     await tw(0.34, k => { e.x = h.x + d * 46 * Math.sin(k * Math.PI); e.y = h.y + 22 * Math.sin(k * Math.PI); e.z = 30 * Math.sin(k * Math.PI); }); e.x = h.x; e.y = h.y; e.z = 0; }
   B.fx = { floater, lunge, back, shake, hop, wait, tw };
+  B.soak = n => (JX.state && JX.state.maxed ? Math.max(1, Math.round(n * 0.25)) : n);      // 演出里直接扣我方气血的地方（琴声）用它过一道，功力全开时一样只算两成半
 
   function strike(b, a, m, t) {
     const res = { evade: false, block: false, dmg: 0 }, mul = (b.def.wheel !== false && a.season != null && a.season === b.season ? 1.25 : 1) * (t.stun ? 1.5 : 1) * (a.weak || 1);
     if (t.stance === 'dodge' && !t.stun && (m.type !== 'light' || (JX.auto && !JX.honest) || Math.random() < 0.5)) { res.evade = true; return res; }
     let d = Math.max(1, Math.round((a.atk * (m.pow || 1) - t.def * 0.5) * mul * rnd(0.92, 1.08)));
+    if (JX.state && JX.state.maxed) d = a.side === 'ally' ? d * 3 : Math.max(1, Math.round(d * 0.25));      // 功力全开：我方出手重三倍，挨打只算两成半（菜单人物页的开关；0.14.1 以前这个开关在战斗里不起作用）
     if (t.stance === 'guard') { if (m.type === 'grab') d = Math.round(d * 1.15); else { d = Math.round(d * (t.guardK == null ? 0.35 : t.guardK)); res.block = true; } }
     res.dmg = d; return res;
   }
@@ -143,6 +145,7 @@
     const xs = b.units.map(u => u.ent.x), ys = b.units.map(u => u.ent.y);
     W.focus = def.focus || { x: (Math.min.apply(0, xs) + Math.max.apply(0, xs)) / 2, y: (Math.min.apply(0, ys) + Math.max.apply(0, ys)) / 2 - 20 }; W.zoom = def.zoom || 1.2;
     if (def.music) { JX.audio.hold = true; JX.audio.music(def.music); }
+    if (JX.state.maxed && !JX.auto && UI.toast) UI.toast('功力全开：出手重三倍，挨打只算两成半');
     const box = b.box = UI.root().appendChild(el('div')); box.id = 'bt';
     box.innerHTML = (def.goal ? '<div class="goal"><b>◆</b>' + def.goal + '</div>' : '') + '<div class="order"></div><div class="wheel"><canvas width="300" height="300"></canvas><div class="wl"></div></div><div class="log"></div><div class="party"></div><div class="foes"></div><div class="cmd hide"></div>';
     const plan = u => { u.intent = u.ai(b, u); };

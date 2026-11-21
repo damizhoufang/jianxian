@@ -75,7 +75,7 @@
     const bo = { name: '裂帛', kind: 'wait', tell: '手指按上了弦——要拨了', say: '金琵琶五指一划——',
       fx: async (b, u) => { JX.audio.sfx('tiexian'); ring(u.ent); await B.fx.wait(0.35);
         if (b.tiao) { b.tiao = false; b.ext = false; u.stun = 1; u.note = '这一声给挑偏了，手上一空'; B.fx.floater(ally(b, 'jingzhe'), '挑偏了', '#f0e2b0'); JX.audio.sfx('tick'); }
-        else b.units.filter(q => q.side === 'ally' && q.hp > 0).forEach(q => { q.stun = Math.max(q.stun, 1); q.hp = Math.max(0, q.hp - 36); B.fx.floater(q, '内息一乱　−36', '#ff9a8a'); B.fx.shake(q); });
+        else b.units.filter(q => q.side === 'ally' && q.hp > 0).forEach(q => { q.stun = Math.max(q.stun, 1); q.hp = Math.max(0, q.hp - B.soak(36)); B.fx.floater(q, '内息一乱　−' + B.soak(36), '#ff9a8a'); B.fx.shake(q); });
         await B.fx.wait(0.4); } };
     const lun = { name: '轮指', type: 'light', pow: 1, tell: '轮指——一串碎音，冲着开口唱的人（没人唱就冲着刀）', pick: (b, pool) => pool.find(q => q.key === (b.sing > 0 ? 'qiushui' : 'jingzhe')) || pool[0], pre: async (b, u) => { JX.audio.sfx('xian', 0.5); ring(u.ent); await B.fx.wait(0.2); } };
     const TIAO = { id: 'tiao', name: '挑灯看剑', kind: 'talk', say: '陆惊蛰：挑灯看剑', desc: '第一式。刀尖自下而上一挑——挑的是他的琴声。他手指按上弦的时候用：那一声给挑偏，他手上一空。',

@@ -4,20 +4,20 @@ const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const go = require('./_go');
 const path = require('path');
 (async () => {
-  const scene = process.argv[2] || 'roof', hook = process.argv[3] || '战三', n = +process.argv[4] || 40;
+  const scene = process.argv[2] || 'roof', hook = process.argv[3] || '战三', n = +process.argv[4] || 40, max = process.argv[5] === 'max';      // 第四个参数写 max：开着“功力全开”打
   const stage = { hall: 6, alley: 8, roof: 9, huafang: 20, jiang: 26, guanshe: 31, haichuan: 36, dongdi: 40, shanmen: 41 }[scene];
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   await go(page, 'file://' + path.resolve('index.html') + '#' + scene); await page.waitForTimeout(1500);
-  const out = await page.evaluate(async ({ hook, n, stage, scene }) => {
-    const W = JX.world, B = JX.battle, H = JX.story.hooks, st = JX.state; st.stage = stage; st.flags.saber = true; st.flags.follow = false;
+  const out = await page.evaluate(async ({ hook, n, stage, scene, max }) => {
+    const W = JX.world, B = JX.battle, H = JX.story.hooks, st = JX.state; st.stage = stage; st.flags.saber = true; st.flags.follow = false; st.maxed = !!max;
     JX.auto = true; JX.honest = true;
     const run0 = B.run, all = []; let tries = 0;
     B.run = async def => { const r = await run0(def); all.push({ result: r.result, acts: r.b.acts, hp: r.b.units.filter(u => u.side === 'ally').map(u => u.hp) }); return r; };
     for (let i = 0; i < n; i++) { st.flags.won2 = st.flags.fell = false; JX.populate(scene); if (scene === 'huafang') { W.remove('maihua'); W.add('meihuachi', 'meihuachi', 2040, 746, { dir: 1, solid: false }); } await H[hook](); }      // 画舫那一战：卖花女先换成梅花翅
     return all;
-  }, { hook, n, stage, scene }).catch(e => ({ err: e.message }));
+  }, { hook, n, stage, scene, max }).catch(e => ({ err: e.message }));
   if (out.err) console.log('出错', out.err, errs.join('\n'));
   else {
     const win = out.filter(o => o.result === 'win'), lose = out.length - win.length, avg = a => (a.reduce((x, y) => x + y, 0) / Math.max(1, a.length)).toFixed(1);

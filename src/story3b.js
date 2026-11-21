@@ -230,7 +230,7 @@
       const bo = { name: '裂帛', kind: 'wait', tell: '手指按上了弦——要拨了', say: '金琵琶五指一划——',
         fx: async b => { JX.audio.sfx('tiexian'); ring(); await B.fx.wait(0.35);
           if (b.ding) { b.ding = false; allies(b).forEach(u => B.fx.floater(u, '镇住了，琴声进不来', '#f0e2b0')); }
-          else { allies(b).forEach(u => { u.stun = Math.max(u.stun, 1); u.hp = Math.max(1, u.hp - 10); B.fx.floater(u, '内息一乱', '#ff9a8a'); B.fx.shake(u); }); }
+          else { allies(b).forEach(u => { u.stun = Math.max(u.stun, 1); u.hp = Math.max(1, u.hp - B.soak(10)); B.fx.floater(u, '内息一乱', '#ff9a8a'); B.fx.shake(u); }); }
           await B.fx.wait(0.4); } };
       const lun = { name: '轮指', kind: 'wait', tell: '手指在弦上慢慢轮着——这一手不伤人', say: '金琵琶的手指在弦上慢慢轮着。', fx: async () => { JX.audio.sfx('xian', 0.4); await B.fx.wait(0.3); } };
       const place = () => {
